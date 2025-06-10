@@ -1,0 +1,12 @@
+<ion-content [fullscreen]="true" class="landing-content">
+  <div class="tiles-grid">
+    <div *ngFor="let tile of tiles" 
+         class="tile" 
+         [style.color]="tile.color"
+         (click)="goTo(tile.route)">
+      <ion-icon [name]="tile.icon" class="tile-icon"></ion-icon>
+      <div class="tile-label">{{ tile.label | translate }}</div>
+      <div class="tile-status">{{ tile.status | translate }}</div>
+    </div>
+  </div>
+</ion-content> 

@@ -1,0 +1,101 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" [text]="'COMMON.BACK' | translate"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ 'THROUGH_MY_WINDOW.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <!-- Barre de recherche -->
+    <ion-searchbar
+      [(ngModel)]="flightNumber"
+      [placeholder]="'THROUGH_MY_WINDOW.SEARCH_PLACEHOLDER' | translate"
+      (ionChange)="loadFlightData()"
+      animated
+      class="search-bar">
+    </ion-searchbar>
+
+    <!-- Message d'erreur -->
+    <ion-text color="danger" *ngIf="error" class="error-message">
+      {{ error }}
+    </ion-text>
+
+    <!-- Indicateur de chargement -->
+    <ion-spinner *ngIf="loading" name="crescent" class="loading-spinner"></ion-spinner>
+
+    <!-- Carte -->
+    <div class="map-container">
+      <app-flight-map></app-flight-map>
+    </div>
+
+    <!-- Informations de vol -->
+    <ion-card *ngIf="flightData" class="flight-info">
+      <ion-card-header>
+        <ion-card-title>{{ flightData.flightNumber }}</ion-card-title>
+        <ion-card-subtitle>{{ flightData.airline }}</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Informations de départ -->
+        <div class="airport-info">
+          <h3>{{ 'THROUGH_MY_WINDOW.DEPARTURE' | translate }}</h3>
+          <p>{{ flightData.departure.name }} ({{ flightData.departure.code }})</p>
+          <p>{{ 'THROUGH_MY_WINDOW.TERMINAL' | translate }}: {{ flightData.departure.terminal }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.GATE' | translate }}: {{ flightData.departure.gate }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.SCHEDULED' | translate }}: {{ flightData.departure.scheduledTime | date:'short' }}</p>
+          <p *ngIf="flightData.departure.actualTime">
+            {{ 'THROUGH_MY_WINDOW.ACTUAL' | translate }}: {{ flightData.departure.actualTime | date:'short' }}
+          </p>
+        </div>
+
+        <!-- Informations d'arrivée -->
+        <div class="airport-info">
+          <h3>{{ 'THROUGH_MY_WINDOW.ARRIVAL' | translate }}</h3>
+          <p>{{ flightData.arrival.name }} ({{ flightData.arrival.code }})</p>
+          <p>{{ 'THROUGH_MY_WINDOW.TERMINAL' | translate }}: {{ flightData.arrival.terminal }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.GATE' | translate }}: {{ flightData.arrival.gate }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.SCHEDULED' | translate }}: {{ flightData.arrival.scheduledTime | date:'short' }}</p>
+          <p *ngIf="flightData.arrival.actualTime">
+            {{ 'THROUGH_MY_WINDOW.ACTUAL' | translate }}: {{ flightData.arrival.actualTime | date:'short' }}
+          </p>
+        </div>
+
+        <!-- Informations de l'avion -->
+        <div class="aircraft-info" *ngIf="flightData.aircraft">
+          <h3>{{ 'THROUGH_MY_WINDOW.AIRCRAFT' | translate }}</h3>
+          <p>{{ flightData.aircraft.type }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.REGISTRATION' | translate }}: {{ flightData.aircraft.registration }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.AGE' | translate }}: {{ flightData.aircraft.age }} {{ 'THROUGH_MY_WINDOW.YEARS' | translate }}</p>
+        </div>
+
+        <!-- Position actuelle -->
+        <div class="current-position" *ngIf="flightData.route?.currentPosition">
+          <h3>{{ 'THROUGH_MY_WINDOW.CURRENT_POSITION' | translate }}</h3>
+          <p>{{ 'THROUGH_MY_WINDOW.LATITUDE' | translate }}: {{ flightData.route.currentPosition.latitude | number:'1.4-4' }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.LONGITUDE' | translate }}: {{ flightData.route.currentPosition.longitude | number:'1.4-4' }}</p>
+          <p>{{ 'THROUGH_MY_WINDOW.ALTITUDE' | translate }}: {{ flightData.route.currentPosition.altitude }} ft</p>
+          <p>{{ 'THROUGH_MY_WINDOW.SPEED' | translate }}: {{ flightData.route.currentPosition.speed }} kts</p>
+          <p>{{ 'THROUGH_MY_WINDOW.HEADING' | translate }}: {{ flightData.route.currentPosition.heading }}°</p>
+          <p>{{ 'THROUGH_MY_WINDOW.LAST_UPDATE' | translate }}: {{ flightData.route.currentPosition.timestamp | date:'medium' }}</p>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="statistics" *ngIf="flightData.statistics">
+          <h3>{{ 'THROUGH_MY_WINDOW.STATISTICS' | translate }}</h3>
+          <p>{{ 'THROUGH_MY_WINDOW.ON_TIME' | translate }}: {{ flightData.statistics.onTimePercentage }}%</p>
+          <p>{{ 'THROUGH_MY_WINDOW.AVERAGE_DELAY' | translate }}: {{ flightData.statistics.averageDelay }} min</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Bouton de rafraîchissement -->
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="refreshData()">
+        <ion-icon name="refresh"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+</ion-content> 

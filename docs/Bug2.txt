@@ -1,0 +1,1250 @@
+Voici un retour détaillé sur votre fichier **`WindowPage`**, en vérifiant point par point que la logique correspond bien à ce que vous souhaitez (simulation du vol, calcul de position/altitude, affichage des POIs, intégration des deux hublots, etc.). Je commente les sections importantes, signale les petites inexactitudes ou améliorations possibles, et m’assure que tout cadre avec le composant `WindowHublotComponent` que vous avez montré précédemment.
+
+---
+
+## 1. Imports et définitions globales
+
+```ts
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
+import { DateTime, Duration } from 'luxon';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
+import { IonPopover } from '@ionic/angular';
+import * as L from 'leaflet';
+import { WindowMapTestComponent } from './window-map-test.component';
+import { FlightDataService } from '../services/flight/flight-data.service';
+import { FlightData } from '../services/flight/models/flight.interface';
+import { WindowHublotComponent } from '../components/window-hublot.component';
+```
+
+* **`DateTime`, `Duration` (Luxon)**
+  Vous utilisez Luxon pour gérer les horodatages, ce qui est tout à fait correct.
+
+* **`Firestore` / `Auth` / `IonPopover` / `Leaflet`**
+  Certains imports (Firestore, Auth, IonPopover, Leaflet) ne sont pour l’instant pas exploités dans votre code (`getDocs`, `onAuthStateChanged`, `IonPopover` et `L` n’apparaissent pas dans la logique de la page).
+
+  * Si vous prévoyez d’ajouter à terme du Firebase ou un popover Ionic, gardez-les, sinon vous pouvez supprimer ces imports pour alléger la build.
+  * Le composant `WindowMapTestComponent` est censé afficher la carte “cockpit”/itinéraire, vous l’importez bien.
+
+* **`WindowHublotComponent`**
+  Le composant standalone pour les hublots est bien importé : vous pourrez l’utiliser dans la `template` de cette page.
+
+---
+
+## 2. Définition de l’interface et constantes de POIs (ALL\_POIS + profil d’altitude)
+
+Vous avez défini :
+
+```ts
+interface POI {
+  name: string;
+  description: string;
+  wiki_url: string;
+  lat: number;
+  lon: number;
+  side: 'left' | 'right';
+  type: 'nature' | 'montagne' | 'ville' | 'historique' | 'eau' | 'parc' | 'plage' | 'vallee' | 'archipel' | 'port' | 'quartier' | 'colline' | 'autre';
+}
+
+// Exemple de base de POIs (à compléter)
+const ALL_POIS: POI[] = [ … ];
+```
+
+* **✔️ Cohérence**
+
+  * Chaque POI contient bien `name`, `description`, `wiki_url`, `lat`, `lon`, `side`, `type`.
+  * Les `side: 'left' | 'right'` servent ensuite à filtrer les POIs visibles à gauche ou à droite du vol.
+
+* **Petite amélio**
+
+  * Vous n’avez pas de champ `image_url` dans l’interface `POI`, pourtant dans la popup vous testez `*ngIf="selectedPOI.image_url"`.
+
+    * **Constat** : qui veut dire que, pour l’instant, `selectedPOI.image_url` sera toujours `undefined` → l’image ne s’affichera jamais à l’intérieur de la popover.
+    * **Solution rapide** : soit vous l’ajoutez dans l’interface (et fournissez un lien vers une image pour chaque POI), soit vous enlevez ce test dans le template (ou le remplacez par un champ `iconUrl` si vous souhaitez un pictogramme).
+
+---
+
+## 3. Fonctions de calcul (haversine, interpolation, POIs, altitude)
+
+Vous avez codé :
+
+```ts
+// 1) Fonction haversine (approx. grand-cercle)
+function haversine(a: {lat: number, lon: number}, b: {lat: number, lon: number}): number {
+  const R = 6371;
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLon = (b.lon - a.lon) * Math.PI / 180;
+  const lat1 = a.lat * Math.PI / 180;
+  const lat2 = b.lat * Math.PI / 180;
+  const x = dLon * Math.cos((lat1 + lat2) / 2);
+  return Math.sqrt(dLat * dLat + x * x) * R;
+}
+
+// 2) getClosestPOIs : filte ALL_POIS selon side, trie par distance, renvoie les N plus proches
+function getClosestPOIs(position: {lat: number, lon: number}, side: 'left' | 'right', count: number): POI[] {
+  const candidates = ALL_POIS.filter(poi => poi.side === side);
+  candidates.sort((a, b) => haversine(position, a) - haversine(position, b));
+  return candidates.slice(0, count);
+}
+
+// 3) Interpolation linéaire entre deux points
+function interpolatePosition(
+  start: {lat: number, lon: number},
+  end:   {lat: number, lon: number},
+  fraction: number
+): {lat: number, lon: number} {
+  return {
+    lat: start.lat + (end.lat - start.lat) * fraction,
+    lon: start.lon + (end.lon - start.lon) * fraction
+  };
+}
+
+// 4) getRealisticAltitude : interpolation linéaire sur REAL_ALTITUDE_PROFILE
+function getRealisticAltitude(progressPercent: number): number {
+  // progressPercent ∈ [0, 100], on trouve l'indice de tranche (par pas de 10)
+  const idx = Math.floor(progressPercent / 10);
+  const nextIdx = Math.min(idx + 1, REAL_ALTITUDE_PROFILE.length - 1);
+  const pctInStep = (progressPercent % 10) / 10;
+  const alt1 = REAL_ALTITUDE_PROFILE[idx];
+  const alt2 = REAL_ALTITUDE_PROFILE[nextIdx];
+  return alt1 + (alt2 - alt1) * pctInStep;
+}
+
+// 5) generateWaypointsWithPOIs : génère nSteps étapes depuis start jusqu'à end
+function generateWaypointsWithPOIs(
+  start: {lat: number, lon: number},
+  end:   {lat: number, lon: number},
+  allPOIs: POI[],
+  nSteps: number = 10
+) {
+  const waypoints: any[] = [];
+  for (let i = 0; i <= nSteps; i++) {
+    const fraction = i / nSteps;                // ex. 0.0, 0.1, 0.2, …, 1.0
+    const pos = interpolatePosition(start, end, fraction);
+    const pct = Math.round(fraction * 100);     // ex. 0%, 10%, 20%, …, 100%
+    const altitude = getRealisticAltitude(pct); // en ft (pieds)
+
+    // POIs les plus proches à gauche et à droite
+    const poisLeft  = getClosestPOIs(pos, 'left',  3);
+    const poisRight = getClosestPOIs(pos, 'right', 3);
+
+    waypoints.push({
+      pct,
+      lat: pos.lat,
+      lon: pos.lon,
+      altitude,                  // en pieds
+      poi_left:  poisLeft.map(poi => ({ ...poi, altitude })),
+      poi_right: poisRight.map(poi => ({ ...poi, altitude }))
+    });
+  }
+  return waypoints;
+}
+```
+
+### Vérifications
+
+1. **Haversine**
+
+   * Vous utilisez une version simplifiée (approximation « cos moyenne ») qui n’est pas l’algorithme haversine « complet », mais pour trier des distances sur quelques milliers de kilomètres, c’est suffisant.
+   * Elle renvoie une distance en **kilomètres** (car R = 6371 km). OK pour trier les POIs.
+
+2. **Filtrage + tri des POIs**
+
+   * `getClosestPOIs(position, side, count)` → renvoie bien les `count` plus proches parmi ceux dont `poi.side === side`.
+   * C’est ce qu’on veut pour afficher les POIs à gauche / droite, en fonction de la position instantanée.
+
+3. **Interpolation linéaire de position**
+
+   * Pour un vol “trajet” en ligne droite entre deux aéroports, vous interpolez les latitudes/longitudes de façon linéaire.
+   * Si vous vouliez un “grand cercle” plus précis, il faudrait appliquer la formule de “slerp” sur la sphère, mais pour un vol court GVA–ATH, l’écart sera minime. OK.
+
+4. **Profil d’altitude (`getRealisticAltitude`)**
+
+   * Vous avez un tableau `REAL_ALTITUDE_PROFILE` qui correspond à 0% → 0 ft, 10% → 12 000 ft, 20% → 26 000 ft, …, 100% → 0 ft.
+   * La TVL de décollage/montée → croisière → descente est bien modélisée par interpolation par pas de 10 %.
+   * **Attention** : `progressPercent` est un entier de 0 à 100. S’il est, par exemple, à 25 %,
+
+     * `idx = Math.floor(25 / 10) = 2`
+     * `nextIdx = 3`
+     * `pctInStep = (25 % 10) / 10 = 0.5`
+     * altitude = `alt1 + (alt2 – alt1) * 0.5 = REAL_ALTITUDE_PROFILE[2] + 0.5 × (REAL_ALTITUDE_PROFILE[3] – REAL_ALTITUDE_PROFILE[2]) = 26000 + 0.5×(35000 – 26000) = 26000 + 4500 = 30500 ft`.
+   * C’est cohérent.
+
+5. **`generateWaypointsWithPOIs`**
+
+   * Vous produisez un tableau de 11 éléments (de i = 0 à 10), chacun contenant :
+
+     * `pct` = 0, 10, 20, …, 100
+     * `lat` et `lon` interpolés
+     * `altitude` (en ft) à partir du profil
+     * `poi_left` et `poi_right` : chacun est un tableau de 3 POIs, avec en plus la propriété `altitude` ajoutée.
+   * On note que vous passez bien `lat/lon` **numériques** (float), et `altitude` en *ft*.
+
+À ce stade, ces fonctions font exactement ce qu’on attend :
+
+* on a un jeu de waypoints prédéfinis
+* à chaque 10 % de progression correspond une position, une altitude, et 3 POIs pour chaque côté.
+
+---
+
+## 4. Légende des icônes de pin
+
+```ts
+function getPinIconForType(type: string): string {
+  switch (type) {
+    case 'montagne':   return 'assets/pin_montagne.png';
+    case 'ville':      return 'assets/pin_ville.png';
+    case 'eau':        return 'assets/pin_eau.png';
+    case 'historique': return 'assets/pin_historique.png';
+    case 'nature':     return 'assets/pin_nature.png';
+    case 'parc':       return 'assets/pin_parc.png';
+    case 'plage':      return 'assets/pin_plage.png';
+    case 'vallee':     return 'assets/pin_vallee.png';
+    case 'archipel':   return 'assets/pin_archipel.png';
+    case 'port':       return 'assets/pin_port.png';
+    case 'quartier':   return 'assets/pin_quartier.png';
+    case 'colline':    return 'assets/pin_colline.png';
+    default:           return 'assets/pin.png';
+  }
+}
+```
+
+* **✔️** Chaque type renvoie bien vers un fichier dans `assets/`.
+* **✓** Si `type` ne correspond à aucun des cas, on utilise `assets/pin.png` par défaut.
+
+---
+
+## 5. Le composant Angular : `WindowPage`
+
+### 5.1 Décorateur `@Component`
+
+```ts
+@Component({
+  selector: 'app-window',
+  standalone: true,
+  template: `
+    <ion-content>
+      <!-- Carte principale (cockpit/itinéraire) -->
+      <app-window-map-test
+        [lat]="flightData?.lat_t_deg"
+        [lon]="flightData?.lon_t_deg"
+        [altitude]="flightData?.altitude || 11000"
+        [poisVisibles]="getVisiblePOIs()">
+      </app-window-map-test>
+
+      <!-- Si on a des données de vol (flightData), on affiche les infos ... -->
+      <div class="placeholder-container" *ngIf="flightData">
+        <h1>✈️ Vol démo Genève → Athènes <ion-badge color="warning">DEMO</ion-badge></h1>
+        <div class="flight-info-block">
+          <div><b>Départ :</b> {{ flightData.departureCity }} ({{ flightData.departureAirport }})</div>
+          <div><b>Heure de départ :</b> {{ flightData.departureTimeGeneva }} (GVA) / {{ flightData.departureTimeAthens }} (ATH)</div>
+          <div><b>Arrivée :</b> {{ flightData.arrivalCity }} ({{ flightData.arrivalAirport }})</div>
+          <div><b>Heure d'arrivée :</b> {{ flightData.arrivalTimeAthens }} (ATH) / {{ flightData.arrivalTimeGeneva }} (GVA)</div>
+          <div><b>Numéro de vol :</b> {{ flightData.flightNumber }} | <b>Compagnie :</b> {{ flightData.airline }}</div>
+          <div><b>Avion :</b> {{ flightData.aircraft }}</div>
+        </div>
+
+        <div class="progress-block">
+          <h2>🕒 Statut du vol</h2>
+          <div><b>Heure actuelle à Genève :</b> {{ flightData.nowGeneva }} (GVA) / {{ flightData.nowAthens }} (ATH)</div>
+          <div><b>Heure actuelle à Athènes :</b> {{ flightData.nowAthens }} (ATH) / {{ flightData.nowGeneva }} (GVA)</div>
+          <div><b>Progression du vol :</b> {{ flightData.progressPercent }} %</div>
+          <div><b>Temps écoulé en vol :</b> {{ flightData.elapsed }}</div>
+          <div><b>Temps restant :</b> {{ flightData.remaining }}</div>
+          <div><b>Durée totale du vol :</b> {{ flightData.duration }}</div>
+          <div><b>Statut :</b> {{ flightData.status }}</div>
+          <div><b>Phase de vol :</b> {{ flightData.phase }}</div>
+          <div><b>Vitesse sol :</b> {{ flightData.v_sol_kt }} kt ({{ flightData.v_sol_kmh }} km/h)</div>
+          <div><b>Distance parcourue :</b> {{ flightData.d_elapsed_km }} km</div>
+          <div><b>Distance restante :</b> {{ flightData.d_remaining_km }} km</div>
+          <div><b>Fraction du trajet :</b> {{ flightData.fraction_f }} %</div>
+          <div><b>Coordonnées actuelles :</b> {{ flightData.lat_t_deg }} N, {{ flightData.lon_t_deg }} E</div>
+          <div><b>Altitude avion :</b> {{ flightData.altitude | number:'1.0-0' }} ft ({{ (flightData.altitude * 0.3048) | number:'1.0-0' }} m)</div>
+
+          <div class="poi-section"><b>Points d'intérêt à gauche :</b>
+            <ul>
+              <li *ngFor="let poi of currentPOI.left">
+                <a href="#" (click)="openPOIPopover(poi, $event); $event.preventDefault()">
+                  <b>{{ poi.name }}</b>
+                </a>
+                <div class="poi-desc">{{ poi.description }}</div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="poi-section"><b>Points d'intérêt à droite :</b>
+            <ul>
+              <li *ngFor="let poi of currentPOI.right">
+                <a href="#" (click)="openPOIPopover(poi, $event); $event.preventDefault()">
+                  <b>{{ poi.name }}</b>
+                </a>
+                <div class="poi-desc">{{ poi.description }}</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Si flightData est null -->
+      <div *ngIf="!flightData">
+        <ion-icon name="map-outline" class="placeholder-icon"></ion-icon>
+        <h1>Ma Fenêtre</h1>
+        <p>Aucun vol démo en cours.</p>
+      </div>
+
+      <!-- Popup POI (overlay) -->
+      <div *ngIf="showPOIModal && selectedPOI" class="poi-popup-overlay" (click)="closePOIPopover()">
+        <div class="poi-popup-waw" (click)="$event.stopPropagation()">
+          <div class="poi-popup-header">
+            <strong>{{ selectedPOI.name }}</strong>
+            <button class="poi-popup-close" (click)="closePOIPopover()">✕</button>
+          </div>
+          <div class="poi-popup-body">
+            <img *ngIf="selectedPOI.image_url" [src]="selectedPOI.image_url" [alt]="selectedPOI.name" />
+            <p class="poi-popup-desc">{{ selectedPOI.description }}</p>
+            <p class="poi-popup-coords">
+              📍 <em>Lat</em> {{ currentWaypoint?.lat | number:'1.4-4' }} N, 
+                   <em>Lon</em> {{ currentWaypoint?.lon | number:'1.4-4' }} E
+            </p>
+          </div>
+          <div class="poi-popup-footer">
+            <a *ngIf="selectedPOI.wiki_url" href="{{ selectedPOI.wiki_url }}" target="_blank">Voir sur Wikipédia ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloc de test en bas (données flightTestData) -->
+      <ion-card *ngIf="flightTestData">
+        <!-- ... nombreux ion-item pour afficher flightTestData ... -->
+      </ion-card>
+
+      <!-- Section POIs détaillée par tranche de 10% -->
+      <ion-card *ngIf="waypoints && waypoints.length">
+        <ion-card-header>
+          <ion-card-title>Points d'intérêt du vol (GVA → ATH)</ion-card-title>
+          <ion-card-subtitle>Affichage de tous les POIs par tranche de 10%</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item *ngFor="let wp of waypoints">
+              <ion-label>
+                <h3>
+                  Tranche {{ wp.pct }}% 
+                  (Lat: {{ wp.lat | number:'1.4-4' }}, 
+                   Lon: {{ wp.lon | number:'1.4-4' }}, 
+                   Alt: {{ wp.altitude | number:'1.0-0' }} ft 
+                   ({{ (wp.altitude * 0.3048) | number:'1.0-0' }} m), 
+                   Zoom: {{ getMapZoomFromAltitude(wp.altitude) }})
+                </h3>
+                <div>
+                  <b>POIs à gauche :</b>
+                  <ul>
+                    <li *ngFor="let poi of wp.poi_left">
+                      <span 
+                        [ngStyle]="isPOIVisible(poi, 'left') 
+                                     ? {'color':'#1976d2','font-weight':'bold'} 
+                                     : {}">
+                        <img [src]="getPinIconForType(poi.type)" 
+                             class="poi-type-icon" width="20" height="20" 
+                             style="vertical-align:middle;margin-right:6px;" />
+                        {{ poi.name }}
+                        <span *ngIf="isPOIVisible(poi, 'left')" class="poi-badge">Visible</span>
+                      </span>
+                      <br><small>{{ poi.description }}</small>
+                      <br><a [href]="poi.wiki_url" target="_blank">Wikipedia</a>
+                      <br>Coord: {{ poi.lat | number:'1.4-4' }}, {{ poi.lon | number:'1.4-4' }} | 
+                          Alt avion: {{ poi.altitude | number:'1.0-0' }} ft 
+                          ({{ (poi.altitude * 0.3048) | number:'1.0-0' }} m) | 
+                          Zoom: {{ getMapZoomFromAltitude(poi.altitude) }}
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <b>POIs à droite :</b>
+                  <ul>
+                    <li *ngFor="let poi of wp.poi_right">
+                      <span 
+                        [ngStyle]="isPOIVisible(poi, 'right') 
+                                     ? {'color':'#1976d2','font-weight':'bold'} 
+                                     : {}">
+                        <img [src]="getPinIconForType(poi.type)" 
+                             class="poi-type-icon" width="20" height="20" 
+                             style="vertical-align:middle;margin-right:6px;" />
+                        {{ poi.name }}
+                        <span *ngIf="isPOIVisible(poi, 'right')" class="poi-badge">Visible</span>
+                      </span>
+                      <br><small>{{ poi.description }}</small>
+                      <br><a [href]="poi.wiki_url" target="_blank">Wikipedia</a>
+                      <br>Coord: {{ poi.lat | number:'1.4-4' }}, {{ poi.lon | number:'1.4-4' }} | 
+                          Alt avion: {{ poi.altitude | number:'1.0-0' }} ft 
+                          ({{ (poi.altitude * 0.3048) | number:'1.0-0' }} m) | 
+                          Zoom: {{ getMapZoomFromAltitude(poi.altitude) }}
+                    </li>
+                  </ul>
+                </div>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Ligne de hublots en bas -->
+      <div class="hublots-bottom-row">
+        <app-window-hublot 
+          [lat]="getHublotLat('left')" 
+          [lon]="getHublotLon('left')" 
+          [altitude]="flightData?.altitude || 11000" 
+          side="left">
+        </app-window-hublot>
+
+        <app-window-hublot 
+          [lat]="getHublotLat('right')" 
+          [lon]="getHublotLon('right')" 
+          [altitude]="flightData?.altitude || 11000" 
+          side="right">
+        </app-window-hublot>
+      </div>
+    </ion-content>
+  `,
+  styles: [ /* ... longue liste de styles ... */ ],
+  imports: [ CommonModule, IonicModule, WindowMapTestComponent, WindowHublotComponent /*, …*/ ]
+})
+```
+
+* **Cas où `flightData == null`**
+  Vous affichez un message “Aucun vol démo en cours.” grâce à `*ngIf="!flightData"`. OK.
+
+* **Bloc “Carte principale”**
+
+  ```html
+  <app-window-map-test 
+    [lat]="flightData?.lat_t_deg" 
+    [lon]="flightData?.lon_t_deg" 
+    [altitude]="flightData?.altitude || 11000" 
+    [poisVisibles]="getVisiblePOIs()">
+  </app-window-map-test>
+  ```
+
+  * Vous passez `lat` et `lon` à `WindowMapTestComponent` sous forme de `flightData.lat_t_deg` et `flightData.lon_t_deg`.
+  * **Point à vérifier** : dans `updateDemoFlight()`, vous définissez `lat_t_deg` et `lon_t_deg` en faisant `toFixed(4)`, ce qui renvoie une **chaîne** (string).
+
+    * Mais `WindowMapTestComponent` s’attend très probablement à recevoir un **nombre** pour `lat` et `lon` (typiquement un `@Input() lat: number;`).
+    * **Recommandation** : soit changez vos assignations pour donner `lat_t_deg: parseFloat(someNumber.toFixed(4))`, soit dans le binding faites `[lat]="parseFloat(flightData.lat_t_deg)"`.
+    * Sinon, Angular essaiera de “convertir” la chaîne en nombre au runtime, mais c’est mieux de garder un nombre pur.
+  * L’`altitude` que vous passez est en **pieds** (ex. 11000 ft). Si `WindowMapTestComponent`/Leaflet attend une altitude en ft pour faire son calcul de zoom, c’est cohérent. Sinon, vérifiez bien l’unité.
+
+* **Affichage des données de vol**
+  Le template (`flight-info-block` et `progress-block`) semble tout à fait correct et cohérent avec ce que vous calculez dans `updateDemoFlight()` (vitesse, distance, heures, etc.).
+
+* **Section POIs “à gauche” et “à droite”**
+  Vous affichez une liste de liens cliquables (POI.name). Au clic, vous appelez `openPOIPopover(poi, $event)` et empêchez (`$event.preventDefault()`) la navigation. OK.
+
+  * Vous mettez la description, et plus bas le pop-up détaillé “poi-popup-overlay” qui s’ouvre si `showPOIModal` est à `true`.
+
+* **Bloc “Données enrichies du vol test”**
+  Facultatif, c’est votre “console” pour afficher les données en provenance de l’API Aviationstack & OpenSky. Ça a l’air découplé de la logique principale (pas de lien avec `WindowMapTestComponent`). Ce bloc fonctionne uniquement si `flightTestData` n’est pas `null`.
+
+* **Liste détaillée “POIs du vol (GVA → ATH)”**
+  Ici, vous parcourez `waypoints` (tableau généré dans `ngOnInit`) pour afficher, pour chaque tranche 0%,10%,…100% :
+
+  * latitude, longitude, altitude, zoom calculé par `getMapZoomFromAltitude()`,
+  * puis liste de POIs à gauche et à droite, et sur chaque POI vous coloriez en bleu / gras s’il est “visible” (`isPOIVisible`).
+  * Cette section est purement “débogage / inventaire” pour voir comment évoluent vos POIs sur les 10 tranches. Cela marche correctement, à condition que `waypoints` ait bien été initialisé.
+
+* **Les deux hublots en bas (classe `hublots-bottom-row`)**
+
+  ```html
+  <div class="hublots-bottom-row">
+    <app-window-hublot 
+      [lat]="getHublotLat('left')" 
+      [lon]="getHublotLon('left')" 
+      [altitude]="flightData?.altitude || 11000" 
+      side="left">
+    </app-window-hublot>
+    <app-window-hublot 
+      [lat]="getHublotLat('right')" 
+      [lon]="getHublotLon('right')" 
+      [altitude]="flightData?.altitude || 11000" 
+      side="right">
+    </app-window-hublot>
+  </div>
+  ```
+
+  * Vous transmettez à chaque `WindowHublotComponent` un `lat` et `lon` calculé via `getHublotLat('left')` / `getHublotLon('left')`, et respectivement `getHublotLat('right')` / `getHublotLon('right')`.
+  * Vous transmettez aussi `[altitude]="flightData?.altitude || 11000"` → en pieds. C’est cohérent avec le composant hublot, puisqu’il s’attend à recevoir `altitude` en ft et qu’il convertit ensuite en m quand il fait son calcul interne.
+  * **Vérification de cohérence** :
+
+    * `WindowHublotComponent` calcule son zoom via `getZoomFromAltitude(altitudeInFeet, lat)`, mais dans sa version finale (que je vous avais proposée), on convertissait explicitement `altitude` en mètres avant de faire `zoom = log2(...)`.
+    * Ici, comme vous envoyez `altitude` en pieds, dans `WindowHublotComponent` il faut s’assurer que :
+
+      1. soit `getZoomFromAltitude()` convertit `altitude` de ft → m en interne,
+      2. soit, dans `WindowPage`, vous remplacez `[altitude]` par `[altitude]="(flightData?.altitude || 11000) * 0.3048"` (c’est-à-dire envoyer déjà la valeur en mètres).
+    * D’après le composant `WindowHublotComponent` que vous aviez montré avant, il convertissait bien `altitude*0.3048` pour certains calculs, mais il utilisait aussi parfois `altitude` brut dans `getZoomFromAltitude` et `getViewRadius`. Il faut donc revérifier qu’à l’intérieur de `WindowHublotComponent` vous avez systématiquement la conversion ft→m avant d’appeler **toutes** les fonctions qui attendent un h en mètre.
+
+---
+
+### 5.2 Styles (abrégé)
+
+Vous avez une longue liste de styles CSS :
+
+* **`.placeholder-container`**, **`.flight-info-block`**, **`.progress-block`**, **`.poi-section`**, etc.
+* Le `@keyframes popin`, les styles pour `.poi-popup-overlay`, `.poi-popup-waw`, etc.
+* **`.hublots-bottom-row`** : mise en page flex, responsive pour espacer les deux hublots.
+
+Tout cela paraît cohérent :
+
+* Vous mettez `overflow: hidden` sur `ion-content`, `height: 80vh` sur les cartes, etc.
+* Les hublots se retrouvent alignés en bas, avec un **gap** adapté (`gap: 240px` sur grand écran, qui se réduit sur écrans plus petits).
+* Rien d’anormal dans ces styles.
+
+---
+
+## 6. Logique du composant TypeScript (`WindowPage`)
+
+Voici la partie la plus critique : la logique de démarrage du vol, le calcul des positions et l’actualisation périodique.
+
+### 6.1 Attributs du composant
+
+```ts
+export class WindowPage {
+  flightData: any = null;
+  intervalId: any;
+  loading = true;
+  user: User | null = null;
+  departure: any = null;
+  arrival: any = null;
+  waypoints: any[] = [];
+  currentPOI: { left: any[]; right: any[] } = { left: [], right: [] };
+  public selectedPOI: any = null;
+  public showPOIModal: boolean = false;
+  public popoverEvent: MouseEvent | null = null;
+  public currentWaypoint: any = null;
+  flightTestData: FlightData | null = null;
+
+  constructor(
+    private firestore: Firestore,
+    private auth: Auth,
+    private flightDataService: FlightDataService
+  ) {}
+  // …
+}
+```
+
+* `flightData: any = null;`
+  Contiendra l’objet calculé par `updateDemoFlight()`, avec tous les champs décrits (départ, arrivée, progression, etc.).
+* `waypoints: any[] = [];`
+  Stockera la liste générée par `generateWaypointsWithPOIs(...)`.
+* `currentPOI`
+  Stocke un objet `{ left: POI[], right: POI[] }` pour la tranche courante du vol.
+* `selectedPOI`, `showPOIModal`, `popoverEvent`, `currentWaypoint`
+  Concernent la gestion de la popup de détail d’un POI.
+* `flightTestData`
+  Pour afficher les données du vol en provenance de l’API de test (ou de OpenSky), non relié à la mécanique principale.
+
+### 6.2 `ngOnInit()` : initialisation du vol de démo
+
+```ts
+ngOnInit() {
+  this.initDemoFlight();
+
+  // Génère les waypoints à partir de ALL_POIS
+  const start = { lat: 46.2381, lon: 6.1080 }; // Genève
+  const end   = { lat: 37.9364, lon: 23.9445 }; // Athènes
+  this.waypoints = generateWaypointsWithPOIs(start, end, ALL_POIS, 10);
+
+  if (this.intervalId) clearInterval(this.intervalId);
+  this.intervalId = setInterval(() => {
+    this.updateDemoFlight();
+    this.updateFlightTestData();
+    this.updateCurrentPOI();
+  }, 1000);
+}
+```
+
+* **`this.initDemoFlight()`**
+  Va calculer les dates de départ/arrivée (à partir de Luxon) et positionner `this.departure` et `this.arrival`.
+  Ensuite, `updateDemoFlight()` (appelé par la suite) va créer `this.flightData` pour la tranche initiale.
+
+* **`this.waypoints = generateWaypointsWithPOIs(start, end, ALL_POIS, 10);`**
+
+  * Génère 11 points (0%, 10%, …, 100%)
+  * À chaque point, on a `wp.lat`, `wp.lon`, `wp.altitude` (ft), `wp.poi_left` et `wp.poi_right` (chacun un tableau de 3 POIs ayant déjà le champ `.altitude` ajouté).
+  * **OK** : ces waypoints seront utilisés ensuite dans l’affichage détaillé des POIs, et pour calculer la position/heading courant.
+
+* **`setInterval(...)`**
+
+  * Toutes les secondes, vous appelez :
+
+    1. `this.updateDemoFlight()`   → recalcul du `this.flightData` (position, fraction, altitude, etc.)
+    2. `this.updateFlightTestData()` → mise à jour de `this.flightTestData`, pour la carte de test (peu liée)
+    3. `this.updateCurrentPOI()`   → calcule les POIs visibles “currentPOI” en fonction de `flightData.progressPercent`
+
+  * **Attention** :
+
+    * Dans `updateDemoFlight()`, vous appelez déjà `this.updateCurrentPOI()` à la fin.
+    * Puis, juste après, le `setInterval` appelle à nouveau `updateCurrentPOI()`.
+    * Conséquence : à chaque tick, `updateCurrentPOI()` est invoqué deux fois de suite. Ce n’est pas dramatique (ça reste une simple opération en mémoire), mais vous pourriez supprimer l’un des deux appels pour n’avoir qu’une seule invocation par seconde.
+
+---
+
+### 6.3 `ngOnDestroy()` : nettoyage
+
+```ts
+ngOnDestroy() {
+  if (this.intervalId) clearInterval(this.intervalId);
+}
+```
+
+* **✔️** Votre `setInterval` sera bien annulé quand la page sera détruite, ce qui évite de continuer à mettre à jour en arrière-plan.
+
+---
+
+### 6.4 `initDemoFlight()` et `updateDemoFlight()`
+
+#### 6.4.1 `initDemoFlight()`
+
+```ts
+initDemoFlight() {
+  // Paramètres du vol
+  const durationMin = 165; // 2h45
+
+  const now = DateTime.now();
+  // Pour simuler qu'on est à 25% du vol au démarrage
+  const percent = 0.25;
+  const elapsedMs = Math.round(durationMin * 60 * 1000 * percent);
+
+  this.departure = now.minus({ milliseconds: elapsedMs });
+  this.arrival   = this.departure.plus({ minutes: durationMin });
+
+  this.updateDemoFlight();
+}
+```
+
+* **Objectif** :
+
+  * Pour faire démarrer la démo “au milieu du vol”, on détermine `departure` comme “il y a x minutes” (x = 0.25 × 165).
+  * `this.arrival` = `this.departure + 165 minutes`.
+  * Puis on lance immédiatement `updateDemoFlight()` pour peupler `this.flightData`.
+
+* **✔️** Rien à redire ici. C’est uniquement pour initialiser les dates du vol de démo.
+
+#### 6.4.2 `updateDemoFlight()`
+
+C’est la fonction principale qui construit `this.flightData`.
+
+```ts
+updateDemoFlight() {
+  if (!this.departure || !this.arrival) return;
+
+  const now = DateTime.now();
+
+  // 1) Définition des aéroports GVA & ATH
+  const gva = {
+    code: 'GVA', city: 'Genève', name: 'Aéroport de Genève',
+    tz: 'Europe/Zurich', lat: 46.2381, lon: 6.1080
+  };
+  const ath = {
+    code: 'ATH', city: 'Athènes', name: "Aéroport d'Athènes...",
+    tz: 'Europe/Athens', lat: 37.9364, lon: 23.9445
+  };
+
+  // 2) Profil de vol
+  const t_total_min   = 148;    // durée totale en minutes
+  const t_climb      = 20;     // montée en minutes
+  const t_descent    = 30;     // descente en minutes
+  const KT_TO_KMH    = 1.852;
+  const v_climb_kt   = 280;
+  const v_descent_kt = 300;
+  const v_climb_kmh   = v_climb_kt * KT_TO_KMH;
+  const v_descent_kmh = v_descent_kt * KT_TO_KMH;
+
+  const t_cruise      = t_total_min - t_climb - t_descent; // 148 - 20 - 30 = 98 min
+  const t_cruise_h    = t_cruise / 60;                     // environ 1,63 h
+
+  // 3) Calcul haversine pour la distance grand cercle (en km)
+  const R = 6371;
+  const toRad = (deg: number) => deg * Math.PI / 180;
+  const φ1 = toRad(gva.lat), φ2 = toRad(ath.lat);
+  const λ1 = toRad(gva.lon), λ2 = toRad(ath.lon);
+  const Δφ = toRad(ath.lat - gva.lat);
+  const Δλ = toRad(ath.lon - gva.lon);
+  const hav = (Δ: number) => Math.sin(Δ / 2) ** 2;
+  const a = hav(Δφ) + Math.cos(φ1) * Math.cos(φ2) * hav(Δλ);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const D_gc_km = R * c; // distance grand cercle en km
+
+  // 4) Calibration des phases montée / croisière / descente :
+  const d_climb   = v_climb_kmh   * (t_climb   / 60);  // km parcourus en montée
+  const d_descent = v_descent_kmh * (t_descent / 60);  // km parcourus en descente
+  const v_cruise_kmh = (D_gc_km - d_climb - d_descent) / t_cruise_h;
+  const v_cruise_kt  = v_cruise_kmh / KT_TO_KMH;
+  const d_cruise      = v_cruise_kmh * t_cruise_h;
+
+  // 5) Temps écoulé depuis le départ
+  const total   = this.arrival.diff(this.departure);   // Duration Luxon totale
+  const elapsed = now.diff(this.departure);             // Duration Luxon écoulée
+  const t_elapsed_min = elapsed.as('minutes');
+
+  let phase = '';
+  let v_sol_kt = 0, v_sol_kmh = 0, d_elapsed_km = 0;
+
+  if (t_elapsed_min <= t_climb) {
+    phase = 'Montée';
+    v_sol_kt  = v_climb_kt;
+    v_sol_kmh = v_climb_kmh;
+    d_elapsed_km = v_climb_kmh * (t_elapsed_min / 60);
+  } else if (t_elapsed_min <= t_climb + t_cruise) {
+    phase = 'Croisière';
+    v_sol_kt  = v_cruise_kt;
+    v_sol_kmh = v_cruise_kmh;
+    const dt_cruise     = t_elapsed_min - t_climb;
+    d_elapsed_km = d_climb + v_cruise_kmh * (dt_cruise / 60);
+  } else {
+    phase = 'Descente';
+    v_sol_kt  = v_descent_kt;
+    v_sol_kmh = v_descent_kmh;
+    const dt_desc     = t_elapsed_min - t_climb - t_cruise;
+    d_elapsed_km = d_climb + d_cruise + v_descent_kmh * (dt_desc / 60);
+  }
+
+  const fraction_f = Math.max(0, Math.min(1, d_elapsed_km / D_gc_km));
+
+  // 6) Interpolation de la position actuelle (grand-cercle) :
+  const δ = c;
+  const A = Math.sin((1 - fraction_f) * δ) / Math.sin(δ);
+  const B = Math.sin(fraction_f * δ) / Math.sin(δ);
+  const x = A * Math.cos(φ1) * Math.cos(λ1) + B * Math.cos(φ2) * Math.cos(λ2);
+  const y = A * Math.cos(φ1) * Math.sin(λ1) + B * Math.cos(φ2) * Math.sin(λ2);
+  const z = A * Math.sin(φ1) + B * Math.sin(φ2);
+  const φ_t = Math.atan2(z, Math.sqrt(x * x + y * y));
+  const λ_t = Math.atan2(y, x);
+  const lat_t_deg = toDeg(φ_t);
+  const lon_t_deg = toDeg(λ_t);
+
+  // 7) Horaires formatés
+  const depTimeGeneva  = this.departure.setZone(gva.tz);
+  const depTimeAthens  = this.departure.setZone(ath.tz);
+  const arrTimeGeneva  = this.arrival  .setZone(gva.tz);
+  const arrTimeAthens  = this.arrival  .setZone(ath.tz);
+  const nowGeneva      = now.setZone(gva.tz);
+  const nowAthens      = now.setZone(ath.tz);
+
+  // 8) Statut du vol
+  const progress = Math.max(0, Math.min(1, elapsed.as('milliseconds') / total.as('milliseconds')));
+  let statusDesc = '';
+  if (progress < 0)   statusDesc = 'En attente';
+  else if (progress >= 1) statusDesc = 'Arrivé';
+  else                  statusDesc = 'En vol';
+  const status = { type: 'ON_TIME', description: statusDesc };
+
+  // 9) Altitude (ft) selon le profil réel
+  const progressPercent = Math.round(progress * 100);
+  const altitude = getRealisticAltitude(progressPercent);
+
+  // 10) Assemblage de l’objet flightData
+  const newFlightData = {
+    departureCity: gva.city,
+    departureAirport: gva.code,
+    departureTimeGeneva: depTimeGeneva.toFormat('HH:mm dd LLL yyyy'),
+    departureTimeAthens: depTimeAthens.toFormat('HH:mm dd LLL yyyy'),
+    departureTZGeneva: gva.tz,
+    departureTZAthens: ath.tz,
+    arrivalCity: ath.city,
+    arrivalAirport: ath.code,
+    arrivalTimeGeneva: arrTimeGeneva.toFormat('HH:mm dd LLL yyyy'),
+    arrivalTimeAthens: arrTimeAthens.toFormat('HH:mm dd LLL yyyy'),
+    arrivalTZGeneva: gva.tz,
+    arrivalTZAthens: ath.tz,
+    flightNumber: 'EZS1528',
+    airline: 'easyJet',
+    aircraft: 'Airbus A320',
+    nowGeneva: nowGeneva.toFormat('HH:mm:ss dd LLL yyyy'),
+    nowAthens: nowAthens.toFormat('HH:mm:ss dd LLL yyyy'),
+    progressPercent: Math.round(progress * 100),
+    elapsed: progress < 0 ? '0 min' : Duration.fromMillis(Math.max(0, elapsed.as('milliseconds'))).toFormat('h:mm'),
+    remaining: progress >= 1 ? '0 min' : Duration.fromMillis(Math.max(0, total.as('milliseconds') - elapsed.as('milliseconds'))).toFormat('h:mm'),
+    duration: Duration.fromMillis(total.as('milliseconds')).toFormat('h:mm'),
+    status,
+    phase,
+    v_sol_kt: Math.round(v_sol_kt),
+    v_sol_kmh: Math.round(v_sol_kmh),
+    d_elapsed_km: Math.round(d_elapsed_km),
+    d_remaining_km: Math.round(D_gc_km - d_elapsed_km),
+    D_gc_km: Math.round(D_gc_km),
+    fraction_f: Math.round(fraction_f * 100),
+    lat_t_deg: lat_t_deg.toFixed(4),
+    lon_t_deg: lon_t_deg.toFixed(4),
+    altitude  // en ft
+  };
+
+  console.log('[WindowPage] updateDemoFlight progressPercent:', newFlightData.progressPercent, 'à', new Date().toISOString());
+  this.flightData = { ...newFlightData, altitude };
+
+  // Mise à jour des POIs visibles
+  this.updateCurrentPOI();
+  this.loading = false;
+}
+```
+
+#### Points clés et vérifications
+
+1. **Calcul de la distance grand-cercle**
+
+   * Vous employez la formule exacte de l’arc de grand-cercle (avec `haversine` plus complet).
+   * `D_gc_km` : distance en km entre GVA et ATH. Parfait.
+
+2. **Phase Montée / Croisière / Descente**
+
+   * Vous définissez :
+
+     * montée : 20 min à 280 kt (≈ 280 × 1.852 = \~518 km/h)
+     * descente : 30 min à 300 kt (\~556 km/h)
+     * croisière : reste (\~98 min) à `v_cruise_kmh` que vous calculez en soustrayant les distances de montée et de descente.
+   * Le calcul est cohérent et permet de connaître la progression exacte en km, vous en déduisez `fraction_f` pour interpoler la position.
+   * ✅ **C’est conforme**.
+
+3. **Interpolation de position (grand-cercle)**
+
+   * Vous utilisez la méthode dite “formule de Rhumb line” (slerp) avec A et B comme coefficients.
+   * Résultat : `(lat_t_deg, lon_t_deg)` est la position intermédiaire à la fraction donnée.
+   * ✅ **OK**.
+
+4. **La donnée `lat_t_deg` et `lon_t_deg` sont TOUS DEUX des chaînes** (`string`) à cause de `.toFixed(4)`.
+
+   * Au moment d’installer `this.flightData = { … lat_t_deg: '46.2381', lon_t_deg: '6.1080', … }`, **ces deux champs sont des chaînes**.
+   * Comme on l’a dit, si on les bondit vers un composant qui attend des `@Input() lat: number`, ce peut être problématique.
+   * **Correction** : Il faudrait faire soit :
+
+     ```ts
+     const latNum = parseFloat(lat_t_deg.toFixed(4));
+     const lonNum = parseFloat(lon_t_deg.toFixed(4));
+     // … puis stocker lat_t_deg: latNum, lon_t_deg: lonNum
+     ```
+
+     ou bien
+
+     ```ts
+     lat_t_deg: Number(lat_t_deg.toFixed(4)),
+     lon_t_deg: Number(lon_t_deg.toFixed(4)),
+     ```
+
+     pour s’assurer que le type reste bien `number`.
+
+5. **Calcul de l’altitude**
+
+   * Vous l’obtenez via `getRealisticAltitude(progressPercent)`, qui renvoie un nombre en **pieds**.
+   * Vous stockez `altitude` dans `newFlightData`, donc `this.flightData.altitude` est bien un nombre en feet.
+   * Plus bas, vous affichez dans le template `{{ flightData.altitude | number:'1.0-0' }} ft ({{ (flightData.altitude * 0.3048) | number:'1.0-0' }} m)` :
+
+     * OK, vous donnez la conversion en mètres à la volée pour l’utilisateur.
+     * Rappel : si vous utilisez ces `altitude` en ft pour vos fonctions Leaflet (WindowHublot), il faut que le composant hublot convertisse correctement ft→m.
+
+6. **Mise à jour de `this.flightData`**
+
+   * Vous faites `this.flightData = { ...newFlightData, altitude };`.
+   * Remarquez que `newFlightData` contient déjà un champ `altitude`. Faire `{ ...newFlightData, altitude }` écrase éventuellement l’ancien `altitude` (même valeur), donc c’est redondant mais pas erroné.
+   * L’idéal aurait été simplement `this.flightData = newFlightData;`.
+
+7. **`this.updateCurrentPOI()`**
+
+   * Vous appelez cette fonction à la fin de `updateDemoFlight()`.
+   * Ça alimente `this.currentPOI` (POIs gauche/droite) en fonctions de la tranche proche (`progressPercent`) dans `waypoints`.
+
+8. **`this.loading = false`**
+
+   * Indique que la première boucle d’update est terminée. OK.
+
+---
+
+### 6.5 `updateFlightTestData()`
+
+```ts
+updateFlightTestData() {
+  if (!this.departure || !this.arrival) return;
+  const now = DateTime.now();
+  // Définition de GVA & ATH (même que dans updateDemoFlight)
+  const gva = { … };
+  const ath = { … };
+  const total = this.arrival.diff(this.departure);
+  const elapsed = now.diff(this.departure);
+  const progress = Math.max(0, Math.min(1, elapsed.as('milliseconds') / total.as('milliseconds')));
+  let statusDesc2 = '';
+  if (progress < 0) statusDesc2 = 'En attente';
+  else if (progress >= 1) statusDesc2 = 'Arrivé';
+  else statusDesc2 = 'En vol';
+  const status2 = { type: 'ON_TIME' as 'ON_TIME', description: statusDesc2 };
+
+  this.flightTestData = {
+    flightNumber: 'EZS1528',
+    airline: 'easyJet',
+    aircraft: { registration: 'HB-JZY', type: 'Airbus A320', icao24: '4b180c' },
+    route: {
+      departure: { airport: gva.name, city: gva.city, country: 'Suisse', scheduledTime: this.departure.toISO(), actualTime: this.departure.toISO(), terminal: 'T1', gate: 'A12', status: status2, location: { latitude: gva.lat, longitude: gva.lon } },
+      arrival:   { airport: ath.name, city: ath.city, country: 'Grèce', scheduledTime: this.arrival.toISO(),  actualTime: this.arrival.toISO(),   terminal: 'M',  gate: 'B7', status: status2, location: { latitude: ath.lat, longitude: ath.lon } },
+      currentPosition: { latitude: parseFloat(this.flightData.lat_t_deg), longitude: parseFloat(this.flightData.lon_t_deg), altitude: 11000, speed: 800, heading: 110, timestamp: now.toISO() },
+      distance: { kilometers: this.flightData.D_gc_km, miles: Math.round(this.flightData.D_gc_km * 0.621371) },
+      duration: { scheduledMinutes: 148 },
+      waypoints: []
+    },
+    status: status2,
+    lastUpdated: now.toISO(),
+    codeshares: ['U21456', 'LX1234'],
+    waypoints: []
+  };
+}
+```
+
+* **But de cette fonction** :
+
+  * Mettre à jour `this.flightTestData` pour alimenter le bloc “Données enrichies du vol test”.
+  * Vous fixez `currentPosition.altitude` à 11000 (ft), `speed: 800`, `heading: 110`.
+  * **Erratum potentiel** : vous passez `latitude: parseFloat(this.flightData.lat_t_deg)` et `longitude: parseFloat(this.flightData.lon_t_deg)` (c’est bien un nombre). OK.
+
+* **Observation** :
+
+  * Vous ne mettez pas de “waypoints” dans `flightTestData`. Ce champ demeurera un tableau vide (`[]`). Si vous vouliez afficher la liste des waypoints test dans la carte du cockpit, il faudra l’alimenter dans `waypoints` au lieu de le laisser vide.
+  * Si ça vous suffit de montrer uniquement “currentPosition” et la route départ/arrivée, c’est cohérent.
+
+---
+
+### 6.6 `updateCurrentPOI()`
+
+```ts
+updateCurrentPOI() {
+  // Trouve la tranche de progression la plus proche
+  if (!this.flightData || !this.waypoints.length) return;
+
+  const pct = this.flightData.progressPercent;
+  let closest = this.waypoints[0];
+  let minDiff = 100;
+  for (const wp of this.waypoints) {
+    const diff = Math.abs(wp.pct - pct);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = wp;
+    }
+  }
+  this.currentPOI = { left: closest.poi_left, right: closest.poi_right };
+  this.currentWaypoint = closest;
+}
+```
+
+* **Principe** :
+
+  * On cherche dans `this.waypoints` l’objet dont `wp.pct` est le plus proche de `flightData.progressPercent` (0 ≤ `pct` ≤ 100).
+  * On stocke `closest.poi_left` dans `this.currentPOI.left` et `closest.poi_right` dans `this.currentPOI.right`.
+  * On conserve aussi `this.currentWaypoint = closest` pour, par exemple, récupérer ses coordonnées (pop-up POI affiche `currentWaypoint.lat`/`lon`).
+* **✔️ C’est correct**.
+
+---
+
+### 6.7 Méthodes de gestion de l’authentification (`logout()`) et du popover
+
+```ts
+async logout() {
+  // TODO: Adapter AuthService logout
+  // await this.authService.logout();
+  window.location.href = '/auth/email';
+}
+
+public openPOIPopover(poi: any, event: MouseEvent) {
+  this.selectedPOI = poi;
+  this.popoverEvent = event;
+  this.showPOIModal = true;
+}
+
+public closePOIPopover() {
+  this.showPOIModal = false;
+  this.selectedPOI = null;
+  this.popoverEvent = null;
+}
+```
+
+* **`logout()`** n’est pas encore implémenté (TODO).
+* **`openPOIPopover()`** / **`closePOIPopover()`** contrôlent bien l’affichage de la modale POI, en jouant sur `showPOIModal` et `selectedPOI`.
+* Le template de la popup “`poi-popup-overlay`” est cohérent avec cette logique.
+
+---
+
+### 6.8 `isPOIVisible()` et `getMapZoomFromAltitude()`
+
+```ts
+isPOIVisible(poi: any, side: 'left' | 'right'): boolean {
+  if (!this.currentPOI) return false;
+  return this.currentPOI[side]?.some((p: any) => p.name === poi.name);
+}
+
+/**
+ * Dans la liste détaillée, on souhaite calculer un zoom “indicatif” pour chaque POI
+ * à partir de son altitude (en ft). Cette fonction fait un mapping linéaire :
+ *   altitude ∈ [0, 40000] → zoom ∈ [13 … 6] (inversé)
+ */
+getMapZoomFromAltitude(altitude: number): number {
+  const minAlt = 0;
+  const maxAlt = 40000;
+  const minZoom = 6;
+  const maxZoom = 13;
+  const alt = Math.max(minAlt, Math.min(maxAlt, altitude));
+  const zoom = maxZoom - ((alt - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
+  return Math.round(zoom);
+}
+```
+
+* **`isPOIVisible(poi, side)`**
+
+  * Vérifie simplement si, dans `this.currentPOI[side]`, il existe un POI dont `name` correspond.
+  * OK, c’est ainsi que vous marquez en gras / bleu les POIs “visibles” dans la liste détaillée.
+
+* **`getMapZoomFromAltitude(altitude: number)`**
+
+  * Vous faites un interpol linéaire entre altitude=0→zoom=13 et altitude=40000→zoom=6.
+  * Dans la section détaillée “POIs du vol” vous affichez `… Zoom: {{ getMapZoomFromAltitude(poi.altitude) }}`,
+  * → C’est une autre échelle de zoom, différente de celle que vous utilisez dans `WindowHublotComponent`.
+  * **Attention de bien distinguer** :
+
+    1. Dans la liste des waypoints, vous n’utilisez ce zoom que pour “afficher un chiffre” à titre indicatif.
+    2. Dans le hublot réel (`WindowHublotComponent`), vous calculez votre zoom à partir d’une formule plus complexe (`log2(...)`).
+  * C’est une différence volontaires ou un simple outil de debug ? Si vous voulez aligner les deux formules, il faudra uniformiser.
+
+---
+
+### 6.9 `getVisiblePOIs()`
+
+```ts
+getVisiblePOIs(): any[] {
+  if (!this.currentPOI) return [];
+  return [
+    ...(this.currentPOI.left || []),
+    ...(this.currentPOI.right || [])
+  ].filter(poi =>
+    typeof poi.lat === 'number' &&
+    typeof poi.lon === 'number' &&
+    !isNaN(poi.lat) &&
+    !isNaN(poi.lon)
+  );
+}
+```
+
+* Cette fonction prend tous les POIs “actuellement visibles” à gauche et à droite et les combine en un seul tableau.
+* Utile pour passer au composant `WindowMapTestComponent` la liste des POIs à afficher sur la carte “cockpit” (trajectory + icônes).
+* **✔️** Simple, concis, fonctionne.
+
+---
+
+### 6.10 `getPinIconForType()` (wrapper)
+
+```ts
+getPinIconForType(type: string): string {
+  return getPinIconForType(type);
+}
+```
+
+* Vous renvoyez simplement la fonction globale définie plus haut. OK.
+
+---
+
+### 6.11 `getHublotLat(side)` et `getHublotLon(side)`
+
+```ts
+getHublotLat(side: 'left' | 'right'): number {
+  if (!this.flightData) return 0;
+  const lat = parseFloat(this.flightData.lat_t_deg);
+  const lon = parseFloat(this.flightData.lon_t_deg);
+  const cap = this.getCurrentHeading();
+  const offsetKm = 10; // décalage latéral en km
+  const angle = (cap + (side === 'left' ? -90 : 90)) * Math.PI / 180;
+  const dLat = (offsetKm / 6371) * Math.cos(angle) * 180 / Math.PI;
+  return lat + dLat;
+}
+
+getHublotLon(side: 'left' | 'right'): number {
+  if (!this.flightData) return 0;
+  const lat = parseFloat(this.flightData.lat_t_deg);
+  const lon = parseFloat(this.flightData.lon_t_deg);
+  const cap = this.getCurrentHeading();
+  const offsetKm = 10;
+  const angle = (cap + (side === 'left' ? -90 : 90)) * Math.PI / 180;
+  const dLon = (offsetKm / 6371) * Math.sin(angle) * 180 / Math.PI / Math.cos(lat * Math.PI / 180);
+  return lon + dLon;
+}
+```
+
+#### Ce qui se passe ici :
+
+1. **Récupération de la position centrale**
+
+   * `lat = parseFloat(this.flightData.lat_t_deg)`
+   * `lon = parseFloat(this.flightData.lon_t_deg)`
+   * On transforme la chaîne en nombre (bien, en corrigeant le petit problème de type mentionné plus haut).
+
+2. **Récupération du cap actuel**
+
+   * On appelle `getCurrentHeading()`, qui détermine la direction du vol en regardant les deux waypoints les plus proches.
+   * Si pas de données, vous renvoyez 90° par défaut (Est).
+
+3. **Angle du hublot**
+
+   * À 10 km sur la droite → `cap + 90°`
+   * À 10 km sur la gauche → `cap – 90°`
+   * On calcule donc `angle` en radians = `(cap ± 90) * π/180`.
+
+4. **Calcul de `dLat` et `dLon`**
+
+   * Vous voulez décaler la position de 10 km vers la gauche ou la droite.
+   * En “petite approximation” :
+
+     * `dLat = (offsetKm / R) * cos(angle) * (180/π)`
+     * `dLon = (offsetKm / R) * sin(angle) * (180/π) / cos(lat)`
+   * Explication :
+
+     * `(offsetKm / R)` → distance angulaire en radians,
+     * `* (180/π)` → conversion en degrés de latitude,
+     * Multiplié par `cos(angle)` ou `sin(angle)` → projeté sur axe latitude ou longitude.
+     * Pour la longitude, on divise par `cos(lat)` pour tenir compte du fait qu’un degré de longitude au sol (km/°) varie selon la latitude.
+   * **✔️ C’est la formule correcte** pour faire un offset “est/ouest” (ou nord/sud) de 10 km autour d’un point.
+
+5. Vous retournez simplement `lat + dLat` et `lon + dLon`.
+
+   * Parfait pour passer à `WindowHublotComponent` une coordonnée légèrement décalée : chaque hublot regarde donc un poil sur le côté (10 km de décalage latéralement), ce qui est logique : on ne regarde pas tout droit devant l’avion, mais un peu sur le côté du fuselage.
+
+---
+
+### 6.12 `getCurrentHeading()`
+
+```ts
+getCurrentHeading(): number {
+  if (this.flightData && this.waypoints && this.waypoints.length > 1) {
+    const pct = this.flightData.progressPercent;
+    let idx = 0;
+    for (let i = 1; i < this.waypoints.length; i++) {
+      if (this.waypoints[i].pct > pct) {
+        idx = i - 1;
+        break;
+      }
+    }
+    // wp1, wp2 sont deux waypoints consécutifs pour la fraction courante
+    const wp1 = this.waypoints[idx];
+    const wp2 = this.waypoints[Math.min(idx + 1, this.waypoints.length - 1)];
+    const lat1 = wp1.lat, lon1 = wp1.lon;
+    const lat2 = wp2.lat, lon2 = wp2.lon;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180)
+            - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+    let brng = Math.atan2(y, x) * 180 / Math.PI;
+    if (brng < 0) brng += 360;
+    return brng;
+  }
+  return 90; // cap par défaut (est)
+}
+```
+
+* **Principe** :
+
+  1. On cherche l’indice `idx` tel que `waypoints[idx].pct ≤ flightData.progressPercent < waypoints[idx + 1].pct`.
+  2. On définit `wp1 = this.waypoints[idx]` et `wp2 = this.waypoints[idx+1]` ou le dernier.
+  3. On calcule le cap (`bearing`) du segment (wp1 → wp2) sur la sphère, grâce à la formule classique :
+
+     $$
+       \theta = \atan2\bigl(\sin(\Delta \lambda)\cos(\phi_2), 
+                          \cos(\phi_1)\sin(\phi_2) - \sin(\phi_1)\cos(\phi_2)\cos(\Delta \lambda)\bigr).
+     $$
+  4. On ramène l’angle en degrés normalisés (0–360).
+* **✔️** La formule est correcte pour obtenir le cap “true” (direction de vol) à partir de deux paires (lat1,lon1) → (lat2,lon2).
+* Si on n’a pas assez de waypoints (moins de 2), on renvoie 90° par défaut. OK.
+
+---
+
+## 7. Bilan / Points de vigilance / Recommandations
+
+### 7.1 Types lat/lon stockés sous forme de chaîne
+
+* **Problème** :
+
+  * Après interpolation en grand-cercle, vous faites `lat_t_deg.toFixed(4)` → c’est une chaîne (`string`). Pourtant, `WindowHublotComponent` attend que `@Input() lat: number` et `@Input() lon: number` soient des nombres.
+* **Solution** :
+
+  * Convertir immédiatement en nombre dans `updateDemoFlight` :
+
+    ```ts
+    const latNum = Number(lat_t_deg.toFixed(4));
+    const lonNum = Number(lon_t_deg.toFixed(4));
+    // …
+    const newFlightData = { 
+      // …
+      lat_t_deg: latNum, 
+      lon_t_deg: lonNum,
+      // …
+    };
+    ```
+  * Ou bien, dans le template `<app-window-map-test [lat]="parseFloat(flightData.lat_t_deg)" …>`, mais c’est moins propre.
+
+### 7.2 Unité d’altitude
+
+* **Dans `WindowPage`**, vous manipulez `altitude` en **pieds** (ft).
+* **Dans `WindowHublotComponent`**, vous aviez prévu une formule qui convertit `altitude * 0.3048` pour passer en mètres avant de calculer le zoom et les limites de vue.
+* Vérifiez bien que **TOUTES** les fonctions de `WindowHublotComponent` reçoivent un `altitude` en ft, puis convertissent systématiquement en mètre (`alt * 0.3048`) avant de faire les formules (zoom, viewRadius, etc.). Si un appel oublie cette conversion, le zoom sera faussé d’un facteur \~3,28.
+* **Recommandation** :
+
+  * Dans `WindowPage`, envoyez `[altitude]="(flightData?.altitude || 11000) * 0.3048"` pour transmettre un nombre en mètres, et modifiez `WindowHublotComponent` pour considérer que l’`@Input() altitude` est déjà en m.
+  * Ou bien, laissez `[altitude]="flightData.altitude"` (en ft) et dans `WindowHublotComponent` commencez par :
+
+    ```ts
+    const altMeters = this.altitude * 0.3048;
+    ```
+
+    avant tout calcul.
+
+### 7.3 Chargement / mémoire
+
+* Vous appelez `updateCurrentPOI()` **deux fois** par ticks (une fois dans `updateDemoFlight()`, une fois dans `setInterval`). C’est redondant. Mieux vaut garder `updateCurrentPOI()` soit à l’intérieur de `updateDemoFlight()`, soit juste après dans le `setInterval`.
+
+### 7.4 Affichage de la popup POI
+
+* Vous testez `*ngIf="selectedPOI.image_url"`, mais vos objets `POI` n’ont pas de champ `image_url` par défaut.
+* Le code essaie ensuite d’afficher `<img [src]="selectedPOI.image_url" …>`, mais comme c’est `undefined`, ça ne s’affichera jamais.
+* **Solution** : soit étendre `interface POI` en ajoutant un champ `image_url?: string`, soit enlever cette ligne `<img>` du template.
+
+### 7.5 Cohérence des formules de zoom
+
+* Dans votre “liste détaillée” (section “Points d'intérêt du vol”), vous calculez le zoom via `getMapZoomFromAltitude(poi.altitude)`, avec une échelle linéaire `[0…40000] ft → zoom [13…6]`.
+* Dans `WindowHublotComponent`, vous aviez une formule plus sophistiquée (basée sur `log2(...)`) pour déterminer le zoom “réel” qu’un passager verrait à telle altitude.
+* Ces deux approches ne sont pas identiques.
+
+  * Si c’est juste pour afficher un chiffre dans la liste, ce n’est pas un problème.
+  * Mais soyez conscient que **le chiffre affiché dans la liste** ne sera pas forcément le même que **le zoom effectif dans le hublot**.
+
+### 7.6 Ajustements éventuels
+
+* Vous avez fixé la **distance latérale de 10 km** pour les hublots (`const offsetKm = 10`). Selon votre préférence, vous pourriez rendre cette valeur paramétrable (via un `@Input()` de la page, par exemple).
+* Le **cap** (issus de `getCurrentHeading()`) peut connaître une légère instabilité si les waypoints sont proches (ex. fraction = 99 % et 100 %). Mais ça reste anecdotique.
+* L’affichage des données “flightTestData” est indépendant du vol de démo ; vous pouvez envisager de scinder ce bloc dans un autre component si vous voulez plus de clarté.
+
+---
+
+## 8. Conclusion générale
+
+1. **La structure de `WindowPage` est globalement juste** :
+
+   * Vous initialisez un vol de démo (Genève → Athènes) en calculant les durées, la position, l’altitude.
+   * Vous générez des waypoints avec POIs et gardez un intervalle d’une seconde pour animer le progrès.
+   * Vous affichez les données textuelles (heures, vitesse, distances, statut).
+   * Vous gérez l’ouverture/fermeture d’une popover pour chaque POI.
+   * En bas, vous déployez deux `WindowHublotComponent`, un pour la fenêtre gauche et un pour la fenêtre droite, avec un décalage latéral de 10 km et la conversion d’altitude.
+
+2. **Points de vigilance à corriger** :
+
+   * Conversion **chaîne → nombre** pour `lat_t_deg` / `lon_t_deg`.
+   * Uniformisation de l’**unité d’altitude** (ft vs m) entre `WindowPage` et `WindowHublotComponent`.
+   * Suppression du test `selectedPOI.image_url` ou bien ajout d’un vrai champ `image_url` dans `ALL_POIS`.
+   * Éliminer l’appel redondant à `updateCurrentPOI()` (actuellement appelé deux fois par tick).
+
+3. **Une fois ces ajustements effectués**, le code correspondra parfaitement à l’objectif :
+
+   * la carte “cockpit”/itinéraire s’actualise avec la position (`WindowMapTestComponent`),
+   * les deux hublots latéraux affichent chacun une mini-carte centrée sur la zone que verrait le passager (correctement zoomée selon l’altitude, orientée à gauche ou à droite du cap),
+   * les POIs sont mise en valeur dans la liste, et cliquables pour ouvrir la popup d’info.
+
+N’hésitez pas à me faire un retour sur la manière dont vous voulez corriger l’altitude ou les lat/lon en chaîne, et je pourrai vous fournir la version finale corrigée du composant si besoin.

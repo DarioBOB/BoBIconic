@@ -1,0 +1,140 @@
+import { Component, AfterViewInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+@Component({
+  selector: 'app-window-map-test',
+  standalone: true,
+  template: `<div id="map"></div>`,
+  styles: [`
+    #map, .leaflet-container {
+      height: 90vh !important;
+      width: 100vw !important;
+      min-height: 400px !important;
+      background: #fff !important;
+      margin: 0;
+      display: block;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  `]
+})
+export class WindowMapTestComponent implements AfterViewInit, OnDestroy, OnChanges {
+  @Input() lat: number | string = 0;
+  @Input() lon: number | string = 0;
+  map: any;
+  planeMarker: any = null;
+  points: [number, number][] = [];
+  lastLat: number | null = null;
+  lastLon: number | null = null;
+
+  ngAfterViewInit() {
+    this.map = L.map('map').setView([44, 15], 6);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri'
+    }).addTo(this.map);
+    // Polyligne grand-cercle Genève-Athènes
+    const from = { lat: 46.2381, lon: 6.1080 };
+    const to = { lat: 37.9364, lon: 23.9445 };
+    const steps = 100;
+    const toRad = (d: number) => d * Math.PI / 180;
+    const toDeg = (r: number) => r * 180 / Math.PI;
+    const lat1 = toRad(from.lat);
+    const lon1 = toRad(from.lon);
+    const lat2 = toRad(to.lat);
+    const lon2 = toRad(to.lon);
+    this.points = [];
+    for (let i = 0; i <= steps; i++) {
+      const f = i / steps;
+      const d = 2 * Math.asin(Math.sqrt(Math.sin((lat2 - lat1) / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin((lon2 - lon1) / 2) ** 2));
+      if (d === 0) {
+        this.points.push([from.lat, from.lon]);
+        continue;
+      }
+      const A = Math.sin((1 - f) * d) / Math.sin(d);
+      const B = Math.sin(f * d) / Math.sin(d);
+      const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+      const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+      const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+      const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
+      const lon = Math.atan2(y, x);
+      this.points.push([toDeg(lat), toDeg(lon)]);
+    }
+    L.polyline(this.points, { color: 'red', weight: 3, dashArray: '8,8' }).addTo(this.map);
+    setTimeout(() => this.map.invalidateSize(), 500);
+    this.updatePlaneMarker();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if ((changes['lat'] || changes['lon']) && this.map) {
+      this.updatePlaneMarker();
+    }
+  }
+
+  updatePlaneMarker() {
+    if (!this.map) return;
+    if (this.planeMarker) this.map.removeLayer(this.planeMarker);
+    const lat = typeof this.lat === 'string' ? parseFloat(this.lat) : this.lat;
+    const lon = typeof this.lon === 'string' ? parseFloat(this.lon) : this.lon;
+    const pos: [number, number] = [lat, lon];
+    // Cap basé sur le mouvement réel
+    let heading = 0;
+    if (this.lastLat !== null && this.lastLon !== null && (lat !== this.lastLat || lon !== this.lastLon)) {
+      const getHeading = (a: [number, number], b: [number, number]) => {
+        const φ1 = a[0] * Math.PI / 180;
+        const φ2 = b[0] * Math.PI / 180;
+        const Δλ = (b[1] - a[1]) * Math.PI / 180;
+        const y = Math.sin(Δλ) * Math.cos(φ2);
+        const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+        let θ = Math.atan2(y, x) * 180 / Math.PI;
+        if (θ < 0) θ += 360;
+        return θ;
+      };
+      heading = getHeading([this.lastLat, this.lastLon], pos);
+    } else {
+      // Fallback : cap vers le point suivant le plus proche sur la polyligne
+      let next = pos;
+      let minDist = 999999;
+      for (const p of this.points) {
+        const d = Math.sqrt((p[0] - lat) ** 2 + (p[1] - lon) ** 2);
+        if (d > 0.01 && d < minDist) {
+          minDist = d;
+          next = p;
+        }
+      }
+      const getHeading = (a: [number, number], b: [number, number]) => {
+        const φ1 = a[0] * Math.PI / 180;
+        const φ2 = b[0] * Math.PI / 180;
+        const Δλ = (b[1] - a[1]) * Math.PI / 180;
+        const y = Math.sin(Δλ) * Math.cos(φ2);
+        const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+        let θ = Math.atan2(y, x) * 180 / Math.PI;
+        if (θ < 0) θ += 360;
+        return θ;
+      };
+      heading = getHeading(pos, next);
+    }
+    const rounded = Math.round(heading / 15) * 15;
+    const normalized = (rounded + 360) % 360;
+    const pad = (n: number) => n.toString().padStart(3, '0');
+    const planeImagePath = `assets/plane_${pad(normalized)}deg.png`;
+    this.planeMarker = L.marker(pos, {
+      icon: L.icon({
+        iconUrl: planeImagePath,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+        popupAnchor: [0, -20]
+      })
+    }).addTo(this.map);
+    this.map.panTo(pos);
+    this.lastLat = lat;
+    this.lastLon = lon;
+  }
+
+  ngOnDestroy() {
+    if (this.planeMarker) this.planeMarker.remove();
+  }
+} 

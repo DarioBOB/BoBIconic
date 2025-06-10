@@ -1,0 +1,8 @@
+Pour bien comprendre l'état du projet BoB backend et reprendre efficacement le développement, lis attentivement les deux fichiers suivants :
+
+- README_BoB_DEV.md : ce fichier contient un récapitulatif détaillé de tout ce qui a été développé, la structure des données, les choix techniques, et le contexte général.
+- TODO_BoB_DEV.md : ce fichier liste tout ce qu'il reste à faire, les fonctionnalités à développer ou améliorer, et les idées pour la suite.
+
+Lis-les intégralement avant toute action. Une fois lu, tu seras prêt à répondre à de nouvelles spécifications, corriger des bugs, ou ajouter des fonctionnalités en toute autonomie.
+
+Si tu as besoin de contexte ou d'exemples, réfère-toi à ces deux fichiers avant de poser des questions ou de commencer à coder. 

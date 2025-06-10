@@ -1,0 +1,133 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ 'WINDOW.TEXT_DATA' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <!-- Informations générales -->
+    <ion-item-divider>
+      <ion-label>{{ 'WINDOW.FLIGHT_INFO' | translate }}</ion-label>
+    </ion-item-divider>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.FLIGHT_NUMBER' | translate }}</h2>
+        <p>{{ flightData.flightNumber }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.AIRLINE' | translate }}</h2>
+        <p>{{ flightData.airline }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.AIRCRAFT' | translate }}</h2>
+        <p>{{ flightData.aircraftType }}</p>
+      </ion-label>
+    </ion-item>
+
+    <!-- Itinéraire -->
+    <ion-item-divider>
+      <ion-label>{{ 'WINDOW.ROUTE' | translate }}</ion-label>
+    </ion-item-divider>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.DEPARTURE' | translate }}</h2>
+        <p>{{ flightData.departure }} - {{ flightData.departureTime }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.ARRIVAL' | translate }}</h2>
+        <p>{{ flightData.arrival }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.DURATION' | translate }}</h2>
+        <p>{{ flightData.duration }}</p>
+      </ion-label>
+    </ion-item>
+
+    <!-- Données dynamiques -->
+    <ion-item-divider>
+      <ion-label>{{ 'WINDOW.CURRENT_STATUS' | translate }}</ion-label>
+    </ion-item-divider>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.ALTITUDE' | translate }}</h2>
+        <p>{{ dynamicData.altitude }} ft</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.SPEED' | translate }}</h2>
+        <p>{{ dynamicData.speed }} km/h</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.WEATHER' | translate }}</h2>
+        <p>{{ dynamicData.weather }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.TIME_REMAINING' | translate }}</h2>
+        <p>{{ dynamicData.estimatedTimeRemaining }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <h2>{{ 'WINDOW.STATUS' | translate }}</h2>
+        <p>{{ flightData.status }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item-divider>
+      <ion-label>Segments (200 points)</ion-label>
+    </ion-item-divider>
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin: 8px 0;">
+      <ion-button size="small" (click)="copySegmentsCSV()">Copier CSV</ion-button>
+      <ion-button size="small" (click)="exportSegmentsCSV()">Exporter CSV</ion-button>
+    </div>
+    <ion-item lines="none">
+      <ion-label>
+        <table style="width:100%; font-size:0.9em;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Lat</th>
+              <th>Lon</th>
+              <th>Alt (m)</th>
+              <th>Vel (m/s)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let seg of segments; let i = index">
+              <td>{{i}}</td>
+              <td>{{seg.lat | number:'1.5-5'}}</td>
+              <td>{{seg.lon | number:'1.5-5'}}</td>
+              <td>{{seg.alt}}</td>
+              <td>{{seg.vel}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content> 

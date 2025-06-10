@@ -1,0 +1,13 @@
+/* Forcer la couleur des icônes du header pour garantir leur visibilité */
+ion-header ion-toolbar ion-icon,
+ion-header ion-toolbar .user-status-bar ion-icon {
+  color: #1976d2 !important;
+}
+
+ion-header ion-toolbar ion-button[routerlink] ion-icon {
+  color: #1976d2 !important;
+}
+
+ion-header ion-toolbar .user-profile ion-icon {
+  color: #1976d2 !important;
+} 

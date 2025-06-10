@@ -1,0 +1,281 @@
+{
+  "user": {
+    "uid": "guest-demo",
+    "email": "guest@bob-demo.com",
+    "firstName": { "fr": "Invité", "en": "Guest" },
+    "lastName": { "fr": "Démo", "en": "Demo" },
+    "preferredLang": "fr",
+    "createdAt": "2023-01-01T10:00:00Z",
+    "lastLogin": "2025-05-01T10:00:00Z"
+  },
+  "trips": [
+    {
+      "id": "trip4",
+      "title": { "fr": "Roadtrip en Espagne", "en": "Roadtrip in Spain" },
+      "startDate": "2025-04-28",
+      "endDate": "2025-05-05",
+      "plans": [
+        {
+          "id": "plan8",
+          "type": "car_rental",
+          "title": { "fr": "Location voiture Barcelone", "en": "Car rental Barcelona" },
+          "startDate": "2025-04-28T09:00:00Z",
+          "endDate": "2025-05-05T18:00:00Z",
+          "details": {
+            "company": "Sixt",
+            "pickup": "Aéroport BCN",
+            "dropoff": "Aéroport BCN"
+          }
+        },
+        {
+          "id": "plan9",
+          "type": "hotel",
+          "title": { "fr": "Hôtel Costa Brava", "en": "Costa Brava Hotel" },
+          "startDate": "2025-04-28T15:00:00Z",
+          "endDate": "2025-05-05T10:00:00Z",
+          "details": {
+            "address": "Plage de Roses, Espagne",
+            "phone": "+34 93 1234567"
+          }
+        },
+        {
+          "id": "plan10",
+          "type": "activity",
+          "title": { "fr": "Kayak sur la Costa Brava", "en": "Kayak on Costa Brava" },
+          "startDate": "2025-05-02T09:00:00Z",
+          "endDate": "2025-05-02T12:00:00Z",
+          "details": {
+            "location": "Plage de Roses"
+          }
+        }
+      ]
+    },
+    {
+      "id": "trip5",
+      "title": { "fr": "Séjour à New York", "en": "Trip to New York" },
+      "startDate": "2025-06-15",
+      "endDate": "2025-06-25",
+      "plans": [
+        {
+          "id": "plan11",
+          "type": "flight",
+          "title": { "fr": "Vol Paris → New York", "en": "Flight Paris → New York" },
+          "startDate": "2025-06-15T10:00:00Z",
+          "endDate": "2025-06-15T13:00:00Z",
+          "details": {
+            "flight": {
+              "flight_number": "DL011",
+              "airline": "DL",
+              "departure": { "airport": "CDG", "city": "Paris" },
+              "arrival": { "airport": "JFK", "city": "New York" },
+              "aircraft": "A330"
+            }
+          }
+        },
+        {
+          "id": "plan12",
+          "type": "hotel",
+          "title": { "fr": "Hôtel Manhattan", "en": "Manhattan Hotel" },
+          "startDate": "2025-06-15T15:00:00Z",
+          "endDate": "2025-06-25T10:00:00Z",
+          "details": {
+            "address": "5th Avenue, New York",
+            "phone": "+1 212 1234567"
+          }
+        },
+        {
+          "id": "plan13",
+          "type": "activity",
+          "title": { "fr": "Comédie musicale à Broadway", "en": "Broadway Musical" },
+          "startDate": "2025-06-18T19:00:00Z",
+          "endDate": "2025-06-18T22:00:00Z",
+          "details": {
+            "location": "Broadway Theatre"
+          }
+        }
+      ]
+    },
+    {
+      "id": "trip6",
+      "title": { "fr": "Randonnée dans les Alpes", "en": "Hiking in the Alps" },
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-10",
+      "plans": [
+        {
+          "id": "plan14",
+          "type": "train",
+          "title": { "fr": "Train Paris → Chamonix", "en": "Train Paris → Chamonix" },
+          "startDate": "2025-08-01T07:00:00Z",
+          "endDate": "2025-08-01T12:00:00Z",
+          "details": {
+            "train_number": "TGV9876",
+            "departure": "Gare de Lyon",
+            "arrival": "Chamonix"
+          }
+        },
+        {
+          "id": "plan15",
+          "type": "hotel",
+          "title": { "fr": "Refuge du Mont Blanc", "en": "Mont Blanc Lodge" },
+          "startDate": "2025-08-01T15:00:00Z",
+          "endDate": "2025-08-10T10:00:00Z",
+          "details": {
+            "address": "Chamonix, France",
+            "phone": "+33 4 50 53 00 00"
+          }
+        },
+        {
+          "id": "plan16",
+          "type": "activity",
+          "title": { "fr": "Randonnée au Lac Blanc", "en": "Hiking to Lac Blanc" },
+          "startDate": "2025-08-03T08:00:00Z",
+          "endDate": "2025-08-03T17:00:00Z",
+          "details": {
+            "location": "Lac Blanc, Chamonix"
+          }
+        }
+      ]
+    },
+    {
+      "id": "trip1",
+      "title": { "fr": "Vacances à Rome", "en": "Holiday in Rome" },
+      "startDate": "2024-07-10",
+      "endDate": "2024-07-20",
+      "plans": [
+        {
+          "id": "plan1",
+          "type": "flight",
+          "title": { "fr": "Vol aller Paris → Rome", "en": "Flight Paris → Rome" },
+          "startDate": "2024-07-10T08:00:00Z",
+          "endDate": "2024-07-10T10:00:00Z",
+          "details": {
+            "flight": {
+              "flight_number": "AF1234",
+              "airline": "AF",
+              "departure": { "airport": "CDG", "city": "Paris" },
+              "arrival": { "airport": "FCO", "city": "Rome" },
+              "aircraft": "A320"
+            }
+          }
+        },
+        {
+          "id": "plan2",
+          "type": "hotel",
+          "title": { "fr": "Hôtel Roma Center", "en": "Roma Center Hotel" },
+          "startDate": "2024-07-10T12:00:00Z",
+          "endDate": "2024-07-20T10:00:00Z",
+          "details": {
+            "address": "Via Roma 1, Rome",
+            "phone": "+39 06 1234567"
+          }
+        },
+        {
+          "id": "plan3",
+          "type": "activity",
+          "title": { "fr": "Visite du Colisée", "en": "Colosseum Visit" },
+          "startDate": "2024-07-12T09:00:00Z",
+          "endDate": "2024-07-12T12:00:00Z",
+          "details": {
+            "location": "Colisée, Rome"
+          }
+        }
+      ]
+    },
+    {
+      "id": "trip2",
+      "title": { "fr": "Séjour à Montréal", "en": "Trip to Montreal" },
+      "startDate": "2024-06-01",
+      "endDate": "2024-06-10",
+      "plans": [
+        {
+          "id": "plan4",
+          "type": "flight",
+          "title": { "fr": "Vol retour Montréal → Paris", "en": "Flight Montreal → Paris" },
+          "startDate": "2024-06-10T15:00:00Z",
+          "endDate": "2024-06-10T23:00:00Z",
+          "details": {
+            "flight": {
+              "flight_number": "AC875",
+              "airline": "AC",
+              "departure": { "airport": "YUL", "city": "Montréal" },
+              "arrival": { "airport": "CDG", "city": "Paris" },
+              "aircraft": "B777"
+            }
+          }
+        },
+        {
+          "id": "plan5",
+          "type": "car_rental",
+          "title": { "fr": "Location voiture", "en": "Car rental" },
+          "startDate": "2024-06-01T10:00:00Z",
+          "endDate": "2024-06-10T10:00:00Z",
+          "details": {
+            "company": "Hertz",
+            "pickup": "Aéroport YUL",
+            "dropoff": "Aéroport YUL"
+          }
+        }
+      ]
+    },
+    {
+      "id": "trip3",
+      "title": { "fr": "Week-end à Lyon", "en": "Weekend in Lyon" },
+      "startDate": "2023-12-15",
+      "endDate": "2023-12-17",
+      "plans": [
+        {
+          "id": "plan6",
+          "type": "train",
+          "title": { "fr": "Train Paris → Lyon", "en": "Train Paris → Lyon" },
+          "startDate": "2023-12-15T18:00:00Z",
+          "endDate": "2023-12-15T20:00:00Z",
+          "details": {
+            "train_number": "TGV1234",
+            "departure": "Gare de Lyon",
+            "arrival": "Lyon Part-Dieu"
+          }
+        },
+        {
+          "id": "plan7",
+          "type": "activity",
+          "title": { "fr": "Dîner gastronomique", "en": "Gastronomic dinner" },
+          "startDate": "2023-12-16T20:00:00Z",
+          "endDate": "2023-12-16T23:00:00Z",
+          "details": {
+            "location": "Restaurant Paul Bocuse"
+          }
+        }
+      ]
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif1",
+      "date": "2025-04-28T08:00:00Z",
+      "message": { "fr": "Bienvenue en mode démo !", "en": "Welcome to demo mode!" },
+      "type": "info"
+    },
+    {
+      "id": "notif2",
+      "date": "2025-05-01T09:00:00Z",
+      "message": { "fr": "Votre location de voiture en Espagne commence aujourd'hui.", "en": "Your car rental in Spain starts today." },
+      "type": "reminder"
+    },
+    {
+      "id": "notif3",
+      "date": "2025-06-15T08:00:00Z",
+      "message": { "fr": "Préparez-vous pour New York !", "en": "Get ready for New York!" },
+      "type": "info"
+    },
+    {
+      "id": "notif4",
+      "date": "2025-08-01T07:00:00Z",
+      "message": { "fr": "Départ pour la randonnée dans les Alpes.", "en": "Departure for hiking in the Alps." },
+      "type": "reminder"
+    }
+  ],
+  "preferences": {
+    "language": "fr",
+    "notifications": true
+  }
+} 

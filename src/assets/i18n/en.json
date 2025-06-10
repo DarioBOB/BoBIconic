@@ -1,0 +1,67 @@
+{
+  "LANDING": {
+    "TILES": {
+      "TRIPS": "Trips",
+      "WINDOW": "My Window",
+      "CHAT": "Chat",
+      "BOBBERS": "Bobbers",
+      "GAMES": "Games",
+      "NOTIFICATIONS": "Notifications",
+      "DOCUMENTS": "Documents",
+      "SUPPORT": "Support",
+      "PREFERENCES": "Preferences",
+      "IN_PROGRESS": "In Progress"
+    }
+  },
+  "WINDOW": {
+    "POIS": {
+      "GENEVA": {
+        "TITLE": "Geneva",
+        "DESCRIPTION": "Starting point"
+      },
+      "MILAN": {
+        "TITLE": "Milan",
+        "DESCRIPTION": "First stop"
+      },
+      "ROME": {
+        "TITLE": "Rome",
+        "DESCRIPTION": "Second stop"
+      },
+      "ATHENS": {
+        "TITLE": "Athens",
+        "DESCRIPTION": "Final destination"
+      }
+    },
+    "PROGRESS": {
+      "CURRENT_POSITION": "Current position",
+      "APPROACHING_MILAN": "Approaching Milan",
+      "APPROACHING_ROME": "Approaching Rome",
+      "APPROACHING_ATHENS": "Approaching Athens",
+      "FINAL_APPROACH": "Final approach to Athens"
+    }
+  },
+  "TRIPS": {
+    "TITLE": "My Trips",
+    "SUBTITLE": "Find all your organized trips",
+    "ONGOING": "Ongoing",
+    "UPCOMING": "Upcoming",
+    "PAST": "Past",
+    "STATUS_ONGOING": "Ongoing",
+    "STATUS_UPCOMING": "Upcoming",
+    "STATUS_PAST": "Past",
+    "NO_ONGOING": "No ongoing trips",
+    "NO_ONGOING_DESC": "You don't have any ongoing trips at the moment",
+    "NO_UPCOMING": "No upcoming trips",
+    "NO_UPCOMING_DESC": "You don't have any upcoming trips planned",
+    "NO_PAST": "No past trips",
+    "NO_PAST_DESC": "You don't have any trips in your history yet",
+    "LOADING_PLANS": "Loading steps...",
+    "NO_PLANS": "No planned steps",
+    "ERROR_TITLE": "An error occurred"
+  },
+  "COMMON": {
+    "LOADING": "Loading...",
+    "SHOW": "Show",
+    "HIDE": "Hide"
+  }
+} 

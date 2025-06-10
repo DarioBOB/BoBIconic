@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Mes Voyages</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="currentUserEmail" disabled>
+        <ion-icon name="person-circle-outline" slot="start"></ion-icon>
+        {{ currentUserEmail }}
+      </ion-button>
+      <ion-button color="danger" (click)="logout()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Déconnexion
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<div *ngIf="selectedTripId === trip.id" class="plans-list-premium">
+  <div *ngIf="loadingPlans" class="loading-plans">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Chargement des étapes…</p>
+  </div>
+  <div *ngIf="!loadingPlans">
+    <div *ngIf="plans.length === 0" class="plans-placeholder">Aucune étape pour ce voyage</div>
+    <app-plan-card *ngFor="let plan of plans" [plan]="plan" [dateFormat]="getDateFormat()"></app-plan-card>
+  </div>
+</div> 

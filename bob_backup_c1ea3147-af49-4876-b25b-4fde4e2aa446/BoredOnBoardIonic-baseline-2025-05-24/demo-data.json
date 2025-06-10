@@ -1,0 +1,142 @@
+{
+  "user": {
+    "uid": "guest-demo",
+    "email": "guest@bob-demo.com",
+    "firstName": { "fr": "Invité", "en": "Guest" },
+    "lastName": { "fr": "Démo", "en": "Demo" },
+    "preferredLang": "fr",
+    "createdAt": "2023-01-01T10:00:00Z",
+    "lastLogin": "2024-06-01T10:00:00Z"
+  },
+  "trips": [
+    {
+      "id": "trip1",
+      "title": { "fr": "Vacances à Rome", "en": "Holiday in Rome" },
+      "startDate": "2024-07-10",
+      "endDate": "2024-07-20",
+      "plans": [
+        {
+          "id": "plan1",
+          "type": "flight",
+          "title": { "fr": "Vol aller Paris → Rome", "en": "Flight Paris → Rome" },
+          "startDate": "2024-07-10T08:00:00Z",
+          "endDate": "2024-07-10T10:00:00Z",
+          "details": {
+            "flight": {
+              "flight_number": "AF1234",
+              "airline": "AF",
+              "departure": { "airport": "CDG", "city": "Paris" },
+              "arrival": { "airport": "FCO", "city": "Rome" },
+              "aircraft": "A320"
+            }
+          }
+        },
+        {
+          "id": "plan2",
+          "type": "hotel",
+          "title": { "fr": "Hôtel Roma Center", "en": "Roma Center Hotel" },
+          "startDate": "2024-07-10T12:00:00Z",
+          "endDate": "2024-07-20T10:00:00Z",
+          "details": {
+            "address": "Via Roma 1, Rome",
+            "phone": "+39 06 1234567"
+          }
+        },
+        {
+          "id": "plan3",
+          "type": "activity",
+          "title": { "fr": "Visite du Colisée", "en": "Colosseum Visit" },
+          "startDate": "2024-07-12T09:00:00Z",
+          "endDate": "2024-07-12T12:00:00Z",
+          "details": {
+            "location": "Colisée, Rome"
+          }
+        }
+      ]
+    },
+    {
+      "id": "trip2",
+      "title": { "fr": "Séjour à Montréal", "en": "Trip to Montreal" },
+      "startDate": "2024-06-01",
+      "endDate": "2024-06-10",
+      "plans": [
+        {
+          "id": "plan4",
+          "type": "flight",
+          "title": { "fr": "Vol retour Montréal → Paris", "en": "Flight Montreal → Paris" },
+          "startDate": "2024-06-10T15:00:00Z",
+          "endDate": "2024-06-10T23:00:00Z",
+          "details": {
+            "flight": {
+              "flight_number": "AC875",
+              "airline": "AC",
+              "departure": { "airport": "YUL", "city": "Montréal" },
+              "arrival": { "airport": "CDG", "city": "Paris" },
+              "aircraft": "B777"
+            }
+          }
+        },
+        {
+          "id": "plan5",
+          "type": "car_rental",
+          "title": { "fr": "Location voiture", "en": "Car rental" },
+          "startDate": "2024-06-01T10:00:00Z",
+          "endDate": "2024-06-10T10:00:00Z",
+          "details": {
+            "company": "Hertz",
+            "pickup": "Aéroport YUL",
+            "dropoff": "Aéroport YUL"
+          }
+        }
+      ]
+    },
+    {
+      "id": "trip3",
+      "title": { "fr": "Week-end à Lyon", "en": "Weekend in Lyon" },
+      "startDate": "2023-12-15",
+      "endDate": "2023-12-17",
+      "plans": [
+        {
+          "id": "plan6",
+          "type": "train",
+          "title": { "fr": "Train Paris → Lyon", "en": "Train Paris → Lyon" },
+          "startDate": "2023-12-15T18:00:00Z",
+          "endDate": "2023-12-15T20:00:00Z",
+          "details": {
+            "train_number": "TGV1234",
+            "departure": "Gare de Lyon",
+            "arrival": "Lyon Part-Dieu"
+          }
+        },
+        {
+          "id": "plan7",
+          "type": "activity",
+          "title": { "fr": "Dîner gastronomique", "en": "Gastronomic dinner" },
+          "startDate": "2023-12-16T20:00:00Z",
+          "endDate": "2023-12-16T23:00:00Z",
+          "details": {
+            "location": "Restaurant Paul Bocuse"
+          }
+        }
+      ]
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif1",
+      "date": "2024-06-01T09:00:00Z",
+      "message": { "fr": "Votre vol pour Rome est confirmé !", "en": "Your flight to Rome is confirmed!" },
+      "type": "info"
+    },
+    {
+      "id": "notif2",
+      "date": "2024-06-10T12:00:00Z",
+      "message": { "fr": "Pensez à rendre la voiture de location.", "en": "Remember to return your rental car." },
+      "type": "reminder"
+    }
+  ],
+  "preferences": {
+    "language": "fr",
+    "notifications": true
+  }
+} 

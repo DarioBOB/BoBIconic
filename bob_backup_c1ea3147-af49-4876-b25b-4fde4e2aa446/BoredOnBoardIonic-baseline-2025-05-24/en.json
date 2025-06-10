@@ -1,0 +1,173 @@
+{
+  "HOME": {
+    "TITLE": "Bored On Board",
+    "WELCOME": "Welcome to Bored On Board",
+    "BASELINE": "Your travel app developed by",
+    "TEST_APP": "Try the app",
+    "LOGIN": "Login",
+    "REGISTER": "Create account"
+  },
+  "AUTH": {
+    "LOGIN": "Login",
+    "LOGIN_TITLE": "Login",
+    "REGISTER": "Create account",
+    "REGISTER_TITLE": "Create account",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "CONFIRM_PASSWORD": "Confirm password",
+    "FIRSTNAME": "First name",
+    "LASTNAME": "Last name",
+    "PREFERRED_LANG": "Preferred language",
+    "FORGOT_PASSWORD": "Forgot password?",
+    "RESET_PASSWORD_TITLE": "Reset Password",
+    "RESET_PASSWORD_INSTRUCTIONS": "Please enter your new password",
+    "NEW_PASSWORD": "New password",
+    "RESET_PASSWORD": "Reset Password",
+    "RESET_SUCCESS": "Your password has been reset successfully",
+    "PASSWORD_REQUIREMENTS": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character",
+    "VERIFY_EMAIL_TITLE": "Verify your email",
+    "VERIFY_EMAIL_MSG": "A verification email has been sent to",
+    "RESEND_VERIFICATION": "Resend verification email",
+    "VERIFY_EMAIL_SENT": "Verification email sent!",
+    "VERIFY_EMAIL_SUCCESS": "Email verified! Redirecting to login...",
+    "RESET_EMAIL_SENT": "A password reset email has been sent",
+    "ERRORS": {
+      "EMPTY_FIELDS": "Please fill in all fields",
+      "INVALID_EMAIL": "Invalid email",
+      "USER_DISABLED": "Account disabled",
+      "INVALID_CREDENTIALS": "Invalid email or password",
+      "USER_NOT_FOUND": "No account found with this email",
+      "EMAIL_REQUIRED": "Please enter your email",
+      "UNKNOWN": "An error occurred",
+      "PASSWORD_MISMATCH": "Passwords do not match",
+      "WEAK_PASSWORD": "Password must be at least 8 characters",
+      "EMAIL_IN_USE": "This email is already in use",
+      "CONFIG_NOT_FOUND": "Firebase configuration missing or incorrect",
+      "PASSWORD_RULES": "Password must be at least 8 characters, with uppercase, lowercase, number and special character",
+      "INVALID_RESET_CODE": "The reset code is invalid or has expired",
+      "EXPIRED_RESET_CODE": "The reset code has expired",
+      "API_KEY_NOT_VALID": "Firebase configuration error: API key is not valid. Please contact support or check your configuration.",
+      "USER_NOT_FOUND_BOB": "This email is not yet known to BoB. Please check your address or create an account if you don't have one yet."
+    }
+  },
+  "TRIPS": {
+    "ONGOING": "Ongoing trips",
+    "UPCOMING": "Upcoming trips",
+    "PAST": "Past trips",
+    "NO_TRIPS": "No trips yet",
+    "ERROR_FIRESTORE": "Unable to fetch your trips. Please try again later or contact support.",
+    "SHOW_ITINERARY": "Show itinerary",
+    "NO_PLANS": "No plans for this trip",
+    "TYPE": "Type",
+    "flight": "Flight",
+    "car_rental": "Car rental",
+    "hotel": "Hotel",
+    "activity": "Activity",
+    "train": "Train",
+    "ferry": "Ferry",
+    "restaurant": "Restaurant",
+    "meeting": "Meeting",
+    "LOADING": "Loading trips...",
+    "FLIGHT": "Flight",
+    "CAR_RENTAL": "Car rental",
+    "HOTEL": "Hotel",
+    "ACTIVITY": "Activity",
+    "TRAIN": "Train",
+    "FERRY": "Ferry",
+    "RESTAURANT": "Restaurant",
+    "THEATER": "Theater",
+    "CONCERT": "Concert",
+    "PARKING": "Parking",
+    "NOTE": "Note",
+    "ITINERARY": "Itinerary",
+    "CRUISE": "Cruise",
+    "MAP": "Map",
+    "MEETING": "Meeting",
+    "VISIT": "Visit",
+    "TRANSPORT": "Transport",
+    "UNKNOWN": "Other"
+  },
+  "LANDING": {
+    "TITLE": "Welcome to BoB",
+    "TILES": {
+      "TRIPS": "My Trips",
+      "PROFILE": "My Profile",
+      "NOTIFICATIONS": "Notifications",
+      "SETTINGS": "Settings",
+      "SUPPORT": "Support",
+      "DOCUMENTS": "Documents",
+      "PREFERENCES": "Preferences",
+      "IN_PROGRESS": "Work in progress...",
+      "WINDOW": "Throw my window",
+      "CHAT": "Online chat",
+      "BOBBERS": "BoBBers nearby",
+      "GAMES": "Games / Quiz"
+    },
+    "LANG": "Language:",
+    "LOGOUT": "Logout"
+  },
+  "COMMON": {
+    "BACK": "Back",
+    "MENU": "Menu",
+    "PROFILE": "Profile",
+    "LOGOUT": "Logout",
+    "DEMO_MODE": "Demo mode active - Test data"
+  },
+  "PAGES": {
+    "TRIPS": {
+      "TITLE": "My Trips",
+      "DESCRIPTION": "Manage your trips and track your itineraries"
+    },
+    "WINDOW": {
+      "TITLE": "My Window",
+      "DESCRIPTION": "See the world through your window"
+    },
+    "CHAT": {
+      "TITLE": "Online Chat",
+      "DESCRIPTION": "Chat with other travelers"
+    },
+    "BOBBERS": {
+      "TITLE": "BoBBers Nearby",
+      "DESCRIPTION": "Discover who's around"
+    },
+    "GAMES": {
+      "TITLE": "Games & Quiz",
+      "DESCRIPTION": "Have fun during your trip"
+    },
+    "NOTIFICATIONS": {
+      "TITLE": "Notifications",
+      "DESCRIPTION": "Stay informed about your updates"
+    },
+    "DOCUMENTS": {
+      "TITLE": "Documents",
+      "DESCRIPTION": "Access your travel documents"
+    },
+    "SUPPORT": {
+      "TITLE": "Support",
+      "DESCRIPTION": "Need help? Contact us"
+    },
+    "PREFERENCES": {
+      "TITLE": "Preferences",
+      "DESCRIPTION": "Customize your experience"
+    }
+  },
+  "PROFILE": {
+    "LANGUAGE": "Language",
+    "NOTIFICATIONS": "Notifications",
+    "EMAIL_NOTIFICATIONS": "Email Notifications",
+    "SAVE": "Save"
+  },
+  "EMAIL": {
+    "PARSER": {
+      "TITLE": "Parse Emails",
+      "LOADING": "Searching for unread emails...",
+      "SUCCESS": "Emails parsed successfully!",
+      "PARSE_BUTTON": "Parse Emails",
+      "ERROR": {
+        "CONNECTION": "Error connecting to email account",
+        "PARSING": "Error parsing emails",
+        "STORAGE": "Error storing data"
+      }
+    }
+  }
+} 

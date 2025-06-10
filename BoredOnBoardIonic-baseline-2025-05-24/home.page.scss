@@ -1,0 +1,104 @@
+#container {
+  text-align: center;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#container strong {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+#container p {
+  font-size: 16px;
+  line-height: 22px;
+
+  color: #8c8c8c;
+
+  margin: 0;
+}
+
+#container a {
+  text-decoration: none;
+}
+
+.bob-logo {
+  height: 40px;
+  margin-right: 12px;
+}
+
+.bob-logo-large {
+  display: block;
+  margin: 32px auto 16px auto;
+  height: 100px;
+}
+
+ion-content.not-logged-in::part(scroll),
+ion-content.not-logged-in {
+  background: url('/assets/bob/background/bob-bg-passport.jpg') center center/cover no-repeat !important;
+}
+
+ion-content.logged-in::part(scroll),
+ion-content.logged-in {
+  background: url('/assets/bob/background/bob-bg-airport.jpg') center center/cover no-repeat !important;
+}
+
+.bob-baseline {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 16px;
+  margin-top: 8px;
+  a {
+    color: #0077cc;
+    text-decoration: underline;
+  }
+}
+
+.auth-container {
+  text-align: center;
+  background: rgba(255,255,255,0.92);
+  border-radius: 16px;
+  padding: 32px 16px;
+  margin: 32px auto;
+  max-width: 400px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+
+.sunshine-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 32px 0 16px 0;
+}
+
+.sunshine-logo {
+  height: 48px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: #fff;
+  padding: 4px;
+}
+
+ion-button {
+  --background: #1bb6b1;
+  --background-hover: #159e9a;
+  --background-activated: #159e9a;
+  --color: #fff;
+  --border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+ion-button[color="secondary"] {
+  --background: #ff9800;
+  --background-hover: #e68900;
+  --background-activated: #e68900;
+  --color: #fff;
+}
+
+.bob-baseline a {
+  color: #1bb6b1;
+}

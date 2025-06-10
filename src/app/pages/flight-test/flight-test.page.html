@@ -1,0 +1,155 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Test des Données de Vol</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="refreshData()">
+        <ion-icon name="refresh"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ng-container *ngIf="loading; else testContent">
+    <div class="spinner-container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;">
+      <ion-spinner name="crescent" style="margin-bottom:16px;"></ion-spinner>
+      <div>Chargement du test de vol…</div>
+    </div>
+  </ng-container>
+  <ng-template #testContent>
+    <div class="container">
+      <div *ngIf="error" class="error">
+        <ion-icon name="alert-circle"></ion-icon>
+        <p>{{ error }}</p>
+      </div>
+
+      <div *ngIf="flightData && !loading" class="flight-data">
+        <!-- Informations de base -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Informations de Base</ion-card-title>
+            <ion-card-subtitle>Source: {{ dataSources.aviationstack }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item>
+                <ion-label>Numéro de Vol</ion-label>
+                <ion-note slot="end">{{ flightData.flightNumber }}</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Compagnie</ion-label>
+                <ion-note slot="end">{{ flightData.airline }}</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Statut</ion-label>
+                <ion-note slot="end">{{ flightData.status.type }}</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Dernière Mise à Jour</ion-label>
+                <ion-note slot="end">{{ flightData.lastUpdated | date:'medium' }}</ion-note>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Informations sur l'aéronef -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Informations sur l'Aéronef</ion-card-title>
+            <ion-card-subtitle>Source: {{ dataSources.opensky }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item>
+                <ion-label>Type</ion-label>
+                <ion-note slot="end">{{ flightData.aircraft.type }}</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Immatriculation</ion-label>
+                <ion-note slot="end">{{ flightData.aircraft.registration }}</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>ICAO24</ion-label>
+                <ion-note slot="end">{{ flightData.aircraft.icao24 }}</ion-note>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Informations sur le trajet -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Informations sur le Trajet</ion-card-title>
+            <ion-card-subtitle>Source: {{ dataSources.aviationstack }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item>
+                <ion-label>Départ</ion-label>
+                <ion-note slot="end">
+                  {{ flightData.route.departure.airport }} - {{ flightData.route.departure.city }}
+                </ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Arrivée</ion-label>
+                <ion-note slot="end">
+                  {{ flightData.route.arrival.airport }} - {{ flightData.route.arrival.city }}
+                </ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Horaire Départ</ion-label>
+                <ion-note slot="end">{{ flightData.route.departure.scheduledTime | date:'medium' }}</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Horaire Arrivée</ion-label>
+                <ion-note slot="end">{{ flightData.route.arrival.scheduledTime | date:'medium' }}</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Distance</ion-label>
+                <ion-note slot="end">{{ flightData.route.distance.kilometers }} km</ion-note>
+              </ion-item>
+              <ion-item>
+                <ion-label>Durée Prévue</ion-label>
+                <ion-note slot="end">{{ flightData.route.duration.scheduledMinutes }} minutes</ion-note>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Waypoints -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Waypoints</ion-card-title>
+            <ion-card-subtitle>Source: {{ dataSources.opensky }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item *ngFor="let waypoint of flightData.waypoints">
+                <ion-label>
+                  <h3>{{ waypoint.timestamp | date:'medium' }}</h3>
+                  <p>Lat: {{ waypoint.latitude }}, Lon: {{ waypoint.longitude }}, Alt: {{ waypoint.altitude }}m</p>
+                  <p>Vitesse: {{ waypoint.speed }} km/h, Cap: {{ waypoint.heading }}°</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Codes partagés -->
+        <ion-card *ngIf="flightData.codeshares?.length">
+          <ion-card-header>
+            <ion-card-title>Codes Partagés</ion-card-title>
+            <ion-card-subtitle>Source: {{ dataSources.aviationstack }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item *ngFor="let code of flightData.codeshares">
+                <ion-label>{{ code }}</ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+  </ng-template>
+</ion-content> 

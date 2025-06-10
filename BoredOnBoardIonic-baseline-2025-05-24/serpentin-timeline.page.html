@@ -1,0 +1,20 @@
+<ion-content class="serpentin-content" fullscreen>
+  <div class="serpentin-wrapper">
+    <svg viewBox="0 0 400 900" class="serpentin-svg">
+      <path #serpentinPath id="serpentinPath" d="M 60 100 Q 200 100 200 220 Q 200 340 60 340 Q -80 340 -80 460 Q -80 580 200 580 Q 480 580 480 700" fill="none" stroke="#2d2536" stroke-width="32" stroke-linecap="round"/>
+      <path d="M 60 100 Q 200 100 200 220 Q 200 340 60 340 Q -80 340 -80 460 Q -80 580 200 580 Q 480 580 480 700" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-dasharray="32 24"/>
+    </svg>
+    <ng-container *ngFor="let plan of plans; let i = index">
+      <div class="serpentin-step-flat" [ngClass]="{left: stepPositions[i]?.side === -1, right: stepPositions[i]?.side === 1}" [ngStyle]="getStepStyle(i)">
+        <div class="flat-icon" [ngStyle]="{'background': getBadgeColor(plan.icon)}">
+          <ion-icon [name]="plan.icon"></ion-icon>
+        </div>
+        <div class="flat-labels">
+          <div class="flat-title">{{ plan.title }}</div>
+          <div class="flat-desc">{{ plan.description }}</div>
+          <div class="flat-time">{{ plan.time }}</div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</ion-content> 

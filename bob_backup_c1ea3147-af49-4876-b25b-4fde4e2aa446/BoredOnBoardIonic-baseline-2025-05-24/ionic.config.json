@@ -1,0 +1,7 @@
+{
+  "name": "BoredOnBoardIonic",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

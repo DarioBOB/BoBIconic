@@ -1,0 +1,40 @@
+# CONTEXTE BoB (BoredOnBoard)
+Application de gestion de voyages avec parsing automatique des emails, affichage des plans (vols, location de voiture, etc.), synchronisation Firestore, et enrichissement des données via APIs externes.
+
+## Mode démo et séparation stricte
+- Un mode démo permet de tester l'app avec un user de démo (`guestuser@demo.com`) et des voyages/plans de démo générés automatiquement.
+- Le script de seed (`seed-demo-trips.ts/.js`) **ne crée que le user de démo et ses voyages/plans**. Il ne touche jamais aux autres users ni à leurs données.
+- Un script de wipe (`wipe-firestore.js`) permet de supprimer toutes les données Firestore (users, voyages, plans) pour repartir d'une base propre. À utiliser avec extrême précaution.
+- Après un wipe, le seed permet de régénérer uniquement les données de démo. Les données réelles sont recréées par le parsing d'emails.
+- **Règle métier absolue : aucun email ne doit jamais être envoyé ni traité pour le user de démo.** Le parsing ignore tous les emails envoyés par ou à `guestuser@demo.com`.
+- La séparation entre données de démo et réelles est strictement garantie par les scripts et process.
+
+## Procédure de reset/test
+1. Lancer `node src/scripts/wipe-firestore.js` pour tout effacer (sauf authentification Firebase).
+2. Compiler puis lancer le seed de démo :
+   ```bash
+   npx tsc --target es2015 --module commonjs src/scripts/seed-demo-trips.ts --outDir src/scripts/
+   node src/scripts/seed-demo-trips.js
+   ```
+3. Lancer le parsing d'emails pour recréer les données réelles à partir des emails reçus.
+
+## Roadmap API & Enrichissement
+- **Vols** : FlightAware (implémenté), AviationStack (implémenté), AirLabs (à faire), OpenSky (à faire)
+- **POIs** : OpenStreetMap (à faire), Google Places (à faire), Wikipedia (partiel)
+- **Calcul position/trajectoire** : Great Circle Mapper (à faire), OpenSky (à faire), FlightAware (implémenté)
+- **Offline** : Export OSM/POIs (à faire), cache Firestore (partiel)
+
+## Scripts à prévoir
+- `src/scripts/airlabs-enrichment.js` : enrichissement vols AirLabs
+- `src/scripts/poi-fetcher.js` : POIs touristiques/offline
+- `src/scripts/flight-tracker.js` : calcul trajectoire/position
+- `src/scripts/offline-data-manager.js` : gestion offline/synchro
+
+## Stratégie
+- Prioriser APIs gratuites/open source
+- Fallback si indispo
+- Documenter chaque script et clé API
+- Prévoir gestion quotas/erreurs
+- Exporter POIs/vols en local pour offline
+
+# Fin du prompt 

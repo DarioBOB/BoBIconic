@@ -1,0 +1,110 @@
+<ion-header>
+  <ion-toolbar>
+    <img src="assets/bob/logo/bob-logo-main.png" alt="BoB Logo" class="bob-logo" />
+    <ion-title>{{ 'HOME.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="languageService.setLanguage('fr')" [color]="isLangActive('fr') ? 'primary' : 'medium'">
+        FR
+      </ion-button>
+      <ion-button (click)="languageService.setLanguage('en')" [color]="isLangActive('en') ? 'primary' : 'medium'">
+        EN
+      </ion-button>
+      <ion-button *ngIf="isLoggedIn" (click)="logout()" color="danger">
+        Logout
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<div style="color: red; font-weight: bold;">TEST PIPE: {{ 'HOME.TITLE' | translate }}</div>
+
+<ion-content [class.not-logged-in]="!isLoggedIn" [class.logged-in]="isLoggedIn" class="ion-padding">
+  <!-- Non connecté -->
+  <div *ngIf="!isLoggedIn" class="auth-container">
+    <img src="assets/bob/logo/bob-logo-circle.png" alt="BoB Logo" class="bob-logo-large" onerror="this.style.display='none'" />
+    <div class="bob-baseline">
+      {{ 'HOME.BASELINE' | translate }}
+      <a href="https://www.sunshine-adventures.net" target="_blank" rel="noopener">www.sunshine-adventures.net</a>
+    </div>
+    <h1>{{ 'HOME.WELCOME' | translate }}</h1>
+    <ion-button expand="block" routerLink="/auth/email">
+      {{ 'HOME.LOGIN' | translate }}
+    </ion-button>
+    <ion-button expand="block" routerLink="/auth/register" fill="outline">
+      {{ 'HOME.REGISTER' | translate }}
+    </ion-button>
+    <ion-button expand="block" color="secondary" (click)="loadDemo()">
+      {{ 'HOME.TEST_APP' | translate }}
+    </ion-button>
+  </div>
+
+  <!-- Connecté -->
+  <div *ngIf="isLoggedIn">
+    <img src="assets/bob/logo/bob-logo-circle.png" alt="BoB Logo" class="bob-logo-large" />
+    <!-- Tuiles principales (existant : voyages) -->
+    <!-- Voyages en cours -->
+    <ion-card *ngIf="trips.ongoing.length > 0">
+      <ion-card-header>
+        <ion-card-title>{{ 'TRIPS.ONGOING' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let trip of trips.ongoing">
+            <ion-label>
+              <h2>{{ trip.title }}</h2>
+              <p>{{ trip.startDate | date }} - {{ trip.endDate | date }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Voyages à venir -->
+    <ion-card *ngIf="trips.upcoming.length > 0">
+      <ion-card-header>
+        <ion-card-title>{{ 'TRIPS.UPCOMING' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let trip of trips.upcoming">
+            <ion-label>
+              <h2>{{ trip.title }}</h2>
+              <p>{{ trip.startDate | date }} - {{ trip.endDate | date }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Voyages passés -->
+    <ion-card *ngIf="trips.past.length > 0">
+      <ion-card-header>
+        <ion-card-title>{{ 'TRIPS.PAST' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let trip of trips.past">
+            <ion-label>
+              <h2>{{ trip.title }}</h2>
+              <p>{{ trip.startDate | date }} - {{ trip.endDate | date }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Aucun voyage -->
+    <div *ngIf="trips.ongoing.length === 0 && trips.upcoming.length === 0 && trips.past.length === 0" class="no-trips">
+      <ion-text color="medium">
+        <p>{{ 'TRIPS.NO_TRIPS' | translate }}</p>
+      </ion-text>
+    </div>
+    <!-- Préparation pour d'autres tuiles (profil, paramètres, etc.) -->
+  </div>
+  <!-- Ajout du logo Sunshine Adventures en bas de page -->
+  <div class="sunshine-logo-container">
+    <a href="https://www.sunshine-adventures.net" target="_blank" rel="noopener">
+      <img src="assets/bob/sunshine-adventures/Sunshine Adventures.jpg" alt="Logo Sunshine Adventures" class="sunshine-logo" />
+    </a>
+  </div>
+</ion-content>

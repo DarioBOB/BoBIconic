@@ -1,0 +1,94 @@
+<ion-app>
+  <app-demo-banner></app-demo-banner>
+  <!-- Menu latéral (hamburger) global, bien configuré -->
+  <ion-menu contentId="main-content" type="overlay">
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Menu</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/landing" routerDirection="root">
+            <ion-icon slot="start" name="home" color="primary"></ion-icon>
+            <ion-label>Accueil</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/trips" routerDirection="root">
+            <ion-icon slot="start" name="airplane" color="tertiary"></ion-icon>
+            <ion-label>Mes voyages</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/window" routerDirection="root">
+            <ion-icon slot="start" name="map" color="warning"></ion-icon>
+            <ion-label>Ma fenêtre</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/chat" routerDirection="root">
+            <ion-icon slot="start" name="chatbubbles" color="success"></ion-icon>
+            <ion-label>Chat en ligne</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/bobbers" routerDirection="root">
+            <ion-icon slot="start" name="people" color="secondary"></ion-icon>
+            <ion-label>BoBBers présents</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/games" routerDirection="root">
+            <ion-icon slot="start" name="game-controller" color="danger"></ion-icon>
+            <ion-label>Jeux / Quiz</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/notifications" routerDirection="root">
+            <ion-icon slot="start" name="notifications" color="medium"></ion-icon>
+            <ion-label>Notifications</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/documents" routerDirection="root">
+            <ion-icon slot="start" name="document" color="dark"></ion-icon>
+            <ion-label>Documents</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/support" routerDirection="root">
+            <ion-icon slot="start" name="help-circle" color="primary"></ion-icon>
+            <ion-label>Support</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true">
+          <ion-item routerLink="/preferences" routerDirection="root">
+            <ion-icon slot="start" name="settings" color="primary"></ion-icon>
+            <ion-label>Préférences</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <!-- Header global, unique -->
+  <ion-header>
+    <ion-toolbar color="light">
+      <ion-buttons slot="start">
+        <ion-menu-button color="primary"></ion-menu-button>
+        <ion-button routerLink="/landing" color="primary">
+          <ion-icon name="home"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-title>BoredOnBoard</ion-title>
+      <ion-buttons slot="end">
+        <app-user-status-bar></app-user-status-bar>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content id="main-content">
+    <ion-router-outlet></ion-router-outlet>
+  </ion-content>
+</ion-app>

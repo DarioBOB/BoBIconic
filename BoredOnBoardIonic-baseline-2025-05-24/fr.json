@@ -1,0 +1,172 @@
+{
+  "HOME": {
+    "TITLE": "Bored On Board",
+    "WELCOME": "Bienvenue sur Bored On Board",
+    "BASELINE": "Votre Application de voyage développée par",
+    "TEST_APP": "Tester l'application",
+    "LOGIN": "Se connecter",
+    "REGISTER": "Créer un compte"
+  },
+  "AUTH": {
+    "LOGIN": "Se connecter",
+    "LOGIN_TITLE": "Connexion",
+    "REGISTER": "Créer un compte",
+    "REGISTER_TITLE": "Créer un compte",
+    "EMAIL": "Email",
+    "PASSWORD": "Mot de passe",
+    "CONFIRM_PASSWORD": "Confirmer le mot de passe",
+    "FIRSTNAME": "Prénom",
+    "LASTNAME": "Nom",
+    "PREFERRED_LANG": "Langue préférée",
+    "FORGOT_PASSWORD": "Mot de passe oublié ?",
+    "RESET_PASSWORD_TITLE": "Réinitialiser le mot de passe",
+    "RESET_PASSWORD_INSTRUCTIONS": "Veuillez entrer votre nouveau mot de passe",
+    "NEW_PASSWORD": "Nouveau mot de passe",
+    "RESET_PASSWORD": "Réinitialiser le mot de passe",
+    "RESET_SUCCESS": "Votre mot de passe a été réinitialisé avec succès",
+    "PASSWORD_REQUIREMENTS": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial",
+    "VERIFY_EMAIL_TITLE": "Vérification de l'email",
+    "VERIFY_EMAIL_MSG": "Un email de vérification a été envoyé à",
+    "RESEND_VERIFICATION": "Renvoyer l'email de vérification",
+    "VERIFY_EMAIL_SENT": "Email de vérification envoyé !",
+    "VERIFY_EMAIL_SUCCESS": "Email vérifié ! Redirection vers la connexion...",
+    "RESET_EMAIL_SENT": "Un email de réinitialisation a été envoyé",
+    "ERRORS": {
+      "EMPTY_FIELDS": "Veuillez remplir tous les champs",
+      "INVALID_EMAIL": "Email invalide",
+      "USER_DISABLED": "Compte désactivé",
+      "INVALID_CREDENTIALS": "Email ou mot de passe incorrect",
+      "USER_NOT_FOUND": "Aucun compte associé à cet email",
+      "EMAIL_REQUIRED": "Veuillez entrer votre email",
+      "UNKNOWN": "Une erreur est survenue",
+      "PASSWORD_MISMATCH": "Les mots de passe ne correspondent pas",
+      "WEAK_PASSWORD": "Le mot de passe doit contenir au moins 8 caractères",
+      "EMAIL_IN_USE": "Cet email est déjà utilisé",
+      "CONFIG_NOT_FOUND": "Configuration Firebase manquante ou incorrecte",
+      "PASSWORD_RULES": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial",
+      "INVALID_RESET_CODE": "Le code de réinitialisation est invalide ou a expiré",
+      "EXPIRED_RESET_CODE": "Le code de réinitialisation a expiré",
+      "API_KEY_NOT_VALID": "Erreur de configuration Firebase : clé API non valide. Merci de contacter le support ou de vérifier la configuration.",
+      "USER_NOT_FOUND_BOB": "Cet email n'est pas encore connu de BoB. Vérifiez votre adresse ou créez un compte si vous n'en avez pas encore."
+    }
+  },
+  "TRIPS": {
+    "ONGOING": "Voyages en cours",
+    "UPCOMING": "Voyages à venir",
+    "PAST": "Voyages passés",
+    "NO_TRIPS": "Aucun voyage pour le moment",
+    "ERROR_FIRESTORE": "Impossible de récupérer vos voyages. Veuillez réessayer plus tard ou contacter le support.",
+    "SHOW_ITINERARY": "Afficher les étapes",
+    "NO_PLANS": "Aucune étape pour ce voyage",
+    "TYPE": "Type",
+    "flight": "Vol",
+    "car_rental": "Location voiture",
+    "hotel": "Hôtel",
+    "activity": "Activité",
+    "train": "Train",
+    "ferry": "Ferry",
+    "restaurant": "Restaurant",
+    "meeting": "Rendez-vous",
+    "LOADING": "Chargement des voyages...",
+    "FLIGHT": "Vol",
+    "CAR_RENTAL": "Location de voiture",
+    "HOTEL": "Hébergement",
+    "ACTIVITY": "Activité",
+    "TRAIN": "Train",
+    "FERRY": "Ferry",
+    "RESTAURANT": "Restaurant",
+    "THEATER": "Théâtre",
+    "CONCERT": "Concert",
+    "PARKING": "Stationnement",
+    "NOTE": "Remarque",
+    "ITINERARY": "Itinéraires",
+    "CRUISE": "Croisière",
+    "MAP": "Carte",
+    "MEETING": "Réunion",
+    "VISIT": "Visite",
+    "TRANSPORT": "Transport",
+    "UNKNOWN": "Autre"
+  },
+  "LANDING": {
+    "TITLE": "Bienvenue sur BoB",
+    "TILES": {
+      "TRIPS": "Mes voyages",
+      "PROFILE": "Mon profil",
+      "NOTIFICATIONS": "Notifications",
+      "SETTINGS": "Paramètres",
+      "SUPPORT": "Support",
+      "DOCUMENTS": "Documents",
+      "PREFERENCES": "Préférences",
+      "IN_PROGRESS": "En travaux...",
+      "WINDOW": "Ma fenêtre",
+      "CHAT": "Chat en ligne",
+      "BOBBERS": "BoBBers présents",
+      "GAMES": "Jeux / Quiz"
+    },
+    "LANG": "Langue :"
+  },
+  "COMMON": {
+    "BACK": "Retour",
+    "MENU": "Menu",
+    "PROFILE": "Profil",
+    "LOGOUT": "Déconnexion",
+    "DEMO_MODE": "Mode démo actif - Données de test"
+  },
+  "PAGES": {
+    "TRIPS": {
+      "TITLE": "Mes Voyages",
+      "DESCRIPTION": "Gérez vos voyages et suivez vos itinéraires"
+    },
+    "WINDOW": {
+      "TITLE": "Ma Fenêtre",
+      "DESCRIPTION": "Voyez le monde à travers votre fenêtre"
+    },
+    "CHAT": {
+      "TITLE": "Chat en Ligne",
+      "DESCRIPTION": "Discutez avec d'autres voyageurs"
+    },
+    "BOBBERS": {
+      "TITLE": "BoBBers Présents",
+      "DESCRIPTION": "Découvrez qui est à proximité"
+    },
+    "GAMES": {
+      "TITLE": "Jeux & Quiz",
+      "DESCRIPTION": "Amusez-vous pendant votre voyage"
+    },
+    "NOTIFICATIONS": {
+      "TITLE": "Notifications",
+      "DESCRIPTION": "Restez informé de vos mises à jour"
+    },
+    "DOCUMENTS": {
+      "TITLE": "Documents",
+      "DESCRIPTION": "Accédez à vos documents de voyage"
+    },
+    "SUPPORT": {
+      "TITLE": "Support",
+      "DESCRIPTION": "Besoin d'aide ? Contactez-nous"
+    },
+    "PREFERENCES": {
+      "TITLE": "Préférences",
+      "DESCRIPTION": "Personnalisez votre expérience"
+    }
+  },
+  "PROFILE": {
+    "LANGUAGE": "Langue",
+    "NOTIFICATIONS": "Notifications",
+    "EMAIL_NOTIFICATIONS": "Notifications par email",
+    "SAVE": "Enregistrer"
+  },
+  "EMAIL": {
+    "PARSER": {
+      "TITLE": "Parser les Emails",
+      "LOADING": "Recherche d'emails non lus...",
+      "SUCCESS": "Emails parsés avec succès !",
+      "PARSE_BUTTON": "Parser les Emails",
+      "ERROR": {
+        "CONNECTION": "Erreur de connexion à la boîte mail",
+        "PARSING": "Erreur lors du parsing des emails",
+        "STORAGE": "Erreur lors du stockage des données"
+      }
+    }
+  }
+} 

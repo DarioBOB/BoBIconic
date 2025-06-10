@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ 'WINDOW.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Slider de progression -->
+  <div class="progress-container">
+    <ion-range
+      [value]="progress"
+      min="0"
+      max="100"
+      step="1"
+      (ionChange)="onProgressChange($event)"
+      class="progress-slider">
+      <div slot="start" class="progress-label">{{ formatProgress(progress) }}</div>
+      <div slot="end" class="progress-label">{{ flightData.departure }} → {{ flightData.arrival }}</div>
+    </ion-range>
+  </div>
+
+  <!-- Onglets via ion-segment -->
+  <ion-segment [(ngModel)]="selectedTab">
+    <ion-segment-button value="flightData">
+      Données vol
+    </ion-segment-button>
+    <ion-segment-button value="map">
+      Carte
+    </ion-segment-button>
+    <ion-segment-button value="hublot">
+      Hublot
+    </ion-segment-button>
+    <ion-segment-button value="mapTest">
+      Test Carte
+    </ion-segment-button>
+  </ion-segment>
+
+  <div [ngSwitch]="selectedTab">
+    <app-window-text-data *ngSwitchCase="'flightData'"></app-window-text-data>
+    <app-window-map *ngSwitchCase="'map'"></app-window-map>
+    <app-window-hublot *ngSwitchCase="'hublot'"></app-window-hublot>
+    <app-window-map-test *ngSwitchCase="'mapTest'"></app-window-map-test>
+  </div>
+</ion-content> 

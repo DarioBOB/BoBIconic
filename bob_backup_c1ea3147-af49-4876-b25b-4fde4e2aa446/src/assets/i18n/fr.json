@@ -1,0 +1,67 @@
+{
+  "LANDING": {
+    "TILES": {
+      "TRIPS": "Voyages",
+      "WINDOW": "Ma Fenêtre",
+      "CHAT": "Chat",
+      "BOBBERS": "Bobbers",
+      "GAMES": "Jeux",
+      "NOTIFICATIONS": "Notifications",
+      "DOCUMENTS": "Documents",
+      "SUPPORT": "Support",
+      "PREFERENCES": "Préférences",
+      "IN_PROGRESS": "En cours"
+    }
+  },
+  "WINDOW": {
+    "POIS": {
+      "GENEVA": {
+        "TITLE": "Genève",
+        "DESCRIPTION": "Point de départ"
+      },
+      "MILAN": {
+        "TITLE": "Milan",
+        "DESCRIPTION": "Première étape"
+      },
+      "ROME": {
+        "TITLE": "Rome",
+        "DESCRIPTION": "Deuxième étape"
+      },
+      "ATHENS": {
+        "TITLE": "Athènes",
+        "DESCRIPTION": "Point d'arrivée"
+      }
+    },
+    "PROGRESS": {
+      "CURRENT_POSITION": "Position actuelle",
+      "APPROACHING_MILAN": "Approche de Milan",
+      "APPROACHING_ROME": "Approche de Rome",
+      "APPROACHING_ATHENS": "Approche d'Athènes",
+      "FINAL_APPROACH": "Approche finale d'Athènes"
+    }
+  },
+  "TRIPS": {
+    "TITLE": "Mes Voyages",
+    "SUBTITLE": "Retrouvez tous vos voyages organisés",
+    "ONGOING": "En cours",
+    "UPCOMING": "À venir",
+    "PAST": "Passés",
+    "STATUS_ONGOING": "En cours",
+    "STATUS_UPCOMING": "À venir",
+    "STATUS_PAST": "Passé",
+    "NO_ONGOING": "Aucun voyage en cours",
+    "NO_ONGOING_DESC": "Vous n'avez pas de voyage en cours pour le moment",
+    "NO_UPCOMING": "Aucun voyage à venir",
+    "NO_UPCOMING_DESC": "Vous n'avez pas de voyage prévu pour le moment",
+    "NO_PAST": "Aucun voyage passé",
+    "NO_PAST_DESC": "Vous n'avez pas encore de voyage dans l'historique",
+    "LOADING_PLANS": "Chargement des étapes...",
+    "NO_PLANS": "Aucune étape planifiée",
+    "ERROR_TITLE": "Une erreur est survenue"
+  },
+  "COMMON": {
+    "LOADING": "Chargement...",
+    "SHOW": "Afficher",
+    "HIDE": "Masquer"
+  }
+} 

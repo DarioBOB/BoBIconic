@@ -1,0 +1,63 @@
+ion-content {
+  --background: none;
+  background: url('/assets/bob/background/login_background.jpg') center center/cover no-repeat !important;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+form {
+  max-width: 400px;
+  margin: 48px auto;
+  padding: 32px 24px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+
+ion-list {
+  background: transparent;
+  padding: 0;
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: #1bb6b1;
+  margin-bottom: 16px;
+}
+
+ion-button {
+  --background: #1bb6b1;
+  --background-hover: #159e9a;
+  --background-activated: #159e9a;
+  --color: #fff;
+  --border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+ion-button[fill="outline"] {
+  --background: #fff;
+  --color: #1bb6b1;
+  --border-color: #1bb6b1;
+}
+
+ion-button[fill="clear"] {
+  --color: #ff9800;
+}
+
+ion-text[color="danger"] {
+  margin-top: 16px;
+  display: block;
+}
+
+.bob-baseline {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+
+.bob-baseline a {
+  color: #1bb6b1;
+} 
