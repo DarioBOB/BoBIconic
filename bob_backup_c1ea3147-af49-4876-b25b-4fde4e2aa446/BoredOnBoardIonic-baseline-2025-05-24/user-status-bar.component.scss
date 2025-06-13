@@ -1,0 +1,101 @@
+.user-status-bar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #f5f5f5;
+  padding: 8px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .demo-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffd700;
+    color: #000;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    font-weight: 500;
+
+    ion-icon {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      padding: 0;
+      margin: 0;
+    }
+
+    .user-name {
+      font-size: 14px;
+    }
+
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      height: 36px;
+      font-size: 0.9rem;
+      
+      ion-icon {
+        font-size: 20px;
+        margin-right: 4px;
+      }
+
+      &[color="danger"] {
+        --color: #f44336;
+        --background: rgba(244, 67, 54, 0.1);
+        border-radius: 18px;
+
+        &:hover {
+          --background: rgba(244, 67, 54, 0.15);
+        }
+      }
+    }
+  }
+
+  ion-button[fill="clear"] {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    height: 36px;
+    
+    ion-icon {
+      font-size: 24px;
+      color: #333;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .user-status-bar {
+    padding: 6px 12px;
+    
+    .user-info {
+      .user-profile {
+        .user-name {
+          font-size: 0.9rem;
+        }
+      }
+      
+      ion-button {
+        --padding-start: 4px;
+        --padding-end: 4px;
+        height: 32px;
+        font-size: 0.85rem;
+        
+        ion-icon {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+} 

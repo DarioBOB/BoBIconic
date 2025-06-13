@@ -1,0 +1,85 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.search-bar {
+  margin-bottom: 16px;
+}
+
+.map-container {
+  flex: 1;
+  min-height: 300px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.flight-info {
+  margin-bottom: 16px;
+}
+
+.airport-info, .aircraft-info, .current-position, .statistics {
+  margin-bottom: 16px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--ion-color-light);
+}
+
+h3 {
+  margin: 0 0 8px 0;
+  color: var(--ion-color-primary);
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+p {
+  margin: 4px 0;
+  color: var(--ion-color-medium);
+}
+
+.error-message {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+ion-fab {
+  margin: 16px;
+}
+
+// Styles pour les appareils mobiles
+@media (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+
+  .map-container {
+    min-height: 200px;
+  }
+
+  .flight-info {
+    margin-bottom: 8px;
+  }
+}
+
+// Styles pour les appareils de bureau
+@media (min-width: 769px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .map-container {
+    min-height: 400px;
+  }
+} 

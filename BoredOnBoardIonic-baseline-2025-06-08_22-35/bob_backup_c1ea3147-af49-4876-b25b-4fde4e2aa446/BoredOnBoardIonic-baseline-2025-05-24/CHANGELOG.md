@@ -1,0 +1,7 @@
+- [trips] UX : tri dynamique des voyages dans onglets segmentés, correction FormsModule/ngModel, debug logs, affichage conforme à la maquette utilisateur. 
+- [trips] Règle métier : les dates du voyage sont toujours synchronisées avec les plans (création, ajout, update). Correction parsing et update Firestore. 
+- [trips] UI/UX : amélioration de l'affichage des détails des plans avec des icônes et des labels traduits, correction des erreurs TypeScript pour l'accès aux propriétés dynamiques, optimisation des performances avec pré-calcul des détails. 
+- [infra] Migration vers un proxy backend sécurisé pour toutes les APIs externes (FlightRadar24, OpenAI, etc.).
+- Suppression des appels directs depuis le frontend, plus aucune faille CORS.
+- Mise en cache des réponses pour rapidité et robustesse.
+- Sécurité maximale : aucune clé API exposée côté client.

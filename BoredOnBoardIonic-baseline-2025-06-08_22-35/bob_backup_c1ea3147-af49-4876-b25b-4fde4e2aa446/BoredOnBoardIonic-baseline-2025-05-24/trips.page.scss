@@ -1,0 +1,403 @@
+// Styles pour la page des voyages
+.trips-content {
+  --background: var(--ion-color-light);
+}
+
+.trips-header {
+  padding: 1rem;
+  text-align: center;
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    margin: 0;
+  }
+  .trips-subtitle {
+    color: var(--ion-color-medium);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
+}
+
+.trips-segment {
+  margin: 1rem 0;
+  --background: var(--ion-color-light);
+  ion-segment-button {
+    --color: var(--ion-color-medium);
+    --color-checked: var(--ion-color-primary);
+    --indicator-color: var(--ion-color-primary);
+    font-weight: 500;
+  }
+}
+
+.loading-spinner-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  ion-spinner {
+    width: 48px;
+    height: 48px;
+    --color: var(--ion-color-primary);
+  }
+  p {
+    margin-top: 1rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.placeholder-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  &.error {
+    .placeholder-icon {
+      color: var(--ion-color-danger);
+    }
+    .error-text {
+      color: var(--ion-color-danger);
+    }
+  }
+  .placeholder-icon {
+    font-size: 4rem;
+    color: var(--ion-color-medium);
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    margin: 0;
+  }
+  p {
+    color: var(--ion-color-medium);
+    margin: 0.5rem 0 0;
+  }
+}
+
+.trip-card-timeline {
+  margin: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  &.success {
+    border-left: 4px solid var(--ion-color-success);
+  }
+  &.primary {
+    border-left: 4px solid var(--ion-color-primary);
+  }
+  &.medium {
+    border-left: 4px solid var(--ion-color-medium);
+  }
+}
+
+.trip-timeline-content {
+  padding: 1rem;
+  background: white;
+}
+
+.trip-timeline-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  .trip-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+    color: var(--ion-color-primary);
+  }
+  .trip-title {
+    flex: 1;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+  ion-badge {
+    font-weight: 500;
+  }
+}
+
+.trip-timeline-dates {
+  display: flex;
+  align-items: center;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+  .trip-date-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+.trip-timeline-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.plans-timeline-list {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ion-color-light-shade);
+}
+
+.plans-placeholder {
+  text-align: center;
+  color: var(--ion-color-medium);
+  padding: 1rem;
+  font-style: italic;
+}
+
+.plan-timeline-item {
+  margin-bottom: 1rem;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.plan-card {
+  margin: 0;
+  box-shadow: none;
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 8px;
+}
+
+.plan-header-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  .plan-icon {
+    font-size: 1.5rem;
+    color: var(--ion-color-primary);
+  }
+  .plan-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--ion-color-dark);
+  }
+  .plan-dates {
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+    margin-top: 0.25rem;
+  }
+  .plan-type {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+    margin-top: 0.25rem;
+  }
+}
+
+.plan-details-list {
+  background: transparent;
+  ion-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    ion-icon {
+      color: var(--ion-color-medium);
+    }
+    ion-label {
+      color: var(--ion-color-dark);
+    }
+    div[slot="end"] {
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+// --- TIMELINE PREMIUM STYLE ---
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-left: 2.5rem;
+}
+
+.timeline-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  position: relative;
+  min-height: 70px;
+}
+
+.timeline-left {
+  width: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-time {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  margin-bottom: 0.2rem;
+  min-height: 1.2rem;
+}
+
+.timeline-dot {
+  width: 1.1rem;
+  height: 1.1rem;
+  background: linear-gradient(135deg, #ff9800 60%, #2196f3 100%);
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255,152,0,0.15);
+  margin-bottom: 0.2rem;
+  z-index: 3;
+  .timeline-dot-icon {
+    font-size: 1.1rem;
+    color: #fff;
+  }
+}
+
+.timeline-line {
+  width: 4px;
+  flex: 1 1 auto;
+  background: linear-gradient(to bottom, #ff9800 0%, #2196f3 100%);
+  margin: 0 auto;
+  border-radius: 2px;
+  min-height: 40px;
+  z-index: 1;
+}
+
+.timeline-right {
+  flex: 1;
+  margin-left: 1.2rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-card.premium {
+  border-left: 4px solid #ff9800;
+  box-shadow: 0 2px 12px rgba(33,150,243,0.08);
+  background: #fff;
+  margin-bottom: 1.2rem;
+  transition: box-shadow 0.2s;
+  &:hover {
+    box-shadow: 0 4px 24px rgba(33,150,243,0.15);
+  }
+}
+
+@media (max-width: 700px) {
+  .timeline-container {
+    margin-left: 1.2rem;
+  }
+  .timeline-row {
+    min-height: 50px;
+  }
+  .timeline-right {
+    margin-left: 0.7rem;
+  }
+  .plan-card.premium {
+    border-left-width: 3px;
+    margin-bottom: 0.7rem;
+  }
+}
+
+.loading-plans {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  margin: 1rem 0;
+
+  ion-spinner {
+    width: 32px;
+    height: 32px;
+    --color: var(--ion-color-primary);
+  }
+
+  p {
+    margin-top: 0.5rem;
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+}
+
+.plans-list-premium {
+  margin-top: 1.2rem;
+  position: relative;
+  min-height: 100px;
+}
+
+.plan-card-premium {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(33,150,243,0.08);
+  margin-bottom: 18px;
+  padding: 1rem 1.2rem;
+  transition: box-shadow 0.2s;
+  &:hover {
+    box-shadow: 0 6px 24px rgba(33,150,243,0.15);
+  }
+}
+
+.plan-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+  margin-right: 1.1rem;
+}
+
+.plan-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #23223a;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.plan-type-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.plan-card-details {
+  font-size: 0.98rem;
+  color: #666;
+  margin-top: 0.2rem;
+}
+
+.plan-card-date {
+  font-size: 0.98rem;
+  color: #1976d2;
+  font-weight: 600;
+  margin-left: 1.2rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .plan-card-premium {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.7rem 0.6rem;
+  }
+  .plan-card-date {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+} 

@@ -1,0 +1,9 @@
+<ng-container *ngIf="isLoadingData; else content">
+  <div class="spinner-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <div>Chargement des données du vol…</div>
+  </div>
+</ng-container>
+<ng-template #content>
+  <!-- contenu principal existant ici -->
+</ng-template> 

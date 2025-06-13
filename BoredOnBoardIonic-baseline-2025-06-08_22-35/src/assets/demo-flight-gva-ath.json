@@ -1,0 +1,32 @@
+{
+  "flightId": "DEMO-GVA-ATH",
+  "departureIATA": "GVA",
+  "arrivalIATA": "ATH",
+  "departureTimeUTC": "2025-06-03T08:00:00Z",
+  "arrivalTimeUTC": "2025-06-03T11:00:00Z",
+  "waypoints": [
+    { "lat": 46.2381, "lng": 6.1080 },
+    { "lat": 45.5000, "lng": 7.5000 },
+    { "lat": 44.5000, "lng": 9.0000 },
+    { "lat": 43.5000, "lng": 11.0000 },
+    { "lat": 42.5000, "lng": 14.0000 },
+    { "lat": 41.5000, "lng": 18.0000 },
+    { "lat": 40.5000, "lng": 21.0000 },
+    { "lat": 39.0000, "lng": 22.0000 },
+    { "lat": 37.9364, "lng": 23.9445 }
+  ],
+  "pois": [
+    {
+      "lat": 45.5000,
+      "lng": 7.5000,
+      "name": "Mont Blanc",
+      "type": "mountain"
+    },
+    {
+      "lat": 43.5000,
+      "lng": 11.0000,
+      "name": "Florence",
+      "type": "city"
+    }
+  ]
+} 

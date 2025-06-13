@@ -1,0 +1,141 @@
+<ion-content class="trips-content">
+  <!-- En-tête -->
+  <div class="trips-header">
+    <h1>{{ 'TRIPS.TITLE' | translate }}</h1>
+    <p class="trips-subtitle">{{ 'TRIPS.SUBTITLE' | translate }}</p>
+  </div>
+
+  <!-- Segment pour les différents types de voyages -->
+  <ion-segment [(ngModel)]="selectedSegment" class="trips-segment">
+    <ion-segment-button value="ongoing">
+      <ion-label>{{ 'TRIPS.ONGOING' | translate }} ({{ ongoingTrips.length }})</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="upcoming">
+      <ion-label>{{ 'TRIPS.UPCOMING' | translate }} ({{ upcomingTrips.length }})</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="past">
+      <ion-label>{{ 'TRIPS.PAST' | translate }} ({{ pastTrips.length }})</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Contenu principal -->
+  <div class="trips-container">
+    <ng-container *ngIf="isLoading; else tripsContent">
+      <div class="spinner-container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;">
+        <ion-spinner name="crescent" style="margin-bottom:16px;"></ion-spinner>
+        <div>Chargement des voyages…</div>
+      </div>
+    </ng-container>
+    <ng-template #tripsContent>
+      <!-- Message d'erreur -->
+      <div *ngIf="error" class="placeholder-container error">
+        <ion-icon name="alert-circle-outline" class="placeholder-icon"></ion-icon>
+        <h1>{{ 'TRIPS.ERROR_TITLE' | translate }}</h1>
+        <p class="error-text">{{ error }}</p>
+      </div>
+
+      <!-- Liste des voyages -->
+      <div *ngIf="!error">
+        <div *ngFor="let segment of ['ongoing', 'upcoming', 'past']">
+          <div *ngIf="selectedSegment === segment">
+            <div *ngIf="(segment === 'ongoing' ? ongoingTrips : segment === 'upcoming' ? upcomingTrips : pastTrips).length === 0" class="placeholder-container">
+              <ion-icon [name]="segment === 'ongoing' ? 'airplane-outline' : segment === 'upcoming' ? 'calendar-outline' : 'time-outline'" class="placeholder-icon"></ion-icon>
+              <h1>{{ segment === 'ongoing' ? ('TRIPS.NO_ONGOING' | translate) : segment === 'upcoming' ? ('TRIPS.NO_UPCOMING' | translate) : ('TRIPS.NO_PAST' | translate) }}</h1>
+              <p>{{ segment === 'ongoing' ? ('TRIPS.NO_ONGOING_DESC' | translate) : segment === 'upcoming' ? ('TRIPS.NO_UPCOMING_DESC' | translate) : ('TRIPS.NO_PAST_DESC' | translate) }}</p>
+            </div>
+
+            <div *ngFor="let trip of (segment === 'ongoing' ? ongoingTrips : segment === 'upcoming' ? upcomingTrips : pastTrips)" class="trip-card-waw" [ngClass]="segment">
+              <div class="trip-card-header">
+                <ion-icon [name]="getPlanIcon(trip.type)" class="trip-type-icon"></ion-icon>
+                <span class="trip-title-waw">
+                  <ng-container *ngIf="trip.type === 'flight' && trip.from && trip.to; else normalTitle">
+                    {{ 'TRIPS.FLIGHT_FROM_TO' | translate:{from: trip.from, to: trip.to} }}
+                  </ng-container>
+                  <ng-template #normalTitle>{{ getTitle(trip.title) }}</ng-template>
+                </span>
+                <ion-badge [color]="segment === 'ongoing' ? 'success' : segment === 'upcoming' ? 'primary' : 'medium'">
+                  {{ segment === 'ongoing' ? ('TRIPS.STATUS_ONGOING' | translate) : segment === 'upcoming' ? ('TRIPS.STATUS_UPCOMING' | translate) : ('TRIPS.STATUS_PAST' | translate) }}
+                </ion-badge>
+              </div>
+              <div class="trip-card-dates">
+                <ion-icon name="calendar-outline" class="trip-date-icon"></ion-icon>
+                <span>{{ trip.startDate | date:'longDate' }} - {{ trip.endDate | date:'longDate' }}</span>
+              </div>
+              <div class="trip-card-actions">
+                <ion-button fill="clear" (click)="toggleTripDetails(trip)">
+                  <ion-icon [name]="trip.showDetails ? 'chevron-up' : 'chevron-down'" slot="start"></ion-icon>
+                  {{ (trip.showDetails ? 'COMMON.HIDE' : 'COMMON.SHOW') | translate }}
+                </ion-button>
+              </div>
+              <div *ngIf="trip.showDetails" class="plans-timeline-waw">
+                <div *ngIf="trip.planError" class="plans-placeholder-waw error">
+                  <ion-icon name="alert-circle-outline" class="plan-placeholder-icon"></ion-icon>
+                  <span>{{ trip.planError }}</span>
+                </div>
+                <div *ngIf="trip.loadingPlans" class="loading-plans">
+                  <ion-spinner name="crescent"></ion-spinner>
+                  <p>{{ 'TRIPS.LOADING_PLANS' | translate }}</p>
+                </div>
+                <div *ngIf="!trip.loadingPlans && (!trip.plans || trip.plans.length === 0)" class="plans-placeholder-waw">
+                  <ion-icon name="sparkles-outline" class="plan-placeholder-icon"></ion-icon>
+                  <span>{{ 'TRIPS.NO_PLANS' | translate }}</span>
+                </div>
+                <div *ngIf="!trip.loadingPlans && trip.plans && trip.plans.length > 0" class="timeline-waw">
+                  <div *ngFor="let plan of trip.plans" class="timeline-row-waw">
+                    <div class="timeline-dot-waw" [style.background]="getPlanColor(plan.type)">
+                      <ion-icon [name]="getPlanIcon(plan.type)"></ion-icon>
+                    </div>
+                    <div class="timeline-content-waw">
+                      <div class="plan-title-waw">
+                        <ng-container *ngIf="plan.type === 'flight' && plan.details?.flight?.departure?.city && plan.details?.flight?.arrival?.city; else normalPlanTitle">
+                          {{ getFlightTitle(
+                            plan.details.flight.departure.city + (plan.details.flight.departure.airport ? ' (' + plan.details.flight.departure.airport + ')' : ''),
+                            plan.details.flight.arrival.city + (plan.details.flight.arrival.airport ? ' (' + plan.details.flight.arrival.airport + ')' : '')
+                          ) }}
+                        </ng-container>
+                        <ng-template #normalPlanTitle>{{ getTitle(plan.title) }}</ng-template>
+                        <ion-badge class="plan-type-badge-waw" [color]="getPlanBadgeColor(plan.type)">
+                          {{ plan.type | translate }}
+                        </ion-badge>
+                      </div>
+                      <div class="plan-dates-waw">
+                        <ion-icon name="calendar-outline" class="plan-date-icon"></ion-icon>
+                        <span>{{ plan.startDate | date:'mediumDate' }}</span>
+                      </div>
+                      <div class="plan-desc-waw">{{ getDescription(plan.description) }}</div>
+                      <div *ngIf="plan.details" class="plan-details-waw">
+                        <ng-container [ngSwitch]="plan.type">
+                          <ng-container *ngSwitchCase="'flight'">
+                            <div *ngIf="plan.details.flight">
+                              <div><b>Numéro de vol :</b> {{ plan.details.flight.flight_number }}</div>
+                              <div><b>Compagnie :</b> {{ plan.details.flight.airline }}</div>
+                              <div><b>Départ :</b> {{ plan.details.flight.departure.city }} ({{ plan.details.flight.departure.airport }})</div>
+                              <div><b>Arrivée :</b> {{ plan.details.flight.arrival.city }} ({{ plan.details.flight.arrival.airport }})</div>
+                            </div>
+                          </ng-container>
+                          <ng-container *ngSwitchCase="'hotel'">
+                            <div *ngIf="plan.details.address"><b>Adresse :</b> {{ plan.details.address }}</div>
+                            <div *ngIf="plan.details.phone"><b>Téléphone :</b> {{ plan.details.phone }}</div>
+                          </ng-container>
+                          <ng-container *ngSwitchCase="'activity'">
+                            <div *ngIf="plan.details.lieu"><b>Lieu :</b> {{ plan.details.lieu }}</div>
+                            <div *ngIf="plan.details.organisateur"><b>Organisateur :</b> {{ plan.details.organisateur }}</div>
+                          </ng-container>
+                          <ng-container *ngSwitchDefault>
+                            <div *ngFor="let key of plan.details | keyvalue">
+                              <b>{{ key.key }} :</b> {{ key.value }}
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</ion-content> 

@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/auth"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ 'AUTH.LOGIN_TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div style="text-align:center; margin-bottom: 8px;">
+    <ion-text color="warning"><b>MODE TEST</b></ion-text>
+  </div>
+  <form (ngSubmit)="login()" #loginForm="ngForm">
+    <div style="text-align:center; margin-bottom: 16px;">
+      <img src="assets/bob/logo/bob-logo-circle.png" alt="BoB Logo" style="height:70px; margin-bottom:8px;" />
+      <div class="bob-baseline">
+        {{ 'HOME.BASELINE' | translate }}
+        <a href="https://www.sunshine-adventures.net" target="_blank" rel="noopener">www.sunshine-adventures.net</a>
+      </div>
+    </div>
+    <ion-item>
+      <ion-label>{{ 'AUTH.PREFERRED_LANG' | translate }}</ion-label>
+      <ion-select [(ngModel)]="selectedLang" name="selectedLang" interface="popover" (ionChange)="onLangChange()">
+        <ion-select-option value="fr">Français</ion-select-option>
+        <ion-select-option value="en">English</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-list>
+      <ion-item>
+        <ion-label position="floating">{{ 'AUTH.EMAIL' | translate }}</ion-label>
+        <ion-input type="email" [(ngModel)]="email" name="email" required></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">{{ 'AUTH.PASSWORD' | translate }}</ion-label>
+        <ion-input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" required></ion-input>
+        <ion-button fill="clear" slot="end" type="button" (click)="togglePasswordVisibility()">
+          <ion-icon [name]="showPassword ? 'eye-off' : 'eye'"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-list>
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="!loginForm.form.valid || isLoading">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">{{ 'AUTH.LOGIN' | translate }}</span>
+      </ion-button>
+
+      <ion-button expand="block" fill="clear" (click)="resetPassword()" [disabled]="isLoading">
+        {{ 'AUTH.FORGOT_PASSWORD' | translate }}
+      </ion-button>
+
+      <ion-button expand="block" fill="outline" type="button" (click)="goToRegister()" [disabled]="isLoading">
+        {{ 'AUTH.REGISTER' | translate }}
+      </ion-button>
+
+      <ion-button expand="block" color="secondary" (click)="loadDemo()" [disabled]="isLoading">
+        {{ 'HOME.TEST_APP' | translate }}
+      </ion-button>
+    </div>
+
+    <ion-text color="danger" *ngIf="errorMessage">
+      <p class="ion-text-center">{{ errorMessage | translate }}</p>
+    </ion-text>
+    <ion-text color="medium" *ngIf="errorMessageRaw && !environment.production">
+      <p class="ion-text-center" style="font-size: 0.9em;">{{ errorMessageRaw }}</p>
+      <p class="ion-text-center" style="font-size: 0.9em; color: orange;" *ngIf="errorMessageRaw.includes('api-key-not-valid')">
+        (Mode test : pour créer un compte, configurez une vraie clé API Firebase dans environment.ts)
+      </p>
+    </ion-text>
+
+    <ion-text color="success" *ngIf="successMessage">
+      <p class="ion-text-center">{{ successMessage | translate }}</p>
+    </ion-text>
+  </form>
+</ion-content> 

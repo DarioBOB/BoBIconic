@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Ma Fenêtre <span *ngIf="callsign">- {{ callsign }}</span></ion-title>
+    <app-flight-search-bar [callsign]="callsign" (callsignChange)="onCallsignChange($event)" (search)="searchFlight($event)"></app-flight-search-bar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-tabs>
+  <ion-tab-bar slot="top">
+    <ion-tab-button tab="flightData">
+      <ion-label>Données</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="map">
+      <ion-label>Carte</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="hublot">
+      <ion-label>Hublot</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+  <ion-router-outlet></ion-router-outlet>
+</ion-tabs> 

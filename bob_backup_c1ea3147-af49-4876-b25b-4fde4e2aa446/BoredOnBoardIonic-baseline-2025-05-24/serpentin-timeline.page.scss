@@ -1,0 +1,126 @@
+.serpentin-content {
+  --background: #fdf6ee;
+}
+
+.serpentin-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 900px;
+}
+
+.serpentin-svg {
+  width: 100%;
+  height: 900px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.serpentin-step-flat {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+  max-width: 320px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  z-index: 2;
+  transition: none;
+}
+.serpentin-step-flat.left {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.serpentin-step-flat.right {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.flat-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.7rem;
+  color: #fff;
+  font-size: 2.8rem;
+  box-shadow: 0 2px 8px rgba(33,150,243,0.10);
+  position: relative;
+  top: 0;
+  left: 0;
+}
+.flat-icon ion-icon {
+  font-size: 2.8rem;
+  color: #fff;
+}
+
+.flat-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background: transparent;
+  margin-left: 32px;
+  margin-right: 32px;
+}
+.serpentin-step-flat.right .flat-labels {
+  margin-left: 0;
+  margin-right: 32px;
+}
+.serpentin-step-flat.left .flat-labels {
+  margin-left: 32px;
+  margin-right: 0;
+}
+.flat-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #23223a;
+  line-height: 1.1;
+}
+.flat-desc {
+  font-size: 1.08rem;
+  color: #444;
+  font-weight: 400;
+  line-height: 1.1;
+}
+.flat-time {
+  font-size: 1.02rem;
+  color: #2196f3;
+  font-weight: 700;
+  margin-top: 0.1rem;
+}
+
+@media (max-width: 600px) {
+  .serpentin-wrapper {
+    max-width: 100vw;
+    min-height: 600px;
+  }
+  .serpentin-svg {
+    height: 600px;
+  }
+  .serpentin-step-flat {
+    min-width: 90px;
+    max-width: 98vw;
+  }
+  .flat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    margin: 0 0.3rem;
+  }
+  .flat-labels {
+    font-size: 0.95rem;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+  .flat-title {
+    font-size: 1.05rem;
+  }
+} 

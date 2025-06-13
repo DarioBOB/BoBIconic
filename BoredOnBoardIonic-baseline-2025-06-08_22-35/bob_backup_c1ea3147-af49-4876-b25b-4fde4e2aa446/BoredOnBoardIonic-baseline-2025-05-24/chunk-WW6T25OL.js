@@ -1,0 +1,1 @@
+import"./chunk-OLRFWS6T.js";var t=[{path:"email",loadComponent:()=>import("./chunk-CU4H2FZ5.js").then(o=>o.EmailAuthPage)},{path:"register",loadComponent:()=>import("./chunk-ZXPU5UMS.js").then(o=>o.RegisterProfilePage)},{path:"reset-password-confirmation",loadComponent:()=>import("./chunk-BP2Y3TB7.js").then(o=>o.ResetPasswordConfirmationPage)}];export{t as AUTH_ROUTES};
