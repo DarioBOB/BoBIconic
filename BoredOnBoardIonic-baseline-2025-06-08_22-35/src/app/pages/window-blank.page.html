@@ -1,0 +1,158 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Ma Fenêtre</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<div class="progress-bar-container">
+  <ion-item lines="none">
+    <ion-label position="stacked">Progression du vol</ion-label>
+    <div class="progress-info">
+      <span>Réel : {{ realProgress }}%</span>
+      <span>Simulé : {{ simulatedProgress }}%</span>
+    </div>
+    <ion-range min="0" max="100" step="1" [(ngModel)]="simulatedProgress" (ionChange)="onSimulatedProgressChange($event.detail.value)">
+      <ion-label slot="start">0%</ion-label>
+      <ion-label slot="end">100%</ion-label>
+    </ion-range>
+  </ion-item>
+</div>
+
+<!-- Onglets maison -->
+<div class="custom-tabs">
+  <button [class.active]="selectedTab === 'infos'" (click)="selectTab('infos')">Données vol</button>
+  <button [class.active]="selectedTab === 'map'" (click)="selectTab('map')">Carte</button>
+  <button [class.active]="selectedTab === 'hublot'" (click)="selectTab('hublot')">Hublot</button>
+</div>
+
+<!-- Contenu conditionnel -->
+<div *ngIf="selectedTab === 'infos'" class="ion-padding">
+  <h2>Données textuelles sur le vol</h2>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Données générales du vol</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Numéro de vol :</strong> LX 4334 (démo)</p>
+      <p><strong>Compagnie :</strong> Swiss International Air Lines</p>
+      <p><strong>Départ :</strong> Genève (GVA)</p>
+      <p><strong>Arrivée :</strong> Athènes (ATH)</p>
+      <p><strong>Date de départ :</strong> {{ departureTime | date:'EEE dd MMM yyyy' }}</p>
+      <p><strong>Heure de départ :</strong> {{ departureTime | date:'HH:mm' }}</p>
+      <p><strong>Heure d'arrivée :</strong> {{ arrivalTime | date:'HH:mm' }}</p>
+      <p><strong>Durée :</strong> 3h 15min</p>
+      <p><strong>Statut :</strong> À l'heure</p>
+      <p><strong>Type d'avion :</strong> Airbus A320</p>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Données dynamiques de vol</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Altitude :</strong> 35,000 ft</p>
+      <p><strong>Vitesse :</strong> 850 km/h</p>
+      <p><strong>Position :</strong> 45.0°N, 10.0°E</p>
+      <p><strong>Météo :</strong> Ensoleillé</p>
+      <p><strong>Temps restant :</strong> 2h 30min</p>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>POIs (Points d'intérêt)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Villes survolées :</strong> Milan, Rome, Naples</p>
+      <p><strong>Monuments :</strong> Colisée, Acropole</p>
+      <p><strong>Reliefs :</strong> Alpes, Apennins</p>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Informations passager (Démo)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngFor="let p of passengers">
+        <p><strong>Nom :</strong> {{ p.name }}</p>
+        <p><strong>Siège :</strong> {{ p.seat }}</p>
+        <p><strong>Bagages :</strong> {{ p.baggage.join(', ') }}</p>
+        <ion-item-divider></ion-item-divider>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Segments de vol (1% chacun)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <table class="segments-table">
+        <thead>
+          <tr>
+            <th>%</th>
+            <th>Lat</th>
+            <th>Lng</th>
+            <th>Altitude (ft)</th>
+            <th>Vitesse (km/h)</th>
+            <th>Temps écoulé (min)</th>
+            <th>Heure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let seg of segments; let i = index" [class.active-segment]="seg.percent === simulatedProgress">
+            <td>{{ seg.percent }}</td>
+            <td>{{ seg.lat }}</td>
+            <td>{{ seg.lng }}</td>
+            <td>{{ seg.altitude }}</td>
+            <td>{{ seg.speed }}</td>
+            <td>{{ seg.elapsedMin }}</td>
+            <td>{{ seg.heure }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ion-card-content>
+  </ion-card>
+</div>
+
+<div *ngIf="selectedTab === 'map'" class="ion-padding">
+  <h2>Carte interactive</h2>
+  <app-window-map-test [segments]="segments" [currentPercent]="simulatedProgress"></app-window-map-test>
+  <app-poi-table [segments]="segments" [currentPercent]="simulatedProgress"></app-poi-table>
+</div>
+
+<div *ngIf="selectedTab === 'hublot'" class="ion-padding">
+  <h2>Vue par les hublots</h2>
+  <p>Effet visuel à intégrer ici.</p>
+</div>
+
+<style>
+.custom-tabs {
+  display: flex;
+  justify-content: space-around;
+  background: #3880ff;
+  border-radius: 12px 12px 0 0;
+  margin: 0 0 16px 0;
+}
+.custom-tabs button {
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.custom-tabs button.active {
+  background: #3dc2ff;
+  color: #222;
+  font-weight: bold;
+  border-bottom: 3px solid #fff;
+}
+</style>
+
+<ion-content>
+  <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
+    <h2 style="color: #1976d2; font-weight: 600;">Carte (Ma Fenêtre)</h2>
+  </div>
+</ion-content> 

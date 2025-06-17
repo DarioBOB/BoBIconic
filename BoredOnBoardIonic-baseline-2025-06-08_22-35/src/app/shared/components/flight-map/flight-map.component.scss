@@ -1,0 +1,135 @@
+.flight-map-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+}
+
+.flight-info {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  min-width: 200px;
+  z-index: 1000;
+}
+
+.flight-header {
+  margin-bottom: 10px;
+}
+
+.flight-header h3 {
+  margin: 0;
+  color: #1bb6b1;
+  font-size: 1.2em;
+}
+
+.airline {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.stats {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.value {
+  font-weight: bold;
+  color: #333;
+}
+
+.airports {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.airport {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.code {
+  font-weight: bold;
+  color: #1bb6b1;
+}
+
+.time {
+  font-size: 0.9em;
+  color: #666;
+}
+
+:host ::ng-deep {
+  .airport-marker {
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .airport-icon {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .airport-icon.departure {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234CAF50"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>');
+  }
+
+  .airport-icon.arrival {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23F44336"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>');
+  }
+
+  .airport-popup {
+    padding: 5px;
+    min-width: 200px;
+  }
+
+  .airport-popup h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.1em;
+  }
+
+  .airport-popup p {
+    margin: 3px 0;
+    color: #666;
+    font-size: 0.9em;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .leaflet-popup-tip {
+    background: white;
+  }
+} 

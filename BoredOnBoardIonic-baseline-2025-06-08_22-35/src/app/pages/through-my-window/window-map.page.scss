@@ -1,0 +1,113 @@
+#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+ion-fab {
+  z-index: 2;
+}
+
+.map-container {
+  position: absolute;
+  top: 120px; /* header + slider */
+  left: 0;
+  right: 0;
+  bottom: 56px; /* hauteur de la tab-bar Ionic */
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+:host ::ng-deep {
+  .leaflet-container {
+    width: 100%;
+    height: 100%;
+  }
+
+  .aircraft-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transform: rotate(45deg);
+  }
+
+  .leaflet-marker-icon {
+    &.leaflet-marker-icon {
+      background-color: #fff;
+      border: 2px solid #2c3e50;
+      border-radius: 50%;
+      width: 20px !important;
+      height: 20px !important;
+      margin-left: -10px !important;
+      margin-top: -10px !important;
+    }
+  }
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  font-size: 1.2em;
+  color: #888;
+}
+
+// Styles pour les marqueurs d'aéroport
+.airport-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+  
+  &.departure {
+    color: #2ecc71; // Vert pour le départ
+  }
+  
+  &.arrival {
+    color: #e74c3c; // Rouge pour l'arrivée
+  }
+}
+
+// Styles pour les popups d'aéroport
+.airport-popup {
+  padding: 8px;
+  min-width: 200px;
+  
+  h3 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: bold;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 4px;
+  }
+
+  p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #34495e;
+  }
+
+  strong {
+    color: #2c3e50;
+  }
+}
+
+// Style pour le marqueur d'avion
+.aircraft-marker {
+  font-size: 24px;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+}
+
+// Forcer l'affichage des marqueurs Leaflet
+:host ::ng-deep .leaflet-marker-icon, :host ::ng-deep .leaflet-marker-shadow {
+  display: block !important;
+  opacity: 1 !important;
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+} 

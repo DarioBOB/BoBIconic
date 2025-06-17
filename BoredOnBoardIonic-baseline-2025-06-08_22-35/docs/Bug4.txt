@@ -1,0 +1,738 @@
+Voici une revue détaillée de votre service **`FlightDataService`**, qui gère la récupération, le cache et le suivi en temps réel des données de vol. Je commente fonction par fonction, en vérifiant la cohérence générale avec ce que vous avez déjà implémenté dans les composants (notamment la simulation statique de vol dans `WindowPage`) et en pointant d’éventuelles améliorations ou corrections.
+
+---
+
+## 1. Imports et constructeur
+
+```ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Storage } from '@ionic/storage-angular';
+import { FlightData, AirportInfo, RouteData, FlightStatistics } from './models/flight.interface';
+import { Observable, from, of, throwError, Subscription, interval } from 'rxjs';
+import { map, catchError, switchMap, tap } from 'rxjs/operators';
+import { FlightAwareService } from './flightaware.service';
+import { FlightMapService } from './flight-map.service';
+import { OpenSkyService } from './opensky.service';
+import { environment } from '../../../environments/environment';
+import { AviationstackService } from './aviationstack.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FlightDataService {
+  private cache = new Map<string, {
+    data: FlightData,
+    timestamp: number
+  }>();
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private readonly STORAGE_KEY = 'flight_data_cache';
+  private trackingSubscription?: Subscription;
+  private readonly FLIGHTAWARE_API_KEY = environment.flightRadar24ApiKey;
+
+  constructor(
+    private http: HttpClient,
+    private storage: Storage,
+    private flightAwareService: FlightAwareService,
+    private flightMapService: FlightMapService,
+    private openSkyService: OpenSkyService,
+    private aviationstackService: AviationstackService
+  ) {
+    this.initStorage();
+  }
+  // …
+}
+```
+
+### Points clés
+
+1. **Cache en mémoire + persistance locale**
+
+   * Vous stockez le résultat de chaque appel dans `this.cache` (clé = `flightNumber`) avec un `timestamp`.
+   * Vous sauvegardez ensuite ce `Map` sérialisé dans `Ionic Storage` (IndexedDB / local storage selon plateforme)
+   * **CACHE\_DURATION = 5 min** → au-delà, on réinterrogera l’API.
+
+2. **Services externes injectés**
+
+   * `AviationstackService` → vous l’utilisez pour récupérer d’abord les données de vol (horaires, aéroport, compagnie, etc.).
+   * `OpenSkyService` → pour obtenir la trajectoire (waypoints) et le suivi en temps réel via `getFlightTrajectory` et `getCurrentPosition`.
+   * `FlightAwareService` et `FlightMapService` sont également injectés, même si ici on ne voit pas d’appel direct à `FlightAwareService`.
+
+     * Peut-être prévoyez-vous un jour d’interroger FlightAware en complément d’Aviationstack.
+     * `FlightMapService` est utilisé pour transmettre les données à un composant qui affiche la carte (probablement un service partagé entre components).
+
+3. **Clé API FlightRadar24**
+
+   * Appelée `FLIGHTAWARE_API_KEY` dans votre code, mais assignée à `environment.flightRadar24ApiKey`.
+   * Vérifiez que cette variable d’environnement existe bien et que vous l’utilisez là où il faut. (Je n’ai vu aucun appel ultérieur à `FlightAwareService`, donc potentiellement non encore implémenté.)
+
+4. **`initStorage()` dans le constructeur**
+
+   ```ts
+   private async initStorage() {
+     await this.storage.create();
+     const cachedData = await this.storage.get(this.STORAGE_KEY);
+     if (cachedData) {
+       this.cache = new Map(JSON.parse(cachedData));
+     }
+   }
+   ```
+
+   * Vous appellez `await this.storage.create()` pour initialiser l’instance Ionic Storage.
+   * Puis vous essayez de récupérer la map sérialisée (tableau de paires) depuis `STORAGE_KEY`.
+   * **✔️** La conversion `new Map(JSON.parse(cachedData))` est valide si vous avez fait `JSON.stringify(Array.from(this.cache.entries()))` au moment de l’enregistrement.
+
+5. **`saveCache()`**
+
+   ```ts
+   private async saveCache() {
+     await this.storage.set(this.STORAGE_KEY, JSON.stringify(Array.from(this.cache.entries())));
+   }
+   ```
+
+   * Vous transformez `this.cache.entries()` (itérateur de `[key, {data, timestamp}]`) en tableau, puis JSON.
+   * Cette structure remonte correctement à `new Map(...)` au chargement.
+   * **✔️** Implémentation cohérente.
+
+---
+
+## 2. `getFlightData(flightNumber: string): Observable<FlightData>`
+
+```ts
+getFlightData(flightNumber: string): Observable<FlightData> {
+  return this.aviationstackService.getFlightData(flightNumber).pipe(
+    switchMap(flightData => {
+      if (!flightData || !flightData.aircraft.icao24) {
+        return of(flightData as FlightData);
+      }
+      // Calcul de timestamps UNIX (seconds) pour la trajectoire
+      const startTime = Math.floor(new Date(flightData.route.departure.scheduledTime).getTime() / 1000);
+      const endTime   = Math.floor(new Date(flightData.route.arrival.scheduledTime).getTime() / 1000);
+
+      // Récupérer la trajectoire via OpenSky
+      return this.openSkyService.getFlightTrajectory(
+        flightData.aircraft.icao24,
+        startTime,
+        endTime
+      ).pipe(
+        map(waypoints => ({
+          ...flightData,
+          route: {
+            ...flightData.route,
+            waypoints
+          }
+        }) as FlightData)
+      );
+    }),
+    catchError(error => {
+      console.error('Error fetching flight data:', error);
+      return of({
+        // Retour d’un FlightData minimal pour éviter null
+        flightNumber: '',
+        airline: '',
+        aircraft: { registration: '', type: '', icao24: '' },
+        route: {
+          departure: { airport: '', city: '', country: '', scheduledTime: '', actualTime: '', terminal: '', gate: '', status: { type: 'ON_TIME', description: '' }, location: { latitude: 0, longitude: 0 } },
+          arrival:   { airport: '', city: '', country: '', scheduledTime: '', actualTime: '', terminal: '', gate: '', status: { type: 'ON_TIME', description: '' }, location: { latitude: 0, longitude: 0 } },
+          currentPosition: { latitude: 0, longitude: 0, altitude: 0, speed: 0, heading: 0, timestamp: '' },
+          distance: { kilometers: 0, miles: 0 },
+          duration: { scheduledMinutes: 0 },
+          waypoints: []
+        },
+        status: { type: 'ON_TIME', description: '' },
+        lastUpdated: '',
+        codeshares: [],
+        waypoints: []
+      } as FlightData);
+    })
+  );
+}
+```
+
+### Analyse et recommandations
+
+1. **Récupération initiale depuis Aviationstack**
+
+   * Vous appelez `this.aviationstackService.getFlightData(flightNumber)`, qui doit renvoyer un `Observable<FlightData>`.
+   * Si l’API ne renvoie pas d’objet (ou si `.aircraft.icao24` est vide), vous retournez directement `of(flightData)`.
+
+     * **Cas possible** : certaines données d’Aviationstack ne contiennent pas encore le champ `icao24`. Dans ce cas, vous ne récupérez pas la trajectoire et renvoyez quand même les infos horodatées (départ, arrivée, etc.).
+   * **✔️** Permet de gérer un vol dont on ne connaît pas l’identifiant icao24 : au minimum, on a l’horaire.
+
+2. **Conversion des heures programmées en timestamps UNIX**
+
+   ```ts
+   const startTime = Math.floor(new Date(flightData.route.departure.scheduledTime).getTime() / 1000);
+   const endTime   = Math.floor(new Date(flightData.route.arrival.scheduledTime).getTime() / 1000);
+   ```
+
+   * On suppose que `flightData.route.departure.scheduledTime` est une string ISO ou un format JavaScript convertible en `Date`.
+   * **✔️** On obtient bien la date en millisecondes, puis en secondes (pour l’API OpenSky).
+
+3. **Appel à `OpenSkyService.getFlightTrajectory(icao24, startTime, endTime)`**
+
+   * Cette méthode doit renvoyer un `Observable<Array<Waypoint>>` (liste de coordonnées horodatées sur la trajectoire).
+   * Vous faites ensuite :
+
+     ```ts
+     map(waypoints => ({
+       ...flightData,
+       route: {
+         ...flightData.route,
+         waypoints
+       }
+     }) as FlightData)
+     ```
+
+     pour fusionner la liste des waypoints dans `flightData.route.waypoints`.
+   * **✔️** Résultat : le `FlightData` complet contiendra désormais `route.waypoints` (Array) qu’on pourra exploiter dans la carte “cockpit” (par ex. dessiner la trajectoire ou animer).
+
+4. **Gestion des erreurs**
+
+   * Vous attrapez toute erreur réseau (Aviationstack ou OpenSky) et retournez un objet minimal `FlightData` plein de champs vides.
+   * **Conséquence** : l’observable ne génère pas d’erreur en amont ; par contre, vous perdez l’information qu’il y a eu une erreur.
+   * **Remarque** : Si vous souhaitez différencier “vol non trouvé/no data” et “erreur serveur”, vous pourriez renvoyer `throwError(error)` après un certain traitement, ou renvoyer un objet typé `{ error: true }`.
+   * Ici, renvoyer un objet vierge garantit que le reste de l’application continue de fonctionner sans crash. À vous de décider si vous voulez quand même notifier l’utilisateur qu’il y a eu un souci côté API.
+
+---
+
+## 3. Méthodes d’accès simplifiées
+
+### 3.1 `getFlightStatus(flightNumber: string): Observable<string>`
+
+```ts
+getFlightStatus(flightNumber: string): Observable<string> {
+  return this.getFlightData(flightNumber).pipe(
+    map(flightData => flightData?.status.type || 'UNKNOWN'),
+    catchError(() => of('UNKNOWN'))
+  );
+}
+```
+
+* **Objectif** : retourner uniquement le type de statut (ex. `"ON_TIME"`, `"DELAYED"`, `"LANDED"`, etc.).
+* Vous reprenez donc `flightData.status.type`.
+* **✔️** Si un champ est manquant ou qu’une erreur survient, vous renvoyez `"UNKNOWN"`.
+* **Remarque** : en pratique, comme `getFlightData` ne renvoie jamais d’erreur (votre `catchError` aplatit tout dans un objet vide), `catchError(() => of('UNKNOWN'))` ne sera pas souvent utilisé. Il restera utile si vous changez la logique d’erreur pour renvoyer `throwError`.
+
+### 3.2 `getFlightRoute(flightNumber: string): Observable<any>`
+
+```ts
+getFlightRoute(flightNumber: string): Observable<any> {
+  return this.getFlightData(flightNumber).pipe(
+    map(flightData => flightData?.route),
+    catchError(() => of(null))
+  );
+}
+```
+
+* **Objectif** : retourner uniquement l’objet `route` (départ, arrivée, waypoints, …).
+* **✔️** Correct, avec retour `null` en cas d’erreur.
+
+### 3.3 `getAircraftInfo(flightNumber: string): Observable<any>`
+
+```ts
+getAircraftInfo(flightNumber: string): Observable<any> {
+  return this.getFlightData(flightNumber).pipe(
+    switchMap(flightData => {
+      if (!flightData?.aircraft.icao24) {
+        return of(flightData?.aircraft);
+      }
+      return this.openSkyService.getAircraftInfo(flightData.aircraft.icao24).pipe(
+        map(aircraftInfo => ({
+          ...flightData.aircraft,
+          ...aircraftInfo
+        }))
+      );
+    }),
+    catchError(() => of(null))
+  );
+}
+```
+
+* **Objectif** :
+
+  1. Si `icao24` est manquant, on renvoie directement l’objet `flightData.aircraft` (contenant au moins `registration` et `type`).
+  2. Sinon, on interroge `OpenSkyService.getAircraftInfo(icao24)` — qui doit fournir des infos détaillées (constructeur, modèle, âge, compagnie, etc.).
+  3. On fusionne ces infos avec `flightData.aircraft` et on renvoie le tout.
+* **✔️** Implémentation cohérente.
+* **Remarque** : assurez-vous que `OpenSkyService.getAircraftInfo()` renvoie un objet compatible (par ex. `{ manufacture: string, model: string, operator: string, ... }`). Sinon, la fusion pourrait écraser de mauvais champs.
+
+---
+
+## 4. Tracking en temps réel : `startTracking` et `stopTracking`
+
+### 4.1 `startTracking(flightNumber: string, icao24: string): Observable<FlightData>`
+
+```ts
+startTracking(flightNumber: string, icao24: string): Observable<FlightData> {
+  // 1) Arrêter le suivi précédent s’il existe
+  this.stopTracking();
+
+  // 2) Démarrer l’abonnement : toutes les 10 secondes, appeler OpenSky pour la position
+  this.trackingSubscription = interval(10000).pipe(
+    switchMap(() => this.openSkyService.getCurrentPosition(icao24))
+  ).subscribe(position => {
+    if (position) {
+      const cachedData = this.getCachedData(flightNumber);
+      if (cachedData) {
+        // 3) Mettre à jour le champ route.currentPosition de l’objet FlightData
+        const updatedData = {
+          ...cachedData,
+          route: {
+            ...cachedData.route,
+            currentPosition: {
+              latitude: position.latitude || 0,
+              longitude: position.longitude || 0,
+              altitude: position.altitude || 0,
+              speed: position.speed || 0,
+              heading: position.heading || 0,
+              timestamp: position.timestamp || ''
+            }
+          }
+        };
+        // 4) Transmettre cette nouvelle donnée à FlightMapService pour affichage
+        this.flightMapService.updateFlightData(updatedData);
+        // 5) Mettre à jour le cache local
+        this.setCachedData(flightNumber, updatedData);
+      }
+    }
+  });
+
+  // Enfin, on retourne l’Observable initial (une mise à jour de base)
+  return this.getFlightData(flightNumber);
+}
+```
+
+#### Déroulé et points de vigilance
+
+1. **Stopper l’ancien tracking**
+
+   * Avant d’en démarrer un nouveau, vous appelez `this.stopTracking()` pour désabonner l’ancienne `Subscription`.
+   * **✔️** Cela évite des abonnements multiples concurrents.
+
+2. **`interval(10000).pipe(switchMap(...))`**
+
+   * Toutes les 10 000 ms (10 s), on invoque `openSkyService.getCurrentPosition(icao24)` → doit renvoyer un objet `{ latitude, longitude, altitude, speed, heading, timestamp }`.
+   * **✅** Bon choix pour un suivi toutes les 10 secondes.
+
+3. **Mise à jour du `FlightData` en cache**
+
+   * Vous appelez `this.getCachedData(flightNumber)` pour récupérer la version la plus récente mise en cache (avant tracking).
+   * **Hypothèse** : `getCachedData` renverra soit un objet `FlightData`, soit `null` si le cache a expiré ou si ce vol n’a jamais été récupéré.
+   * Vous ne gérez que le cas “cache existant” (`if (cachedData) { ... }`).
+
+     * **Si `cachedData` est `null`**, vous n’effectuez aucune mise à jour en temps réel.
+     * **Remarque** : vous pourriez alors récupérer une `FlightData` fraîche via `getFlightData(flightNumber)` avant de démarrer le tracking, pour vous assurer d’avoir quelque chose dans le cache.
+       Par exemple :
+
+       ```ts
+       if (!cachedData) {
+         this.getFlightData(flightNumber).pipe(
+           tap(data => this.setCachedData(flightNumber, data))
+         ).subscribe();
+       }
+       ```
+
+       ou simplement attendre le flux initial de `getFlightData` (qui est retourné à la fin de `startTracking`).
+
+4. **Création de `updatedData`**
+
+   * Vous copiez l’ancien `cachedData` et réassignez `route.currentPosition = { ... }` d’après la position en temps réel.
+   * **✔️** Cela met à jour uniquement la position, sans toucher aux autres champs (horaires, waypoints, etc.).
+
+5. **`FlightMapService.updateFlightData(updatedData)`**
+
+   * Vous transmettez immédiatement cette donnée au service de cartographie qui, je suppose, fait suivre la nouvelle position à un composant (par ex. `WindowMapTestComponent` via un `Subject`).
+   * **✔️** Utile pour faire bouger le marker avion en temps réel.
+
+6. **Mise à jour du cache**
+
+   * Vous appelez `this.setCachedData(flightNumber, updatedData)` pour conserver dans `this.cache` le `updatedData` accompagné d’un nouveau `timestamp`.
+   * Ainsi, la prochaine fois que vous appelerez `getCachedData`, vous aurez l’objet le plus à jour.
+   * **✔️** Il faudra aussi appeler `saveCache()` (ce que fait `setCachedData`) pour que la version locale sur l’appareil soit persistée.
+
+7. **Retour de la méthode**
+
+   ```ts
+   return this.getFlightData(flightNumber);
+   ```
+
+   * Vous renvoyez l’`Observable<FlightData>` initial obtenu en appelant à la volée `getFlightData()`.
+   * **Attention** :
+
+     * Cet observable se déclenchera une fois (récupération depuis Aviationstack + OpenSky pour la trajectoire) et ne sera pas mis à jour toutes les 10 s.
+     * ***Il ne reflète pas*** la position en temps réel : c’est simplement un “instantané” de la donnée initiale (qui contient la liste des waypoints, l’heure, etc.).
+     * Pour recevoir les mises à jour en direct, votre composant doit plutôt s’abonner à un flux que fournit `FlightMapService`, car c’est dans la `subscribe` de `startTracking` que vous appelez `flightMapService.updateFlightData(updatedData)`.
+   * **Suggestion** : soit vous modifiez `startTracking(...)` pour qu’il retourne un **`Subject<FlightData>`** ou un **`BehaviorSubject<FlightData>`** qui s’émule à chaque update,
+     soit vous laissez ce comportement “push” dans `FlightMapService`. Dans ce dernier cas, ce que retourne `startTracking` (l’`Observable<FlightData>`) sert seulement à récupérer l’état initial du vol avant tracking.
+
+### 4.2 `stopTracking()`
+
+```ts
+stopTracking(): void {
+  if (this.trackingSubscription) {
+    this.trackingSubscription.unsubscribe();
+    this.trackingSubscription = undefined;
+  }
+}
+```
+
+* **✔️** Très simple, suffisant pour arrêter le timer `interval(10000)` et libérer la ressource.
+
+---
+
+## 5. Cache : `getCachedData`, `setCachedData`, `clearCache`
+
+### 5.1 `getCachedData(flightNumber: string): FlightData | null`
+
+```ts
+private getCachedData(flightNumber: string): FlightData | null {
+  const cached = this.cache.get(flightNumber);
+  if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+    return cached.data;
+  }
+  return null;
+}
+```
+
+* Vous vérifiez si l’entrée existe et si elle n’a pas plus de 5 minutes (par `cached.timestamp`).
+* **✔️** Remet à zéro le cache après 5 min pour un vol donné.
+
+### 5.2 `setCachedData(flightNumber: string, data: FlightData): void`
+
+```ts
+private setCachedData(flightNumber: string, data: FlightData): void {
+  this.cache.set(flightNumber, {
+    data,
+    timestamp: Date.now()
+  });
+  this.saveCache();
+}
+```
+
+* Vous mettez à jour la `Map` et appelez `saveCache()` pour écrire le cache dans `Ionic Storage`.
+* **✔️** Fonctionne correctement.
+
+### 5.3 `clearCache(flightNumber?: string): void`
+
+```ts
+clearCache(flightNumber?: string): void {
+  if (flightNumber) {
+    this.cache.delete(flightNumber);
+  } else {
+    this.cache.clear();
+  }
+  this.saveCache();
+}
+```
+
+* **Usage**
+
+  * Si on passe un `flightNumber`, on supprime uniquement l’entrée correspondante.
+  * Si on n’en passe pas, on vide tout le cache.
+* **✔️** Permet de forcer un rafraîchissement manuel.
+
+---
+
+## 6. Mise à jour forcée : `updateFlightData(flightNumber: string): Observable<FlightData>`
+
+```ts
+updateFlightData(flightNumber: string): Observable<FlightData> {
+  return this.getFlightData(flightNumber).pipe(
+    map(flightData => {
+      // Mettre à jour la carte (via FlightMapService)
+      this.flightMapService.updateFlightData(flightData);
+      return flightData;
+    })
+  );
+}
+```
+
+* **Rôle**
+
+  * Récupère l’`Observable` de `getFlightData` (qui appelle Aviationstack → OpenSky pour la trajectoire).
+  * Dans le `map(...)`, vous appelez `this.flightMapService.updateFlightData(flightData)` pour indiquer à **tous** les abonnés (par ex. à `WindowMapTestComponent`) de se mettre à jour avec ces données.
+  * Finalement, on renvoie `flightData` à quiconque s’abonne à `updateFlightData(...)`.
+* **✔️** Très utile pour “rafraîchir” manuellement en une seule méthode : l’application commande ce refresh, la carte se met à jour, et le composant peut réagir.
+
+---
+
+## 7. Méthodes internes “Mock” / TODO
+
+### 7.1 `getBasicFlightInfo(flightNumber: string): Observable<Partial<FlightData>>`
+
+```ts
+private getBasicFlightInfo(flightNumber: string): Observable<Partial<FlightData>> {
+  // TODO: Implémenter l'appel à l'API FlightAware
+  return of({
+    flightNumber,
+    airline: 'Swiss',
+    departure: {
+      code: 'GVA',
+      name: 'Genève',
+      terminal: '1',
+      gate: 'A1',
+      scheduledTime: '10:00',
+      averageDelay: 15,
+      baggageClaim: '3'
+    },
+    arrival: {
+      code: 'ATH',
+      name: 'Athènes',
+      terminal: '2',
+      gate: 'B2',
+      scheduledTime: '13:00',
+      averageDelay: 10,
+      baggageClaim: '4'
+    }
+  });
+}
+```
+
+* **C’est un stub** : vous prévoyez de recouvrer ces données depuis FlightAware.
+* **✔️** Tant que les appels réels ne sont pas implémentés, ce mock permet à l’application de fonctionner sans planter.
+
+### 7.2 `getHistoricalData(flightNumber: string): Observable<any>`
+
+```ts
+private getHistoricalData(flightNumber: string): Observable<any> {
+  // TODO: Implémenter l'appel à l'API AviationStack
+  return of({
+    delays: [
+      { reason: 'Météo', frequency: 30 },
+      { reason: 'Trafic', frequency: 20 }
+    ],
+    onTimePercentage: 85
+  });
+}
+```
+
+* **Mock** pour les statistiques historiques.
+* **✔️** Permet de tester la fonction `calculateStatistics`.
+
+### 7.3 `getRouteData(flightNumber: string): Observable<RouteData>`
+
+```ts
+private getRouteData(flightNumber: string): Observable<RouteData> {
+  return of({
+    distance: 0,
+    averageDuration: 180,
+    waypoints: [
+      { latitude: 46.2381, longitude: 6.1080, altitude: 0, speed: 0, heading: 0, timestamp: '2024-01-01T10:00:00Z' },
+      { latitude: 45.0, longitude: 10.0,  altitude: 35000, speed: 0, heading: 0, timestamp: '2024-01-01T11:00:00Z' },
+      { latitude: 37.9364, longitude: 23.9445, altitude: 0, speed: 0, heading: 0, timestamp: '2024-01-01T13:00:00Z' }
+    ]
+  });
+}
+```
+
+* **Mock** pour la route moyenne (pas utilisée ailleurs dans ce service).
+* \*\* suggest\*\* Si vous n’utilisez pas `getRouteData` dans le reste de l’application, vous pouvez retirer cette méthode ou la documenter pour indiquer son objectif.
+
+### 7.4 `calculateStatistics(historicalData: any): FlightStatistics`
+
+```ts
+private calculateStatistics(historicalData: any): FlightStatistics {
+  return {
+    onTimePercentage: historicalData.onTimePercentage,
+    averageDelay: 15, // Placeholder
+    mostCommonDelays: historicalData.delays,
+    totalFlights: 0,
+    cancelledFlights: 0,
+    divertedFlights: 0
+  };
+}
+```
+
+* **Mock** qui construit un objet `FlightStatistics` à partir de `historicalData`.
+* **✔️** Pas encore utilisé dans le service ; à conserver si vous comptez l’exposer publiquement plus tard.
+
+---
+
+## 8. `refreshFlightData(flightNumber: string): Promise<FlightData>`
+
+```ts
+async refreshFlightData(flightNumber: string): Promise<FlightData> {
+  this.cache.delete(flightNumber);
+  const data = await this.getFlightData(flightNumber).toPromise();
+  if (!data) throw new Error('Failed to get flight data');
+  return data;
+}
+```
+
+* **Rôle** :
+
+  1. Forcer la supression de l’entrée dans `this.cache`.
+  2. Appeler de nouveau `getFlightData(flightNumber)` (en contournant le cache car il est supprimé juste avant).
+  3. Attendre la réponse (via `.toPromise()`) et renvoyer le `FlightData` récupéré.
+* **Notes** :
+
+  * `.toPromise()` est déprécié dans RxJS 7/8, il est préférable d’utiliser `firstValueFrom(...)` ou `lastValueFrom(...)` (ex. `const data = await firstValueFrom(this.getFlightData(flightNumber));`).
+  * **Sinon** la logique est correcte : on force toujours un appel réseau, et si la donnée est nulle on lève une exception.
+
+---
+
+## 9. Points de cohérence avec les composants
+
+### 9.1 Cohérence de la structure `FlightData`
+
+* Dans vos composants (`WindowPage`, `WindowMapTestComponent`, `WindowHublotComponent`), vous utilisez des champs tels que :
+
+  * `flightData.route.departure.scheduledTime`, `flightData.route.arrival.scheduledTime`
+  * `flightData.route.waypoints` (array)
+  * `flightData.route.currentPosition.latitude`, `.longitude`, `.altitude`, `.heading`
+  * `flightData.status.type`
+  * `flightData.lastUpdated`
+* **Vérifiez** que votre interface `FlightData` (dans `models/flight.interface.ts`) contient bien tous ces champs, au bon type (string / number / nested objects). Sinon, vous pourriez avoir des erreurs de compilation ou des valeurs `undefined`.
+
+### 9.2 Suivi en temps réel vs simulation statique
+
+* Dans `WindowPage`, vous avez codé une simulation “démo” (Genève → Athènes) indépendante de ce service.
+* **Si vous voulez** passer du mode “simulation” au mode “données réelles”, il suffirait de remplacer l’appel à `generateWaypointsWithPOIs(...)` par un appel à `flightDataService.startTracking(...)` pour un vol précis (numéro + icao24).
+* Ensuite, vos composants (`WindowMapTestComponent` et `WindowHublotComponent`) devraient s’abonner à une observable ou un mécanisme de `FlightMapService` pour recevoir les mises à jour en direct de position/altitude.
+* Actuellement, `WindowPage` ne fait pas appel à `FlightDataService` en production – tout est simulé en interne.
+* **Recommandation** :
+
+  * Si vous voulez unifier, vous pouvez retirer la simulation interne et, dans `ngOnInit` de `WindowPage`, faire quelque chose comme :
+
+    ```ts
+    this.flightDataService.getFlightData(flightNumber).subscribe(data => {
+      this.handleNewFlightData(data);
+      this.flightDataService.startTracking(flightNumber, data.aircraft.icao24);
+    });
+    ```
+  * Puis, vous devez abonner vos composants (`WindowMapTestComponent`, `WindowHublotComponent`) aux flux produits par `FlightMapService.updateFlightData(updatedData)` pour recevoir en temps réel la position / altitude / orientation / POIs.
+
+---
+
+## 10. Synthèse des améliorations possibles
+
+1. **Refactor du retour de `startTracking(...)`**
+
+   * Actuellement, il retourne un `Observable<FlightData>` qui ne contient que l’état initial (avant tracking).
+   * Pour plus de cohérence, vous pourriez faire pointer `startTracking` vers un `Subject<FlightData>` que vous alimentez à chaque mise à jour en temps réel. Ainsi, toute partie de l’application abonnée à ce `Subject` recevra un flux continu de mises à jour. Par exemple :
+
+     ```ts
+     private liveData$ = new BehaviorSubject<FlightData | null>(null);
+
+     startTracking(flightNumber: string, icao24: string): Observable<FlightData> {
+       this.stopTracking();
+       // Récupérer données initiales
+       this.getFlightData(flightNumber).subscribe(data => {
+         this.liveData$.next(data);
+         this.setCachedData(flightNumber, data);
+         // Puis lancer le tracking
+         this.trackingSubscription = interval(10000).pipe(
+           switchMap(() => this.openSkyService.getCurrentPosition(icao24))
+         ).subscribe(position => {
+           if (position) {
+             const cached = this.getCachedData(flightNumber);
+             if (cached) {
+               const updated = { ...cached,
+                 route: {
+                   ...cached.route,
+                   currentPosition: { ...position }
+                 }
+               };
+               this.liveData$.next(updated);
+               this.setCachedData(flightNumber, updated);
+             }
+           }
+         });
+       });
+       return this.liveData$.asObservable().pipe(
+         filter((fd): fd is FlightData => fd !== null)
+       );
+     }
+     ```
+   * De cette façon, quiconque s’abonne à `startTracking(...)` reçoit non seulement l’état initial, mais aussi les mises à jour toutes les 10 s.
+
+2. **Prise en compte du cache dans `getFlightData`**
+
+   * Actuellement, `getFlightData` interroge systématiquement Aviationstack et, si possible, OpenSky.
+   * Vous pourriez commencer par vérifier dans le cache avant de faire un appel réseau. Par exemple :
+
+     ```ts
+     getFlightData(flightNumber: string): Observable<FlightData> {
+       const cached = this.getCachedData(flightNumber);
+       if (cached) {
+         return of(cached);
+       }
+       // Sinon, faire l’appel réseau et stocker dans le cache
+       return this.aviationstackService.getFlightData(flightNumber).pipe(
+         // … même logique qu’auparavant …,
+         tap(freshData => this.setCachedData(flightNumber, freshData)),
+         catchError(...)
+       );
+     }
+     ```
+   * **Avantage** :
+
+     * On ne surcharge pas inutilement Aviationstack toutes les 5 secondes.
+     * On reste conforme à la durée de vie de 5 min du cache.
+
+3. **Conversion RxJS `.toPromise()` → `firstValueFrom`**
+
+   * Dans `refreshFlightData`, préférez :
+
+     ```ts
+     import { firstValueFrom } from 'rxjs';
+     ...
+     async refreshFlightData(flightNumber: string): Promise<FlightData> {
+       this.cache.delete(flightNumber);
+       const data = await firstValueFrom(this.getFlightData(flightNumber));
+       if (!data) throw new Error('Failed to get flight data');
+       return data;
+     }
+     ```
+
+4. **Gestion d’erreurs plus fine**
+
+   * Au lieu de toujours renvoyer un “FlightData vide” lorsqu’il y a une erreur, vous pourriez renvoyer une erreur poussée dans l’observable.
+   * Exemple :
+
+     ```ts
+     catchError(err => throwError(() => new Error('Failed to fetch flight data')));
+     ```
+   * Ainsi, les éventuels abonnés à `getFlightData` pourront gérer eux-mêmes l’erreur (afficher un message à l’utilisateur, retrigger la requête, etc.).
+
+5. **Utilisation homogène de champs date/heure**
+
+   * Dans la simulation de `WindowPage`, vous utilisiez Luxon (`DateTime`) pour formater `departureTimeGeneva` et consorts.
+   * Ici, `getFlightData` récupère les strings brutes depuis Aviationstack.
+   * **Suggestion** :
+
+     * Convertir ces chaînes (`scheduledTime`, `actualTime`) en objets Luxon (`DateTime.fromISO(...)`) dès que possible, pour bénéficier des méthodes de manipulation (diff, format, etc.).
+     * Ou, à minima, documenter dans l’interface `FlightData` que ces champs sont des `string` ISO.
+
+---
+
+## 11. Conclusion
+
+1. **Le service `FlightDataService` est globalement bien construit**
+
+   * Vous avez mis en place un cache en mémoire + persistance locale.
+   * Vous interrogez successivement Aviationstack puis, si possible, OpenSky pour récupérer la trajectoire.
+   * Vous exposez des méthodes utilitaires (`getFlightStatus`, `getFlightRoute`, `getAircraftInfo`) qui se basent sur `getFlightData`.
+   * Vous implémentez un suivi en temps réel toutes les 10 s en actualisant `route.currentPosition` et en poussant les données via `FlightMapService`.
+   * Vous proposez un rafraîchissement forcé (`refreshFlightData`).
+
+2. **Quelques améliorations**
+
+   * **Prise en compte du cache dans `getFlightData`** : éviter d’appeler l’API si une version en cache est encore valide.
+   * **Subscription “live”** : plutôt que de simplement retourner l’état initial, faire de `startTracking` un flux continu (ex. `BehaviorSubject<FlightData>`).
+   * **Usage de `firstValueFrom` à la place de `.toPromise()`**.
+   * **Optionnel** : nettoyer les `poiMarkers` dans `ngOnDestroy` ou ajouter un test pour supprimer l’ensemble des `poiMarkers` même en destruction.
+   * **Raffinement de la gestion d’erreurs** : décider si l’on veut “planter” l’observable en cas d’erreur ou bien renvoyer un objet vide.
+
+3. **Cohérence avec vos composants**
+
+   * Le format de `FlightData` utilisé dans ce service doit coller avec ce que vos composants `WindowPage`, `WindowMapTestComponent` et `WindowHublotComponent` attendent.
+   * En particulier :
+
+     * `route.departure.scheduledTime` et `route.arrival.scheduledTime` doivent être des chaînes ISO valides,
+     * `route.waypoints` doit être un tableau d’objets `{ latitude, longitude, altitude, speed, heading, timestamp }`,
+     * `route.currentPosition` est mis à jour en temps réel.
+   * Si vous utilisez les données de ce service en remplacement de la simulation dans `WindowPage`, il faudra adapter la logique pour qu’elle s’abonne à ce flux “live” et distribue les mises à jour aux composants concernés (via `FlightMapService`).
+
+En résumé, **`FlightDataService`** remplit bien son rôle. Après ces petites corrections (cache en amont, conversion RxJS moderne, éventuellement rendre `startTracking` vraiment “observable en continu”), vous aurez un back-end solide pour alimenter vos composants de vol en temps réel ou en mode “simulation” selon votre choix.

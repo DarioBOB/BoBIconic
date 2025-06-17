@@ -1,0 +1,101 @@
+{
+  "LANDING": {
+    "TILES": {
+      "TRIPS": "Voyages",
+      "WINDOW": "Ma Fenêtre",
+      "CHAT": "Chat",
+      "BOBBERS": "Bobbers",
+      "GAMES": "Jeux",
+      "NOTIFICATIONS": "Notifications",
+      "DOCUMENTS": "Documents",
+      "SUPPORT": "Support",
+      "PREFERENCES": "Préférences",
+      "IN_PROGRESS": "En cours"
+    }
+  },
+  "WINDOW": {
+    "TITLE": "Mon Voyage par ma Fenêtre",
+    "TEXT_DATA": "Données",
+    "MAP": "Carte",
+    "HUBLOT": "Hublot",
+    "SEARCH": {
+      "PLACEHOLDER": "Entrez un numéro de vol (ex: LX1820)",
+      "BUTTON": "Rechercher",
+      "LOADING": "Recherche en cours...",
+      "ERROR": "Erreur lors de la recherche",
+      "NO_RESULTS": "Aucun vol trouvé"
+    },
+    "FLIGHT_INFO": {
+      "TITLE": "Informations du vol",
+      "FLIGHT_NUMBER": "Numéro de vol",
+      "AIRLINE": "Compagnie aérienne",
+      "AIRCRAFT": "Type d'avion",
+      "DEPARTURE": "Départ",
+      "ARRIVAL": "Arrivée",
+      "SCHEDULED_TIME": "Horaire prévu",
+      "ACTUAL_TIME": "Horaire réel",
+      "STATUS": "Statut",
+      "ALTITUDE": "Altitude",
+      "SPEED": "Vitesse",
+      "WEATHER": "Météo",
+      "TIME_REMAINING": "Temps restant"
+    },
+    "STATUS": {
+      "SCHEDULED": "Prévu",
+      "ACTIVE": "En vol",
+      "LANDED": "Atterri",
+      "CANCELLED": "Annulé",
+      "DIVERTED": "Dérouté",
+      "UNKNOWN": "Inconnu"
+    },
+    "POIS": {
+      "GENEVA": {
+        "TITLE": "Genève",
+        "DESCRIPTION": "Point de départ"
+      },
+      "MILAN": {
+        "TITLE": "Milan",
+        "DESCRIPTION": "Première étape"
+      },
+      "ROME": {
+        "TITLE": "Rome",
+        "DESCRIPTION": "Deuxième étape"
+      },
+      "ATHENS": {
+        "TITLE": "Athènes",
+        "DESCRIPTION": "Point d'arrivée"
+      }
+    },
+    "PROGRESS": {
+      "CURRENT_POSITION": "Position actuelle",
+      "APPROACHING_MILAN": "Approche de Milan",
+      "APPROACHING_ROME": "Approche de Rome",
+      "APPROACHING_ATHENS": "Approche d'Athènes",
+      "FINAL_APPROACH": "Approche finale d'Athènes"
+    }
+  },
+  "TRIPS": {
+    "TITLE": "Mes Voyages",
+    "SUBTITLE": "Retrouvez tous vos voyages organisés",
+    "ONGOING": "En cours",
+    "UPCOMING": "À venir",
+    "PAST": "Passés",
+    "STATUS_ONGOING": "En cours",
+    "STATUS_UPCOMING": "À venir",
+    "STATUS_PAST": "Passé",
+    "NO_ONGOING": "Aucun voyage en cours",
+    "NO_ONGOING_DESC": "Vous n'avez pas de voyage en cours pour le moment",
+    "NO_UPCOMING": "Aucun voyage à venir",
+    "NO_UPCOMING_DESC": "Vous n'avez pas de voyage prévu pour le moment",
+    "NO_PAST": "Aucun voyage passé",
+    "NO_PAST_DESC": "Vous n'avez pas encore de voyage dans l'historique",
+    "LOADING_PLANS": "Chargement des étapes...",
+    "NO_PLANS": "Aucune étape planifiée",
+    "ERROR_TITLE": "Une erreur est survenue"
+  },
+  "COMMON": {
+    "LOADING": "Chargement...",
+    "SHOW": "Afficher",
+    "HIDE": "Masquer"
+  }
+} 

@@ -1,0 +1,89 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      {{ 'WINDOW.TITLE' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="search-container">
+    <ion-item>
+      <ion-input
+        [(ngModel)]="callsign"
+        [placeholder]="'WINDOW.SEARCH.PLACEHOLDER' | translate"
+        (keyup.enter)="searchFlight()"
+      ></ion-input>
+      <ion-button slot="end" (click)="searchFlight()" [disabled]="loading">
+        {{ 'WINDOW.SEARCH.BUTTON' | translate }}
+      </ion-button>
+    </ion-item>
+
+    <div *ngIf="error" class="error-message">
+      {{ error | translate }}
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ 'WINDOW.SEARCH.LOADING' | translate }}</p>
+    </div>
+
+    <div *ngIf="flightInfo" class="flight-info">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'WINDOW.FLIGHT_INFO.TITLE' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.FLIGHT_NUMBER' | translate }}</ion-label>
+              <ion-note slot="end">{{ flightInfo.flightNumber }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.AIRLINE' | translate }}</ion-label>
+              <ion-note slot="end">{{ flightInfo.airline }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.AIRCRAFT' | translate }}</ion-label>
+              <ion-note slot="end">{{ flightInfo.aircraft }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.DEPARTURE' | translate }}</ion-label>
+              <ion-note slot="end">
+                {{ flightInfo.departure.airport }}
+                ({{ flightInfo.departure.scheduledTime }})
+              </ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.ARRIVAL' | translate }}</ion-label>
+              <ion-note slot="end">
+                {{ flightInfo.arrival.airport }}
+                ({{ flightInfo.arrival.scheduledTime }})
+              </ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.STATUS' | translate }}</ion-label>
+              <ion-note slot="end">{{ 'WINDOW.STATUS.' + flightInfo.status | translate }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.altitude">
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.ALTITUDE' | translate }}</ion-label>
+              <ion-note slot="end">{{ flightInfo.altitude }} ft</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.speed">
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.SPEED' | translate }}</ion-label>
+              <ion-note slot="end">{{ flightInfo.speed }} km/h</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.weather">
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.WEATHER' | translate }}</ion-label>
+              <ion-note slot="end">{{ flightInfo.weather }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.timeRemaining">
+              <ion-label>{{ 'WINDOW.FLIGHT_INFO.TIME_REMAINING' | translate }}</ion-label>
+              <ion-note slot="end">{{ flightInfo.timeRemaining }}</ion-note>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content> 

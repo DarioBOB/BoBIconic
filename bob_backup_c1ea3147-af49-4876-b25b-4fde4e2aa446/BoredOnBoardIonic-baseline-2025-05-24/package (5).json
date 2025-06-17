@@ -1,0 +1,29 @@
+{
+  "name": "bob-email-parser",
+  "version": "1.0.0",
+  "description": "Email parser for Bored On Board",
+  "main": "email-parser.ts",
+  "scripts": {
+    "start": "ts-node email-parser.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@types/iconv-lite": "^0.0.1",
+    "dotenv": "^16.3.1",
+    "firebase-admin": "^11.11.0",
+    "iconv-lite": "^0.6.3",
+    "imap": "^0.8.19",
+    "mailparser": "^3.6.5",
+    "undici": "^7.9.0",
+    "undici-types": "^7.9.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/imap": "^0.8.40",
+    "@types/mailparser": "^3.4.0",
+    "@types/node": "^20.8.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}

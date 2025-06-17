@@ -1,0 +1,41 @@
+<ng-container *ngIf="isLoadingHublot; else hublotContent">
+  <div class="spinner-container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;">
+    <ion-spinner name="crescent" style="margin-bottom:16px;"></ion-spinner>
+    <div>Chargement de la vue hublot…</div>
+  </div>
+</ng-container>
+<ng-template #hublotContent>
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>{{ 'WINDOW.HUBLOT' | translate }}</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <div #container class="hublot-container"></div>
+
+    <!-- Données dynamiques en superposition -->
+    <div class="dynamic-data">
+      <ion-item lines="none">
+        <ion-label>
+          <h2>{{ 'WINDOW.ALTITUDE' | translate }}</h2>
+          <p>{{ dynamicData.altitude }} ft</p>
+        </ion-label>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-label>
+          <h2>{{ 'WINDOW.SPEED' | translate }}</h2>
+          <p>{{ dynamicData.speed }} knots</p>
+        </ion-label>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-label>
+          <h2>{{ 'WINDOW.WEATHER' | translate }}</h2>
+          <p>{{ dynamicData.weather }}</p>
+        </ion-label>
+      </ion-item>
+    </div>
+  </ion-content>
+</ng-template> 
