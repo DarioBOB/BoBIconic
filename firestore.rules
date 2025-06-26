@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Fonction pour vérifier si l'utilisateur est admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Fonction pour vérifier si l'utilisateur est en mode démo
+    function isDemo() {
+      return request.auth.uid == 'fUBBVpboDeaUjD6w2nz0xKni9mG3' || 
+             request.auth.uid == 'guest-demo' ||
+             request.auth.token.email.matches('.*@demo[.]com');
+    }
+
+    // Fonction pour vérifier si c'est une création de données démo
+    function isDemoDataCreation() {
+      return isDemo() && 
+             request.resource.data.createdByDemo == true;
+    }
+
+    // Règles pour la collection users
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Règles pour la collection trips
+    match /trips/{tripId} {
+      allow read: if isAdmin() || 
+                 resource.data.userId == request.auth.uid ||
+                 (isDemo() && resource.data.userId in ['fUBBVpboDeaUjD6w2nz0xKni9mG3', 'guest-demo']);
+      allow write: if isAdmin() ||
+                  (request.auth.uid == request.resource.data.userId && !isDemo()) ||
+                  isDemoDataCreation();
+    }
+
+    // Règles pour la collection plans (au niveau racine)
+    match /plans/{planId} {
+      allow read: if isAdmin() ||
+                 exists(/databases/$(database)/documents/trips/$(resource.data.tripId)) &&
+                 (
+                   get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.userId == request.auth.uid ||
+                   (isDemo() && get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.userId in ['fUBBVpboDeaUjD6w2nz0xKni9mG3', 'guest-demo'])
+                 );
+      allow write: if isAdmin() ||
+                  (
+                    exists(/databases/$(database)/documents/trips/$(request.resource.data.tripId)) &&
+                    get(/databases/$(database)/documents/trips/$(request.resource.data.tripId)).data.userId == request.auth.uid &&
+                    !isDemo()
+                  ) ||
+                  isDemoDataCreation();
+    }
+
+    // Anciennes règles pour la sous-collection plans (à conserver pour la rétrocompatibilité)
+    match /trips/{tripId}/plans/{planId} {
+      allow read: if isAdmin() ||
+                 get(/databases/$(database)/documents/trips/$(tripId)).data.userId == request.auth.uid ||
+                 (isDemo() && get(/databases/$(database)/documents/trips/$(tripId)).data.userId in ['fUBBVpboDeaUjD6w2nz0xKni9mG3', 'guest-demo']);
+      allow write: if isAdmin() ||
+                  (get(/databases/$(database)/documents/trips/$(tripId)).data.userId == request.auth.uid && !isDemo()) ||
+                  isDemoDataCreation();
+    }
+  }
+} 

@@ -1,0 +1,279 @@
+Ci-dessous la liste complète des pages de ton projet (sous `src/app/pages/`) susceptibles de déclencher un chargement “long” (requêtes HTTP, traitement de données volumineuses, initialisation de composants lourds, etc.). Pour chacune, j’ai indiqué brièvement pourquoi elle peut prendre du temps au démarrage, de façon à savoir où insérer un spinner + un message « Chargement… ».
+
+---
+
+## 1. Pages du module « Through My Window »
+
+Ces pages font des appels réseau vers OpenSky, Firestore, ou/et construisent la carte Leaflet et la scène 3D. C’est donc le premier endroit où afficher un spinner « Chargement… » tant que les données ne sont pas prêtes.
+
+1. **`window-tabs.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Cette page parent appelle au démarrage la méthode `loadRealFlightData()` (via `FlightEnrichmentService`) pour récupérer les 101 points (réels ou simulés).
+     * Tant que la requête OpenSky n’a pas répondu (ou que la simulation n’est pas générée), l’UI attend avant d’afficher les onglets enfants.
+   * **Emplacement conseillé du spinner :**
+
+     * Directement dans le template (`window-tabs.page.html`), afficher un `<ion-spinner>` + « Chargement des données » tant que `isRealData` ou `isLoading` n’est pas passé à `false`.
+
+2. **`window-text-data.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Cette page s’abonne aux observables de `WindowService` pour récupérer les données statiques (numéro de vol, compagnie…) et les données dynamiques (altitude, vitesse, etc.).
+     * Si ces observables n’ont pas encore émis (parce que `window-tabs` est encore en train de charger), la page peut rester vide ou en attente.
+   * **Emplacement du spinner :**
+
+     * Dans `window-text-data.page.html`, encapsuler toute la partie « Données générales »/« Données dynamiques » dans un `*ngIf="flightData"` (ou `*ngIf="!isLoadingData"`).
+     * Afficher un `<ion-spinner>` + « Chargement des données du vol… » lorsque `flightData` est `undefined`.
+
+3. **`window-map.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Initialisation de la carte Leaflet (`L.map('map') → tileLayer`).
+     * Récupération des 101 points pour tracer les polylines (appel via `WindowService`).
+     * Placement du marqueur avion + POIs (là encore dépendant de la fin du chargement des données).
+   * **Emplacement du spinner :**
+
+     * Dans `window-map.page.html`, remplacer le `<div id="map">` (vide) par un container `*ngIf="trajectoryLoaded"` et, dans le cas contraire, afficher `<ion-spinner>` + « Chargement de la carte… ».
+     * Une fois que `trajectoryLoaded = true` (après réception des 101 points et après `map.invalidateSize()`), on déclenche l’affichage du `<div id="map">`.
+
+4. **`window-hublot.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Initialisation de la scène Three.js (chargement du renderer, création du skybox, création des nuages).
+     * À la fin, on superpose l’overlay des données dynamiques (altitude/vitesse).
+   * **Emplacement du spinner :**
+
+     * Dans `window-hublot.page.html`, placer un `*ngIf="!hublotReady"` avant le canvas Three.js, et afficher `<ion-spinner>` + « Chargement de la vue hublot… ».
+     * Lorsque la scène est montée (`hublotReady = true`), on fait disparaître le spinner et on affiche le `<canvas>`.
+
+---
+
+## 2. Pages « hors Through My Window » qui font des appels réseau ou initialisations lourdes
+
+En plus du module “Window”, ton projet contient d’autres pages dont la construction / les données dépendent de requêtes Firestore ou d’API externes. Il est conseillé d’afficher un spinner sur chacune de celles-ci :
+
+5. **`flight-tracker.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Ce tracker peut :
+
+       * Consommer l’API OpenSky pour afficher la trajectoire en temps réel d’un vol donné.
+       * Charger un fond de carte Leaflet et y dessiner la trace.
+       * Récupérer des POIs ou la météo (via un service).
+   * **Emplacement du spinner :**
+
+     * Dans `flight-tracker.page.html`, utiliser un `*ngIf="!isLoadingTrack"` pour masquer la carte + marqueur tant que `isLoadingTrack = true`.
+     * Afficher `<ion-spinner>` + « Chargement du tracker… » au démarrage.
+
+6. **`flight-test.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Si cette page appelle des endpoints de test (simulation du vol, resampling, etc.), elle peut être en attente de réponses asynchrones.
+   * **Emplacement du spinner :**
+
+     * Similaire à la précédente : `*ngIf="!isLoadingTest"`, puis `<ion-spinner>` + « Chargement du test vol… ».
+
+7. **`trips.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Récupération depuis Firestore de la liste de voyages/itinéraires (requête potentiellement volumineuse).
+   * **Emplacement du spinner :**
+
+     * Dans `trips.page.html`, afficher `<ion-spinner>` jusqu’à ce que `tripList` (tableau) soit rempli, c’est-à-dire `*ngIf="tripList.length > 0"` → sinon spinner « Chargement des voyages… ».
+
+8. **`admin.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Chargement de statistiques / tableaux depuis Firestore ou d’autres API backend pour l’administration (users, logs, etc.).
+   * **Emplacement du spinner :**
+
+     * Dans `admin.page.html`, masquer tout le contenu statistique avec `*ngIf="!isLoadingAdminData"` et afficher `<ion-spinner>` + « Chargement des données d’administration… ».
+
+9. **`email-auth.page.ts`**
+
+   * **Pourquoi c’est lent ?**
+
+     * Lorsque l’on envoie un e-mail de confirmation ou que l’on appelle un endpoint pour vérifier un token, l’attente réseau peut durer quelques secondes.
+   * **Emplacement du spinner :**
+
+     * Dans `email-auth.page.html`, faire `*ngIf="!isLoadingAuth"` pour masquer le formulaire et montrer `<ion-spinner>` + « Vérification en cours… » jusqu’à réception de la réponse.
+
+10. **`landing-tiles.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Si cette page récupère dynamiquement les tuiles (cards) d’accueil (via un service, par ex. menus, notifications, etc.), l’attente existe.
+    * **Emplacement du spinner :**
+
+      * Dans `landing-tiles.page.html`, utiliser `<ion-spinner>` tant que `tiles` n’est pas injecté (`*ngIf="tiles.length === 0"`), avec texte « Chargement de l’accueil… ».
+
+11. **`home.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Souvent la home page charge un mix de contenus (actualités, notifications, services tiers).
+    * **Emplacement du spinner :**
+
+      * Dans `home.page.html`, masque le contenu principal si `isLoadingHome = true`, et afficher `<ion-spinner>` + « Chargement de la page d’accueil… ».
+
+12. **`register.page.ts`** & **`register-profile.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Si l’inscription déclenche des appels à un backend (vérification e-mail, envoi OTP, etc.).
+    * **Emplacement du spinner :**
+
+      * Dans leurs templates, remplacer le bouton « Valider » par un `<ion-spinner size="small">` + « Création de compte… » tant que `isRegistering` est vrai.
+
+13. **`preferences.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Chargement des préférences utilisateur depuis Firestore ou la base locale.
+    * **Emplacement du spinner :**
+
+      * Dans `preferences.page.html`, cacher le formulaire avec `*ngIf="!isLoadingPrefs"`, afficher `<ion-spinner>` + « Chargement des préférences… ».
+
+14. **`support.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Si la page support charge le FAQ, les tickets ou le chat avec un backend (e.g., Firestore).
+    * **Emplacement du spinner :**
+
+      * Dans template, `*ngIf="!isLoadingSupport"`, et spinner « Chargement du support… ».
+
+15. **`notifications.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Lecture des notifications stockées dans Firestore (ou un service tiers).
+    * **Emplacement du spinner :**
+
+      * Dans `notifications.page.html`, si `notifications.length === 0` (ou `isLoadingNotifications === true`), afficher `<ion-spinner>` + « Chargement des notifications… ».
+
+16. **`documents.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Chargement de la liste de documents depuis Firestore ou Cloud Storage (possiblement volumineux).
+    * **Emplacement du spinner :**
+
+      * Dans template, `*ngIf="!isLoadingDocs"`, spinner « Chargement des documents… ».
+
+17. **`bobbers.page.ts`**, **`chat.page.ts`**, **`games.page.ts`**
+
+    * **Pourquoi c’est lent ?**
+
+      * Chacun de ces écrans peut appeler un service pour récupérer une liste (liste d’utilisateurs, messages de chat, liste de jeux, etc.).
+    * **Emplacement du spinner :**
+
+      * Dans leurs templates respectifs, utiliser `*ngIf="!isLoading..."` pour cacher le contenu principal et afficher `<ion-spinner>` + message du type « Chargement du chat… » ou « Chargement des jeux… ».
+
+---
+
+## 3. Récapitulatif des pages à équiper d’un spinner
+
+| Page                         | Pourquoi ça peut être lent                                      | Texte du spinner proposé                   |
+| ---------------------------- | --------------------------------------------------------------- | ------------------------------------------ |
+| **window-tabs.page.ts**      | Chargement des 101 points via OpenSky + simulation éventuelle   | “Chargement des données du vol…”           |
+| **window-text-data.page.ts** | Récupération des données statiques/dynamiques via WindowService | “Chargement des données de vol…”           |
+| **window-map.page.ts**       | Initialisation Leaflet + récupération trajectoire               | “Chargement de la carte…”                  |
+| **window-hublot.page.ts**    | Initialisation Three.js + overlay des données dynamiques        | “Chargement de la vue hublot…”             |
+| **flight-tracker.page.ts**   | Appel API OpenSky + initialisation carte                        | “Chargement du tracker de vol…”            |
+| **flight-test.page.ts**      | Exécution/simulation des données de test                        | “Chargement du test de vol…”               |
+| **trips.page.ts**            | Requête Firestore de la liste des voyages                       | “Chargement des voyages…”                  |
+| **admin.page.ts**            | Requête Firestore (statistiques, logs)                          | “Chargement des données d’administration…” |
+| **email-auth.page.ts**       | Vérification du token e-mail (API)                              | “Vérification de votre email…”             |
+| **landing-tiles.page.ts**    | Chargement des tuiles dynamiques (menus, etc.)                  | “Chargement de l’accueil…”                 |
+| **home.page.ts**             | Chargement des données de la page d’accueil                     | “Chargement de la page d’accueil…”         |
+| **register.page.ts**         | Création de compte (API/backend)                                | “Création du compte…”                      |
+| **register-profile.page.ts** | Enregistrement des données de profil (API)                      | “Enregistrement du profil…”                |
+| **preferences.page.ts**      | Chargement des préférences utilisateur (Firestore)              | “Chargement des préférences…”              |
+| **support.page.ts**          | Chargement des tickets/support (API/Firestore)                  | “Chargement du support…”                   |
+| **notifications.page.ts**    | Chargement des notifications (Firestore)                        | “Chargement des notifications…”            |
+| **documents.page.ts**        | Téléchargement/liste des documents (Firestore/Storage)          | “Chargement des documents…”                |
+| **bobbers.page.ts**          | Chargement de la liste bobbers (API/Firestore)                  | “Chargement des utilisateurs…”             |
+| **chat.page.ts**             | Chargement des messages du chat (WebSocket/Firestore)           | “Chargement du chat…”                      |
+| **games.page.ts**            | Chargement de la liste de jeux (API/Firestore)                  | “Chargement des jeux…”                     |
+
+---
+
+## 4. Comment intégrer le spinner dans chaque page
+
+1. **Définis un booléen `isLoading` (ou un équivalent) dans le fichier TS**
+
+   ```ts
+   export class WindowMapPage implements OnInit {
+     isLoadingMap = true;
+     trajectory: Array<{lat: number, lng: number}> = [];
+
+     ngOnInit() {
+       // 1) lancer le spinner
+       this.isLoadingMap = true;
+
+       // 2) appel asynchrone pour récupérer la trajectoire
+       this.windowService.getTrajectory().subscribe(points => {
+         this.trajectory = points;
+         // 3) dès que les données sont prêtes, arrêter le spinner
+         this.isLoadingMap = false;
+         // 4) dessiner la carte
+         this.drawFlightPath();
+       });
+     }
+   }
+   ```
+
+2. **Dans le template HTML, encapsule le contenu sous `*ngIf="!isLoading"` et affiche `<ion-spinner>` sinon**
+
+   ```html
+   <ion-content>
+     <ng-container *ngIf="!isLoadingMap; else loading">
+       <div id="map"></div>
+     </ng-container>
+     <ng-template #loading>
+       <div class="spinner-container">
+         <ion-spinner name="crescent"></ion-spinner>
+         <p>Chargement de la carte…</p>
+       </div>
+     </ng-template>
+   </ion-content>
+   ```
+
+3. **Ajoute du CSS pour centrer le spinner**
+
+   ```scss
+   .spinner-container {
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+     height: 100%;
+     text-align: center;
+
+     ion-spinner {
+       margin-bottom: 16px;
+     }
+   }
+   ```
+
+4. **Répète la même structure dans toutes les pages listées** :
+
+   * Crée une propriété `isLoadingX` (X = nom de la page) dans le TS.
+   * Lance le spinner avant l’appel asynchrone (API, Firestore, Three.js…).
+   * Dans le bloc de réponse (`subscribe`, `then`, `await`), arrête le spinner (`isLoadingX = false`).
+   * Dans le HTML, utilise `*ngIf="!isLoadingX"` pour masquer le contenu principal tant que c’est en cours de chargement, et affiche un `<ion-spinner>` dans un `<ng-template>` (nommé `#loading` ou un autre).
+
+---
+
+### Conclusion
+
+En insérant un `<ion-spinner>` + « Chargement… » dans chacune de ces pages (là où elles font un appel réseau ou initialisent un composant lourd), tu garantis à l’utilisateur une indication visuelle immédiate que l’application est en cours de préparation. Cela améliore l’UX en évitant un écran blanc vide ou une carte qui n’apparaît pas sans explication.
