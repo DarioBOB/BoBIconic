@@ -439,8 +439,14 @@ export class DemoService {
 
         for (const plan of trip.plans) {
           const planRef = doc(collection(this.firestore, 'plans'));
+          // Séparer les champs de contrôle d'accès et les champs métier
+          const planData = { ...plan };
+          if ('userId' in planData) delete (planData as any).userId;
+          if ('createdByDemo' in planData) delete (planData as any).createdByDemo;
+          if ('tripId' in planData) delete (planData as any).tripId;
+          if ('id' in planData) delete (planData as any).id;
           await setDoc(planRef, {
-            ...plan,
+            ...planData, // tous les champs métier (title, type, startDate, endDate, details, etc.)
             id: planRef.id,
             userId: 'fUBBVpboDeaUjD6w2nz0xKni9mG3',
             createdByDemo: true,

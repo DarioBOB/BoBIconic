@@ -24,6 +24,7 @@ import { DemoService } from '../services/demo.service';
 import { getDemoData } from '../demo/demo-data';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { LoggerService } from '../services/logger.service';
+import { DateTimeService } from '../services/date-time.service';
 import { Subscription } from 'rxjs';
 import { FlightDataService } from '../services/flight/flight-data.service';
 import { FlightData } from '../services/flight/models/flight-data.interface';
@@ -110,7 +111,8 @@ export class TripsPage implements OnInit, OnDestroy {
     private toastController: ToastController,
     private logger: LoggerService,
     private demoService: DemoService,
-    private flightDataService: FlightDataService
+    private flightDataService: FlightDataService,
+    private dateTimeService: DateTimeService
   ) {
     // Initialisation asynchrone déplacée dans ngOnInit
   }
@@ -130,11 +132,12 @@ export class TripsPage implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.logger.info('Trips', 'Initialisation de la page Trips');
-    
     try {
       await this.initializeStorage();
       await this.loadUserRole();
-      await this.loadTrips();
+      if (this.userRole.isDemo) {
+        await this.resetDemoData();
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Trips', 'Erreur lors de l\'initialisation', { error: errorMessage }, new Error(errorMessage));
@@ -183,6 +186,12 @@ export class TripsPage implements OnInit, OnDestroy {
             isDemo: userData['role'] === 'demo',
             isStandard: userData['role'] === 'standard'
           };
+
+          // 🔥 Forcer le mode démo pour l'UID démo même si le champ 'role' est absent ou incorrect
+          if (user.uid === 'fUBBVpboDeaUjD6w2nz0xKni9mG3' || user.email?.endsWith('@demo.com')) {
+            this.userRole.isDemo = true;
+            this.logger.warn('Trips', 'Mode démo FORCÉ pour UID démo', { userId: user.uid, email: user.email });
+          }
           
           await this.saveToCache(`userRole_${user.uid}`, this.userRole);
           this.logger.info('Trips', 'Rôle utilisateur chargé depuis Firestore', { role: this.userRole });
@@ -190,6 +199,7 @@ export class TripsPage implements OnInit, OnDestroy {
           this.logger.warn('Trips', 'Document utilisateur non trouvé', { userId: user.uid });
           this.userRole = { isAdmin: false, isDemo: false, isStandard: false };
         }
+        await this.loadTrips();
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
@@ -470,67 +480,193 @@ export class TripsPage implements OnInit, OnDestroy {
 
     // --- LOGIQUE DEMO DYNAMIQUE ---
     if (this.userRole.isDemo) {
-      console.log('[Trips] Mode Démo détecté. Recalage sur dernier vol LX1820…');
+      const currentDateTime = this.dateTimeService.getCurrentDateTime();
+      this.logger.info('Trips', 'Mode Démo détecté - Début du recalibrage sur dernier vol LX1820', {
+        currentDateTime: currentDateTime.iso,
+        timeZone: currentDateTime.timeZone,
+        offsetHours: currentDateTime.offsetHours
+      });
+      
       try {
-        // 1️⃣ Charger le trip "ongoing" depuis Firestore
+        // 1️⃣ Charger le trip "ongoing" depuis Firestore (avec tous ses plans)
+        this.logger.debug('Trips', 'Étape 1: Chargement du trip démo depuis Firestore', { tripId: 'trip-ongoing' });
         const docRef = doc(this.firestore, 'trips', 'trip-ongoing');
         const tripSnap = await getDoc(docRef);
         if (!tripSnap.exists()) {
           throw new Error('Trip démo en cours (trip-ongoing) introuvable en base');
         }
         const ongoingTrip = { id: tripSnap.id, ...tripSnap.data() } as Trip;
+        if (!ongoingTrip.plans || ongoingTrip.plans.length === 0) {
+          throw new Error('Le trip démo ne contient aucun plan.');
+        }
+        this.logger.info('Trips', 'Trip démo chargé avec succès', { 
+          tripId: ongoingTrip.id, 
+          plansCount: ongoingTrip.plans.length,
+          plans: ongoingTrip.plans.map(p => ({ id: p.id, type: p.type, title: p.title }))
+        });
 
-        // 2️⃣ Récupérer le dernier vol LX1820 complété via FR24
+        // 2️⃣ Trouver le plan "vol aller" (LX1820)
+        this.logger.debug('Trips', 'Étape 2: Recherche du plan vol aller LX1820');
+        const flightPlanIdx = ongoingTrip.plans.findIndex(
+          p => p.type === 'flight' && (p.title === 'LX1820' || (typeof p.title === 'string' && p.title.includes('LX1820')))
+        );
+        if (flightPlanIdx === -1) {
+          throw new Error('Aucun plan "vol aller" LX1820 trouvé dans le trip démo.');
+        }
+        const flightPlan = ongoingTrip.plans[flightPlanIdx];
+        this.logger.info('Trips', 'Plan vol aller trouvé', { 
+          planIndex: flightPlanIdx, 
+          planId: flightPlan.id, 
+          planTitle: flightPlan.title,
+          originalStartDate: flightPlan.startDate,
+          originalEndDate: flightPlan.endDate
+        });
+
+        // 3️⃣ Récupérer le dernier vol LX1820 complété via FR24
+        this.logger.debug('Trips', 'Étape 3: Récupération du dernier vol LX1820 via FR24');
         const lastFlight = await this.flightDataService
           .getLastCompletedFlight('LX1820')
           .toPromise();
-
         if (!lastFlight) {
           throw new Error('Impossible de récupérer les données du vol LX1820');
         }
+        this.logger.info('Trips', 'Dernier vol LX1820 récupéré', { 
+          flightNumber: lastFlight.flightNumber,
+          departure: lastFlight.route.departure.airport,
+          arrival: lastFlight.route.arrival.airport,
+          scheduledDeparture: lastFlight.route.departure.scheduledTime,
+          actualDeparture: lastFlight.route.departure.actualTime,
+          scheduledArrival: lastFlight.route.arrival.scheduledTime,
+          actualArrival: lastFlight.route.arrival.actualTime
+        });
 
-        // 3️⃣ Calculer la fenêtre à 1/3 du vol
+        // 4️⃣ Calculer la nouvelle date de départ du vol aller (à 1/3 du vol) avec DateTimeService
+        this.logger.debug('Trips', 'Étape 4: Calcul du recalibrage à 1/3 du vol avec DateTimeService');
         const dep0 = new Date(lastFlight.route.departure.actualTime || lastFlight.route.departure.scheduledTime);
         const arr0 = new Date(lastFlight.route.arrival.actualTime || lastFlight.route.arrival.scheduledTime);
-        const durationMs = arr0.getTime() - dep0.getTime();
-        const nowMs = Date.now();
+        const durationMs = this.dateTimeService.calculateDateOffset(dep0, arr0);
+        const nowMs = currentDateTime.date.getTime();
         const newDep = new Date(nowMs - durationMs / 3);
         const newArr = new Date(newDep.getTime() + durationMs);
+        
+        this.logger.info('Trips', 'Nouvelle date recalée du vol aller LX1820', {
+          originalDeparture: dep0.toISOString(),
+          originalArrival: arr0.toISOString(),
+          flightDurationMs: durationMs,
+          flightDurationHours: durationMs / (1000 * 60 * 60),
+          newDeparture: newDep.toISOString(),
+          newArrival: newArr.toISOString(),
+          currentDateTime: currentDateTime.iso,
+          timeZone: currentDateTime.timeZone
+        });
 
-        // 4️⃣ Mettre à jour le trip et son unique plan
-        ongoingTrip.startDate = newDep;
-        ongoingTrip.endDate = newArr;
-        ongoingTrip.plans = [
-          this.mapFlightDataToPlan({
-            ...lastFlight,
-            route: {
-              ...lastFlight.route,
-              departure: { ...lastFlight.route.departure, scheduledTime: newDep.toISOString() },
-              arrival: { ...lastFlight.route.arrival, scheduledTime: newArr.toISOString() }
-            }
-          })
-        ];
+        // 5️⃣ Calculer le delta à appliquer à tous les plans avec DateTimeService
+        const oldDep = new Date(flightPlan.startDate);
+        const deltaMs = this.dateTimeService.calculateDateOffset(oldDep, newDep);
+        this.logger.info('Trips', 'Delta calculé pour le décalage', {
+          oldDeparture: oldDep.toISOString(),
+          newDeparture: newDep.toISOString(),
+          deltaMs: deltaMs,
+          deltaHours: deltaMs / (1000 * 60 * 60)
+        });
 
-        // 5️⃣ Poursuivre le traitement standard
+        // 6️⃣ Décaler tous les plans du même delta
+        this.logger.debug('Trips', 'Étape 6: Application du décalage à tous les plans');
+        const originalPlans = ongoingTrip.plans.map(p => ({
+          id: p.id,
+          title: p.title,
+          startDate: p.startDate,
+          endDate: p.endDate
+        }));
+        
+        ongoingTrip.plans = ongoingTrip.plans.map(plan => {
+          const newPlan = { ...plan };
+          if (plan.startDate) newPlan.startDate = new Date(new Date(plan.startDate).getTime() + deltaMs);
+          if (plan.endDate) newPlan.endDate = new Date(new Date(plan.endDate).getTime() + deltaMs);
+          if (plan.startTime) newPlan.startTime = new Date(new Date(plan.startTime).getTime() + deltaMs);
+          if (plan.endTime) newPlan.endTime = new Date(new Date(plan.endTime).getTime() + deltaMs);
+          // Pour le plan vol aller, on injecte aussi les détails FR24 recalés
+          if (plan === flightPlan) {
+            newPlan.details = lastFlight;
+            newPlan.title = lastFlight.flightNumber;
+            newPlan.description = `${lastFlight.route.departure.airport} → ${lastFlight.route.arrival.airport}`;
+          }
+          return newPlan;
+        });
+
+        // 🔄 Persister les plans recalibrés dans Firestore
+        for (const plan of ongoingTrip.plans) {
+          try {
+            const planRef = doc(this.firestore, 'plans', plan.id);
+            await updateDoc(planRef, {
+              startDate: plan.startDate,
+              endDate: plan.endDate,
+              startTime: plan.startTime || null,
+              endTime: plan.endTime || null,
+              title: plan.title,
+              description: plan.description,
+              details: plan.details || null
+            });
+            this.logger.info('Trips', 'Plan recalibré persisté dans Firestore', { planId: plan.id, title: plan.title });
+          } catch (err) {
+            this.logger.error('Trips', 'Erreur lors de la persistance du plan recalibré', { planId: plan.id, error: String(err) });
+          }
+        }
+
+        this.logger.info('Trips', 'Tous les plans ont été décalés', {
+          plansCount: ongoingTrip.plans.length,
+          plansDetails: ongoingTrip.plans.map((plan, index) => ({
+            index,
+            id: plan.id,
+            title: plan.title,
+            originalStartDate: originalPlans[index]?.startDate,
+            newStartDate: plan.startDate,
+            originalEndDate: originalPlans[index]?.endDate,
+            newEndDate: plan.endDate
+          }))
+        });
+
+        // 7️⃣ Mettre à jour les dates du trip (début = début du 1er plan, fin = fin du dernier plan)
+        this.logger.debug('Trips', 'Étape 7: Mise à jour des dates du trip');
+        const sortedPlans = [...ongoingTrip.plans].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+        const oldStartDate = ongoingTrip.startDate;
+        const oldEndDate = ongoingTrip.endDate;
+        ongoingTrip.startDate = sortedPlans[0].startDate;
+        ongoingTrip.endDate = sortedPlans[sortedPlans.length - 1].endDate;
+        
+        this.logger.info('Trips', 'Dates du trip mises à jour', {
+          oldStartDate: oldStartDate?.toISOString(),
+          newStartDate: ongoingTrip.startDate?.toISOString(),
+          oldEndDate: oldEndDate?.toISOString(),
+          newEndDate: ongoingTrip.endDate?.toISOString()
+        });
+
+        // 8️⃣ Afficher le trip recalé
+        this.logger.info('Trips', 'Recalibrage terminé avec succès - Affichage du trip recalé');
         this.processTrips([ongoingTrip]);
         this.isLoading = false;
         return;
       } catch (error) {
-        console.error('[Trips] Erreur lors du recalage démo:', error);
-        this.error = 'Erreur lors du recalage du voyage démo.';
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.error('Trips', 'Erreur lors du recalibrage démo', { 
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined
+        }, error instanceof Error ? error : new Error(errorMessage));
+        this.error = 'Erreur lors du recalibrage du voyage démo.';
         this.isLoading = false;
         return;
       }
     }
 
     // --- LOGIQUE STANDARD (utilisateurs non-démo) ---
+    this.logger.info('Trips', 'Mode Standard - Chargement des voyages');
     try {
       // Logique Standard (Cache puis Firestore) pour les autres utilisateurs
       const cacheKey = this.getCacheKey('trips', this.userId || undefined);
       const cachedTrips = await this.getFromCache<Trip[]>(cacheKey);
 
       if (cachedTrips && cachedTrips.length > 0) {
-        console.log('[Trips] Voyages en cache:', cachedTrips.length);
+        this.logger.info('Trips', 'Voyages trouvés en cache', { count: cachedTrips.length });
         
         // Filtrer les voyages en cache selon les permissions (sans requête Firestore)
         const filteredTrips = cachedTrips.filter(trip => {
@@ -552,7 +688,11 @@ export class TripsPage implements OnInit, OnDestroy {
           return false;
         });
         
-        console.log('[Trips] Voyages filtrés (cache):', filteredTrips.length);
+        this.logger.info('Trips', 'Voyages filtrés depuis le cache', { 
+          originalCount: cachedTrips.length,
+          filteredCount: filteredTrips.length,
+          userRole: this.userRole
+        });
         
         // Mettre à jour les statuts
         filteredTrips.forEach(trip => {
@@ -563,7 +703,7 @@ export class TripsPage implements OnInit, OnDestroy {
         
         // Afficher immédiatement les données du cache
         if (filteredTrips.length > 0) {
-          console.log('[Trips] Données affichées depuis le cache');
+          this.logger.info('Trips', 'Données affichées depuis le cache');
         }
       }
 
@@ -574,8 +714,12 @@ export class TripsPage implements OnInit, OnDestroy {
           ? query(tripsRef) // Admin voit tous les voyages
           : query(tripsRef, where('userId', '==', this.userId)); // Utilisateur standard
         
+        this.logger.debug('Trips', 'Requête Firestore en cours', { 
+          mode: this.userRole.isAdmin ? 'admin' : 'standard',
+          userId: this.userId 
+        });
+        
         const querySnapshot = await getDocs(q);
-        console.log('[Trips] Requête Firestore effectuée pour le mode:', this.userRole.isAdmin ? 'admin' : 'standard');
 
         const trips: Trip[] = [];
         const validationErrors: string[] = [];
@@ -614,19 +758,29 @@ export class TripsPage implements OnInit, OnDestroy {
               userId: data['userId']
             });
           } catch (err) {
-            console.error(`[Trips] Erreur parsing voyage ${doc.id}:`, err);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            this.logger.error('Trips', `Erreur parsing voyage ${doc.id}`, { error: errorMessage });
           }
         }
 
         // Log des erreurs de validation et d'accès
         if (validationErrors.length > 0) {
-          console.warn('[Trips] Voyages avec données invalides:', validationErrors);
+          this.logger.warn('Trips', 'Voyages avec données invalides', { validationErrors });
         }
         if (accessErrors.length > 0) {
-          console.warn('[Trips] Voyages avec accès refusé:', accessErrors);
+          this.logger.warn('Trips', 'Voyages avec accès refusé', { accessErrors });
         }
 
-        console.log('[Trips] Voyages Firestore récupérés:', trips.length);
+        this.logger.info('Trips', 'Voyages Firestore récupérés', { 
+          count: trips.length,
+          validationErrors: validationErrors.length,
+          accessErrors: accessErrors.length
+        });
+
+        this.logger.info('Trips', 'Liste brute des voyages récupérés Firestore', {
+          userIdCourant: this.userId,
+          trips: trips.map(t => ({ id: t.id, userId: t.userId, title: t.title }))
+        });
 
         // Sauvegarder dans le cache
         await this.saveToCache(cacheKey, trips);
@@ -634,7 +788,7 @@ export class TripsPage implements OnInit, OnDestroy {
         // Mettre à jour l'affichage seulement si on a de nouvelles données
         if (trips.length > 0) {
           this.processTrips(trips);
-          console.log('[Trips] Données mises à jour depuis Firestore');
+          this.logger.info('Trips', 'Données mises à jour depuis Firestore');
         }
 
         // Message explicite si aucun voyage trouvé

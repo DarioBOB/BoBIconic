@@ -4,6 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { map, catchError, timeout } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { FlightData } from './models/flight-data.interface';
+import { LoggerService } from '../logger.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,10 @@ export class FR24Service {
   private readonly API_KEY = environment.flightRadar24ApiKey;
   private readonly TIMEOUT_MS = 10000; // 10 secondes
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private logger: LoggerService
+  ) {}
 
   /**
    * Récupère le dernier vol achevé d'un numéro donné via FlightRadar24
@@ -21,10 +25,21 @@ export class FR24Service {
   getLastCompletedFlight(flightNumber: string): Observable<FlightData> {
     const url = `https://api.flightradar24.com/common/v1/flight/list.json?query=${flightNumber}`;
     
+    this.logger.info('FR24Service', 'Appel API FR24 pour récupérer le dernier vol complété', { 
+      flightNumber, 
+      url 
+    });
+    
     return this.http.get<any>(url).pipe(
       timeout(this.TIMEOUT_MS),
       map(resp => {
-        console.log(`[FR24] Recherche vol ${flightNumber}:`, resp);
+        this.logger.debug('FR24Service', 'Réponse FR24 reçue', { 
+          flightNumber, 
+          responseSize: JSON.stringify(resp).length,
+          hasData: !!resp.data,
+          hasFlights: !!(resp.data && resp.data.flights),
+          flightsCount: resp.data?.flights?.length || 0
+        });
         
         if (!resp.data || !resp.data.flights || !Array.isArray(resp.data.flights)) {
           throw new Error(`Réponse invalide pour ${flightNumber}`);
@@ -36,10 +51,25 @@ export class FR24Service {
         );
         
         if (!flight) {
+          this.logger.warn('FR24Service', 'Aucun vol complété trouvé dans la réponse', { 
+            flightNumber,
+            availableStatuses: resp.data.flights.map((f: any) => f.status),
+            totalFlights: resp.data.flights.length
+          });
           throw new Error(`Aucun vol achevé trouvé pour ${flightNumber}`);
         }
         
-        console.log(`[FR24] Vol trouvé:`, flight);
+        this.logger.info('FR24Service', 'Vol complété trouvé dans la réponse FR24', {
+          flightNumber,
+          foundFlightNumber: flight.identification?.number,
+          status: flight.status,
+          departure: flight.departure?.iata,
+          arrival: flight.arrival?.iata,
+          scheduledDeparture: flight.times?.scheduled?.departure,
+          actualDeparture: flight.times?.actual?.departure,
+          scheduledArrival: flight.times?.scheduled?.arrival,
+          actualArrival: flight.times?.actual?.arrival
+        });
         
         return {
           flightNumber: flight.identification?.number || flightNumber,
@@ -104,16 +134,21 @@ export class FR24Service {
         } as FlightData;
       }),
       catchError(error => {
-        console.error(`[FR24] Erreur récupération vol ${flightNumber}:`, error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.error('FR24Service', 'Erreur lors de la récupération du vol', {
+          flightNumber,
+          error: errorMessage,
+          url
+        }, error instanceof Error ? error : new Error(errorMessage));
         
         // Fallback avec données statiques pour LX1820
         if (flightNumber === 'LX1820') {
-          console.log(`[FR24] Utilisation données statiques pour ${flightNumber}`);
+          this.logger.info('FR24Service', 'Utilisation des données statiques de fallback pour LX1820');
           const now = new Date();
           const depTime = new Date(now.getTime() - 3 * 60 * 60 * 1000); // 3h ago
           const arrTime = new Date(now.getTime() - 1 * 60 * 60 * 1000); // 1h ago
           
-          return of({
+          const fallbackData = {
             flightNumber: 'LX1820',
             airline: 'Swiss',
             aircraft: {
@@ -167,7 +202,17 @@ export class FR24Service {
             },
             lastUpdated: now.toISOString(),
             waypoints: []
-          } as FlightData);
+          } as FlightData;
+          
+          this.logger.info('FR24Service', 'Données de fallback générées', {
+            flightNumber,
+            departure: fallbackData.route.departure.airport,
+            arrival: fallbackData.route.arrival.airport,
+            departureTime: fallbackData.route.departure.actualTime,
+            arrivalTime: fallbackData.route.arrival.actualTime
+          });
+          
+          return of(fallbackData);
         }
         
         return throwError(() => error);

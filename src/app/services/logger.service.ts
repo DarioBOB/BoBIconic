@@ -1,6 +1,9 @@
 /**
  * LoggerService - Service de logging centralisé pour BOB
  * ---------------------------------------------------------------------
+ * Tous les logs sont persistés dans logs/app.log (racine du projet)
+ * Accessible à l'IA et à l'utilisateur pour analyse/export
+ * ---------------------------------------------------------------------
  * Rôle :
  *   - Centralise tous les logs de l'application avec différents niveaux
  *   - Gère la rotation des fichiers de logs
@@ -95,6 +98,8 @@ export interface LogMetrics {
   };
 }
 
+const LOG_PROXY_URL = 'http://localhost:3030';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -153,18 +158,22 @@ export class LoggerService {
     });
 
     // Écouter les changements d'authentification
-    this.auth.onAuthStateChanged((user) => {
-      if (user) {
-        this.info('Auth', 'Utilisateur connecté', { 
-          userId: user.uid, 
-          email: user.email,
-          provider: user.providerData[0]?.providerId,
-          emailVerified: user.emailVerified
-        });
-      } else {
-        this.info('Auth', 'Utilisateur déconnecté');
-      }
-    });
+    if (this.auth && typeof this.auth.onAuthStateChanged === 'function') {
+      this.auth.onAuthStateChanged((user) => {
+        if (user) {
+          this.info('Auth', 'Utilisateur connecté', { 
+            userId: user.uid, 
+            email: user.email,
+            provider: user.providerData[0]?.providerId,
+            emailVerified: user.emailVerified
+          });
+        } else {
+          this.info('Auth', 'Utilisateur déconnecté');
+        }
+      });
+    } else {
+      console.warn('[LoggerService] Auth non disponible pour onAuthStateChanged');
+    }
 
     // Démarrer le nettoyage automatique
     if (this.config.autoCleanup) {
@@ -314,7 +323,7 @@ export class LoggerService {
       category,
       message,
       context: this.sanitizeContext(context),
-      userId: this.auth.currentUser?.uid,
+      userId: (this.auth && typeof this.auth.currentUser !== 'undefined' && this.auth.currentUser) ? this.auth.currentUser.uid : undefined,
       sessionId: this.sessionId,
       userAgent: navigator.userAgent,
       url: window.location.href,
@@ -423,38 +432,16 @@ export class LoggerService {
   private logToFile(entry: LogEntry): void {
     try {
       const logLine = this.formatLogLine(entry);
-      
-      // Créer un blob avec le contenu
-      const blob = new Blob([logLine + '\n'], { type: 'text/plain' });
-      
-      // En développement, sauvegarder dans localStorage
-      if (!environment.production) {
-        this.saveToLocalStorage(entry);
-      } else {
-        // En production, on pourrait envoyer au serveur
-        this.saveToLocalStorage(entry);
-      }
+      fetch(LOG_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: logLine
+      }).catch((err) => {
+        console.error('[LoggerService] Echec d\'envoi au proxy:', err);
+      });
+      console.log('[LOG]', logLine);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du log:', error);
-    }
-  }
-
-  /**
-   * Sauvegarde dans localStorage avec rotation
-   */
-  private saveToLocalStorage(entry: LogEntry): void {
-    try {
-      const logs = JSON.parse(localStorage.getItem('bob_logs') || '[]');
-      logs.push(entry);
-      
-      // Rotation : garder seulement les 1000 derniers logs
-      if (logs.length > 1000) {
-        logs.splice(0, logs.length - 1000);
-      }
-      
-      localStorage.setItem('bob_logs', JSON.stringify(logs));
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde localStorage:', error);
     }
   }
 

@@ -5,6 +5,7 @@ import { FlightData, AirportInfo, Waypoint, RouteData, FlightStatistics } from '
 import { Observable, from, of, throwError, Subscription, interval, forkJoin, timer } from 'rxjs';
 import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import { FR24Service } from './fr24.service';
+import { LoggerService } from '../logger.service';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -18,40 +19,100 @@ export class FlightDataService {
   constructor(
     private http: HttpClient,
     private storage: Storage,
-    private fr24Service: FR24Service
+    private fr24Service: FR24Service,
+    private logger: LoggerService
   ) {
     this.initStorage();
   }
 
   private async initStorage() {
-    await this.storage.create();
-    const cachedData = await this.storage.get('flight_data_cache');
-    if (cachedData) {
-      this.flightDataCache = new Map(JSON.parse(cachedData));
+    try {
+      await this.storage.create();
+      const cachedData = await this.storage.get('flight_data_cache');
+      if (cachedData) {
+        this.flightDataCache = new Map(JSON.parse(cachedData));
+        this.logger.info('FlightDataService', 'Cache de vols initialisé', { 
+          cacheSize: this.flightDataCache.size 
+        });
+      } else {
+        this.logger.info('FlightDataService', 'Aucun cache de vols trouvé, initialisation d\'un nouveau cache');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error('FlightDataService', 'Erreur lors de l\'initialisation du cache', { error: errorMessage });
     }
   }
 
   private async saveCache() {
-    await this.storage.set('flight_data_cache', JSON.stringify(Array.from(this.flightDataCache.entries())));
+    try {
+      await this.storage.set('flight_data_cache', JSON.stringify(Array.from(this.flightDataCache.entries())));
+      this.logger.debug('FlightDataService', 'Cache sauvegardé', { cacheSize: this.flightDataCache.size });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error('FlightDataService', 'Erreur lors de la sauvegarde du cache', { error: errorMessage });
+    }
   }
 
   /**
    * Récupère le dernier vol achevé d'un numéro donné via FlightRadar24
    */
   getLastCompletedFlight(flightNumber: string): Observable<FlightData> {
-    return this.fr24Service.getLastCompletedFlight(flightNumber);
+    this.logger.info('FlightDataService', 'Récupération du dernier vol complété', { flightNumber });
+    
+    return this.fr24Service.getLastCompletedFlight(flightNumber).pipe(
+      tap(flightData => {
+        this.logger.info('FlightDataService', 'Dernier vol complété récupéré avec succès', {
+          flightNumber,
+          departure: flightData.route?.departure?.airport,
+          arrival: flightData.route?.arrival?.airport,
+          scheduledDeparture: flightData.route?.departure?.scheduledTime,
+          actualDeparture: flightData.route?.departure?.actualTime,
+          scheduledArrival: flightData.route?.arrival?.scheduledTime,
+          actualArrival: flightData.route?.arrival?.actualTime,
+          status: flightData.status?.type
+        });
+      }),
+      catchError(error => {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.error('FlightDataService', 'Erreur lors de la récupération du dernier vol complété', {
+          flightNumber,
+          error: errorMessage
+        }, error instanceof Error ? error : new Error(errorMessage));
+        return throwError(() => error);
+      })
+    );
   }
 
   getFlightData(flightNumber: string): Observable<FlightData> {
+    this.logger.debug('FlightDataService', 'Récupération des données de vol', { flightNumber });
+    
     const cachedData = this.getCachedFlightData(flightNumber);
     if (cachedData) {
+      this.logger.info('FlightDataService', 'Données de vol trouvées en cache', { 
+        flightNumber,
+        cacheAge: Date.now() - (this.flightDataCache.get(flightNumber)?.timestamp || 0)
+      });
       return of(cachedData);
     }
 
+    this.logger.info('FlightDataService', 'Données de vol non trouvées en cache, appel FR24', { flightNumber });
+    
     return this.fr24Service.getFlightData(flightNumber).pipe(
-      tap(data => this.cacheFlightData(flightNumber, data)),
+      tap(data => {
+        this.logger.info('FlightDataService', 'Données de vol récupérées via FR24', {
+          flightNumber,
+          departure: data.route?.departure?.airport,
+          arrival: data.route?.arrival?.airport,
+          status: data.status?.type
+        });
+        this.cacheFlightData(flightNumber, data);
+      }),
       catchError(error => {
-        console.error('Error fetching flight data:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.error('FlightDataService', 'Erreur lors de la récupération des données de vol', {
+          flightNumber,
+          error: errorMessage
+        }, error instanceof Error ? error : new Error(errorMessage));
         return throwError(() => error);
       })
     );
@@ -62,6 +123,13 @@ export class FlightDataService {
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
       return cached.data;
     }
+    if (cached) {
+      this.logger.debug('FlightDataService', 'Données de vol en cache expirées', { 
+        flightNumber,
+        cacheAge: Date.now() - cached.timestamp,
+        maxAge: this.CACHE_DURATION
+      });
+    }
     return null;
   }
 
@@ -70,6 +138,11 @@ export class FlightDataService {
       data,
       timestamp: Date.now()
     });
+    this.logger.debug('FlightDataService', 'Données de vol mises en cache', { 
+      flightNumber,
+      cacheSize: this.flightDataCache.size
+    });
+    this.saveCache();
   }
 
   getFlightStatus(flightNumber: string): Observable<string> {

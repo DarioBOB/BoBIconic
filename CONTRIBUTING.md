@@ -346,3 +346,12 @@ Pour toute question ou problème :
 ---
 
 **Merci de contribuer au projet BoredOnBoard !** 🛩️ 
+
+# Règles de collaboration IA / Humain
+
+- L'utilisateur (humain) **ne touche jamais au code** : seul l'agent IA (ChatGPT) réalise les modifications, corrections, refactoring, etc.
+- **Aucune action ne doit être faite en background** ou sans retour immédiat à l'utilisateur. Toute commande, modification ou analyse doit être explicitement expliquée et validée étape par étape.
+- **Transparence totale** : chaque étape, chaque correction, chaque analyse doit être expliquée en temps réel à l'utilisateur.
+- Ces règles sont à respecter pour toute la durée du projet et doivent être rappelées à chaque nouvelle session.
+
+--- 

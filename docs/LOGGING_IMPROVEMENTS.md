@@ -330,4 +330,44 @@ Le nouveau système de logging de BoBIconic offre :
 4. **Évolutivité** : Architecture extensible pour les besoins futurs
 5. **Sécurité** : Gestion appropriée des données sensibles
 
-Cette amélioration transforme BoBIconic en une application robuste et maintenable, prête pour la production et l'échelle. 
+Cette amélioration transforme BoBIconic en une application robuste et maintenable, prête pour la production et l'échelle.
+
+## DateTimeService - Gestion centralisée des dates/heures
+
+### Règles d'utilisation OBLIGATOIRES
+
+**⚠️ IMPORTANT :** Pour tout calcul de date/heure dans l'application, utiliser UNIQUEMENT le `DateTimeService` :
+
+```typescript
+// ✅ CORRECT - Utiliser le service
+constructor(private dateTimeService: DateTimeService) {}
+
+const current = this.dateTimeService.getCurrentDateTime();
+const status = this.dateTimeService.getDateStatus(someDate);
+const offset = this.dateTimeService.calculateDateOffset(date1, date2);
+
+// ❌ INCORRECT - Utiliser new Date() directement
+const now = new Date(); // Ne pas faire ça !
+```
+
+### Méthodes disponibles
+
+- `getCurrentDateTime()` : Date/heure actuelle avec fuseau horaire
+- `getFormattedCurrentDateTime(locale)` : Date/heure formatée
+- `compareWithCurrentDate(date)` : Comparaison avec la date actuelle
+- `getDateStatus(date, tolerance)` : Statut passé/présent/futur
+- `calculateDateOffset(date1, date2)` : Décalage entre deux dates
+
+### Avantages
+
+1. **Détection automatique du fuseau horaire** (Europe/Paris, etc.)
+2. **Logging automatique** de tous les calculs de dates
+3. **Cohérence** dans toute l'application
+4. **Traçabilité** des calculs de recalibrage
+
+### Utilisation dans le recalibrage du voyage démo
+
+Le `DateTimeService` doit être utilisé pour :
+- Comparer les dates du voyage démo avec la date actuelle
+- Calculer les décalages de dates lors du recalibrage
+- Logger chaque étape avec la date/heure exacte 

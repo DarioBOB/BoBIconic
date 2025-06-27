@@ -19,6 +19,7 @@ import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { addIcons } from 'ionicons';
 import { home, personCircleOutline } from 'ionicons/icons';
 import { IonicStorageModule } from '@ionic/storage-angular';
+import { LoggerService } from './app/services/logger.service';
 addIcons({
   'home': home,
   'person-circle-outline': personCircleOutline
@@ -33,6 +34,9 @@ registerLocaleData(localeFr, 'fr');
 if (environment.production) {
   enableProdMode();
 }
+
+const logger = new LoggerService(null as any);
+logger.info('Main', 'Démarrage de l\'application Angular/Ionic');
 
 bootstrapApplication(AppComponent, {
   providers: [

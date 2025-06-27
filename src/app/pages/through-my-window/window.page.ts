@@ -8,6 +8,8 @@ import { WindowService } from '../../services/window.service';
 import { TranslationService } from '../../services/translation.service';
 import { Auth } from '@angular/fire/auth';
 import { DemoService } from '../../services/demo.service';
+import { DateTimeService } from '../../services/date-time.service';
+import { LoggerService } from '../../services/logger.service';
 
 interface FlightInfo {
   flightNumber: string;
@@ -83,7 +85,9 @@ export class WindowPage implements OnInit {
     private windowService: WindowService,
     private translationService: TranslationService,
     private auth: Auth,
-    private demoService: DemoService
+    private demoService: DemoService,
+    private dateTimeService: DateTimeService,
+    private loggerService: LoggerService
   ) {
     this.locale = this.translationService.getCurrentLang() || 'fr';
     this.dateFormat = this.locale === 'fr' ? 'EEEE d MMMM yyyy à HH:mm' : 'EEEE, MMMM d, yyyy, h:mm a';
@@ -315,7 +319,11 @@ export class WindowPage implements OnInit {
                        user.uid === 'guest-demo' ||
                        user.email?.endsWith('@demo.com') ||
                        false;
-      console.log('[Window] Mode démo détecté:', this.isDemoUser);
+      this.loggerService.info('Window', 'Mode démo détecté', { 
+        userId: user.uid,
+        email: user.email,
+        isDemoUser: this.isDemoUser
+      });
     }
   }
 
@@ -325,33 +333,63 @@ export class WindowPage implements OnInit {
   private async checkOngoingTrips() {
     const user = this.auth.currentUser;
     if (!user) {
-      console.log('[Window] Aucun utilisateur connecté - pas de vérification de voyage en cours');
+      this.loggerService.warn('Window', 'Aucun utilisateur connecté - pas de vérification de voyage en cours');
       return;
     }
 
+    const currentDateTime = this.dateTimeService.getCurrentDateTime();
+    this.loggerService.info('Window', 'Vérification des voyages en cours', {
+      userId: user.uid,
+      currentDateTime: currentDateTime.iso,
+      timeZone: currentDateTime.timeZone
+    });
+
     try {
-      console.log('[Window] Vérification des voyages en cours pour:', user.uid);
-      
       // Vérifier si l'utilisateur a un voyage en cours
       this.hasOngoingTrip = await this.windowService.hasOngoingTrip(user.uid);
+      this.loggerService.debug('Window', 'Vérification hasOngoingTrip', { 
+        userId: user.uid, 
+        hasOngoingTrip: this.hasOngoingTrip 
+      });
       
       if (this.hasOngoingTrip) {
-        console.log('[Window] Voyage en cours détecté');
+        this.loggerService.info('Window', 'Voyage en cours détecté');
         
         // Récupérer les détails du voyage en cours
         const ongoingTrips = await this.windowService.getOngoingTrips(user.uid);
+        this.loggerService.debug('Window', 'Voyages en cours récupérés', { 
+          count: ongoingTrips.length,
+          trips: ongoingTrips.map(t => ({ id: t.id, title: t.title, startDate: t.startDate, endDate: t.endDate }))
+        });
+        
         if (ongoingTrips.length > 0) {
           this.ongoingTripInfo = ongoingTrips[0]; // Prendre le premier voyage en cours
           
           // Récupérer les plans de vol
           const flightPlans = await this.windowService.getFlightPlans(this.ongoingTripInfo.id);
+          this.loggerService.debug('Window', 'Plans de vol récupérés', { 
+            tripId: this.ongoingTripInfo.id,
+            plansCount: flightPlans.length,
+            plans: flightPlans.map(p => ({ id: p.id, type: p.type, title: p.title }))
+          });
           
           if (flightPlans.length > 0) {
             // Extraire le numéro de vol du premier plan de vol
             const flightNumber = this.windowService.extractFlightNumber(flightPlans[0]);
             
+            this.loggerService.debug('Window', 'Extraction du numéro de vol', { 
+              planId: flightPlans[0].id,
+              planTitle: flightPlans[0].title,
+              extractedFlightNumber: flightNumber
+            });
+            
             if (flightNumber) {
-              console.log('[Window] Numéro de vol extrait du voyage en cours:', flightNumber);
+              this.loggerService.info('Window', 'Numéro de vol extrait du voyage en cours', { 
+                flightNumber: flightNumber,
+                tripId: this.ongoingTripInfo.id,
+                tripTitle: this.ongoingTripInfo.title
+              });
+              
               this.callsign = flightNumber;
               
               // Lancer automatiquement la recherche
@@ -363,16 +401,23 @@ export class WindowPage implements OnInit {
       }
       
       // Si pas de voyage en cours ou pas de numéro de vol trouvé
-      console.log('[Window] Aucun vol automatique trouvé');
+      this.loggerService.info('Window', 'Aucun vol automatique trouvé', { 
+        hasOngoingTrip: this.hasOngoingTrip,
+        ongoingTripsCount: this.ongoingTripInfo ? 1 : 0
+      });
       
       // En mode démo, permettre la recherche manuelle
       if (this.isDemoUser) {
         this.showManualSearch = true;
-        console.log('[Window] Mode démo activé - recherche manuelle autorisée');
+        this.loggerService.info('Window', 'Mode démo activé - recherche manuelle autorisée');
       }
       
     } catch (error) {
-      console.error('[Window] Erreur lors de la vérification des voyages en cours:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.loggerService.error('Window', 'Erreur lors de la vérification des voyages en cours', { 
+        userId: user.uid,
+        error: errorMessage
+      }, error instanceof Error ? error : new Error(errorMessage));
     }
   }
 } 

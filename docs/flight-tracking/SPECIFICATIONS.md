@@ -1,3 +1,16 @@
+# ⚠️ Identifiants et conventions pour le mode démo
+
+- **UID démo principal** : `fUBBVpboDeaUJd6w2nz0xKni9mG3`
+- **Email démo** : `guestuser@demo.com`
+- **Champ utilisateur démo** : `isDemo: true`
+- **Champ trip démo** : `createdByDemo: true`
+- **Champ userId des trips démo** : `userId: "fUBBVpboDeaUJd6w2nz0xKni9mG3"`
+- **Règle Firestore** : seuls les trips/plans avec ce userId sont accessibles en mode démo
+
+**À ne pas modifier sans mettre à jour les règles Firestore et la documentation !**
+
+---
+
 # Spécifications du Système de Suivi de Vol
 
 ## Vue d'ensemble

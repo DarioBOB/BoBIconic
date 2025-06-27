@@ -2,6 +2,8 @@
 
 Application mobile pour les passagers d'avion, développée avec Ionic/Angular.
 
+[![CI/CD](https://github.com/${{github.repository}}/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/${{github.repository}}/actions/workflows/ci-cd.yml)
+
 ## Prérequis
 
 - Node.js (version 18 ou supérieure)
@@ -100,4 +102,36 @@ Pour toute question ou problème, veuillez ouvrir une issue sur GitHub.
 ---
 
 **Prochain sujet à traiter :**
-_(à compléter selon la demande)_ 
+_(à compléter selon la demande)_
+
+## Identifiants et conventions du mode démo
+
+- **UID démo principal** : `fUBBVpboDeaUJd6w2nz0xKni9mG3`
+- **Email démo** : `guestuser@demo.com`
+- **Champ utilisateur démo** : `isDemo: true`
+- **Champ trip démo** : `createdByDemo: true`
+- **Champ userId des trips démo** : `userId: "fUBBVpboDeaUJd6w2nz0xKni9mG3"`
+- **Règle Firestore** : seuls les trips/plans avec ce userId sont accessibles en mode démo
+
+**À ne pas modifier sans mettre à jour les règles Firestore et la documentation !**
+
+## DateTimeService - Gestion des dates/heures
+
+**⚠️ RÈGLE OBLIGATOIRE :** Pour tout calcul de date/heure dans l'application, utiliser UNIQUEMENT le `DateTimeService` :
+
+```typescript
+// ✅ CORRECT
+constructor(private dateTimeService: DateTimeService) {}
+const current = this.dateTimeService.getCurrentDateTime();
+
+// ❌ INCORRECT
+const now = new Date(); // Ne pas faire ça !
+```
+
+Le service fournit :
+- Détection automatique du fuseau horaire
+- Logging automatique des calculs
+- Méthodes de comparaison et de décalage de dates
+- Cohérence dans toute l'application
+
+**Voir `docs/LOGGING_IMPROVEMENTS.md` pour plus de détails.** 

@@ -1,9 +1,34 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(cors());
+app.use(express.json()); // Pour parser le JSON des logs
+
+// Création du dossier logs/ si besoin
+const logsDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir);
+}
+const logFile = path.join(logsDir, 'app.log');
+
+// Endpoint pour recevoir les logs de l'app Angular
+app.post('/api/logs', (req, res) => {
+  const logEntry = {
+    ...req.body,
+    receivedAt: new Date().toISOString()
+  };
+  fs.appendFile(logFile, JSON.stringify(logEntry) + '\n', err => {
+    if (err) {
+      console.error('[LOGGING] Erreur écriture log:', err);
+      return res.status(500).json({ error: 'Erreur écriture log' });
+    }
+    res.json({ status: 'ok' });
+  });
+});
 
 const OPENSKY_CLIENT_ID = 'contact@sunshine-adventures.net-api-client';
 const OPENSKY_CLIENT_SECRET = 'TcmsDEEKWgDFfrrcGId4S1Ze8qLy35lL';

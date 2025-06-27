@@ -19,6 +19,10 @@
       <ion-button fill="clear" (click)="addNewTrip()" class="add-btn">
         <ion-icon name="add" slot="icon-only"></ion-icon>
       </ion-button>
+      <ion-button fill="outline" color="warning" (click)="resetDemoData()" *ngIf="userRole.isDemo" style="margin-left: 8px;">
+        <ion-icon name="refresh-circle" slot="start"></ion-icon>
+        Réinitialiser la démo
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
