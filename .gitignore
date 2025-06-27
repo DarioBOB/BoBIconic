@@ -73,3 +73,9 @@ Thumbs.db
 serviceAccountKey.json
 *-service-account*.json
 firebase-admin-key*.json
+
+# New additions
+.env
+*.env
+*.key
+firebase-key.json
