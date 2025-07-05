@@ -1,0 +1,301 @@
+Voici un prompt détaillé à envoyer à Cursor pour qu’il génère la fonctionnalité « Hublot » (Three.js + overlay) dans ton application Ionic/Angular. Adapte-le si besoin en fonction de la structure exacte de ton projet :
+
+---
+
+**Prompt à donner à Cursor :**
+
+> **Contexte général :**
+> Nous avons une application Ionic/Angular (version 6+), déjà configurée avec Capacitor/Cordova pour Android et iOS. Nous avons un module « Through My Window » constitué d’une page par onglet :
+>
+> * `WindowTextDataPage` (données textuelles du vol)
+> * `WindowMapPage` (carte Leaflet)
+> * **`WindowHublotPage` (vue 3D hublot)**
+>
+> Le service `WindowService` (ou `FlightEnrichmentService`) fournit un objet `flightData` avec au minimum :
+>
+> ```ts
+> interface FlightData {
+>   lat_t_deg: number;      // latitude actuelle en degrés
+>   lon_t_deg: number;      // longitude actuelle en degrés
+>   altitude: number;       // altitude en pieds
+>   v_sol_kmh: number;      // vitesse sol en km/h
+>   progressPercent: number;// pourcentage du vol (0 à 100)
+>   // … autres champs (phase, d_remaining_km, eta, météo, etc.)
+> }
+> ```
+>
+> Et un tableau `waypoints` de 101 points `{ lat: number; lng: number; altitude: number; }` pour toute la trajectoire.
+>
+> **Objectif :**
+> Développer **la page WindowHublotPage** de façon à :
+>
+> 1. Créer une scène Three.js qui simule la vue par le hublot d’un avion en vol.
+>
+>    * Un skybox statique à 360°, avec un dégradé de couleurs ciel, soleil, nuages.
+>    * Ajouter un nuage ou un effet « centerpiece/cloud » qui se déplace lentement selon la trajectoire.
+>    * Placer une caméra en perspective à l’avant, donnant l’impression de voler.
+>    * L’arrière-plan (sol, montagnes) peut être représenté par un plan incliné ou une texture simplifiée, mais l’essentiel est le ciel et les nuages.
+>    * Écrire le code pour initialiser le `WebGLRenderer`, la `PerspectiveCamera`, la `Scene`, et un `DirectionalLight` (ou `HemisphereLight`).
+>    * La page doit écouter l’événement `window.resize` pour ajuster `renderer.setSize()` et `camera.aspect`, puis `camera.updateProjectionMatrix()`.
+> 2. Superposer **un overlay HTML/CSS** (en `ion-overlay` ou un simple `div` positionné en `absolute` au-dessus du canvas) qui affiche en temps réel, à partir de `flightData` :
+>
+>    * Altitude (en ft)
+>    * Vitesse sol (en km/h et en knots)
+>    * Phase du vol (Taxi, Climb, Cruise, Descent, Taxi)
+>    * Distance restante (en km)
+>    * ETA (heure locale)
+>    * Temps écoulé (hh\:mm\:ss)
+>    * Index de progression (0–100 %)
+>    * Un indicateur météo (texte ou icône)
+>    * Les données doivent être **liées à Angular** : lorsque `flightData` change (via un `BehaviorSubject` ou un `Observable`), l’overlay se met à jour automatiquement.
+> 3. Gérer le **cycle de vie du composant** :
+>
+>    * Dans `ngAfterViewInit()`, initialiser la scène Three.js.
+>    * Dans `ngOnDestroy()`, arrêter l’animation (`cancelAnimationFrame`), enlever le listener `window.resize` et disposer correctement du renderer (`renderer.dispose()` si besoin).
+>    * La boucle d’animation (`animate()`) doit appeler `requestAnimationFrame` tant que la page est affichée, et mettre à jour la position des nuages ou des éléments dynamiques en fonction de `flightData.progressPercent` (par exemple, déplacer lentement un objet “nuage” à l’horizon).
+> 4. **Intégration Angular/Ionic** :
+>
+>    * `WindowHublotPage` doit être **standalone** (dans Angular 16+), avec les imports nécessaires (`Three.js` n’est pas un module Angular, donc on importe directement depuis `node_modules/three`).
+>    * Le template `window-hublot.page.html` doit contenir :
+>
+>      ```html
+>      <ion-header>
+>        <ion-toolbar>
+>          <ion-title>Vue Hublot</ion-title>
+>        </ion-toolbar>
+>      </ion-header>
+>
+>      <ion-content>
+>        <div class="hublot-container">
+>          <!-- Canvas Three.js -->
+>          <canvas #hublotCanvas></canvas>
+>          <!-- Overlay Angular affichant les données du vol -->
+>          <div class="hublot-overlay">
+>            <p>Altitude : {{ flightData.altitude | number:'1.0-0' }} ft</p>
+>            <p>Vitesse : {{ flightData.v_sol_kmh | number:'1.0-0' }} km/h ({{ (flightData.v_sol_kmh / 1.852) | number:'1.0-0' }} kt)</p>
+>            <p>Phase : {{ flightData.phase }}</p>
+>            <p>Distance restante : {{ flightData.d_remaining_km | number:'1.0-0' }} km</p>
+>            <p>ETA : {{ flightData.eta | date:'HH:mm' }}</p>
+>            <p>Temps écoulé : {{ elapsedTime }}</p>
+>            <p>Météo : {{ weatherText }}</p>
+>          </div>
+>        </div>
+>      </ion-content>
+>      ```
+>    * Les styles `window-hublot.page.scss` doivent positionner le `<canvas>` en `position: absolute; top: 0; left: 0; width: 100%; height: 100%;` et l’`overlay` en `position: absolute; top: 16px; left: 16px; color: white; z-index: 10;`.
+> 5. **Données d’entrée** :
+>
+>    * Injecter `WindowService` (ou `FlightEnrichmentService`) dans le constructeur de `WindowHublotPage`, s’abonner à `windowService.flightData$` (ou équivalent) pour récupérer un objet `flightData: FlightData`.
+>    * Calculer localement `elapsedTime` à partir de `flightData.firstSeen` via un `setInterval` (toutes les secondes) ou un `pipe(interval(1000))` RxJS.
+>    * Calculer `weatherText` (ex. « Ensoleillé », « Nuageux », « Pluie ») en fonction des champs `flightData.weatherCondition` (s’il existe) ou simuler un texte fixe si la météo n’est pas fournie.
+> 6. **Phases de vol simplifiées** :
+>
+>    * La page devrait déterminer la phase du vol (`flightData.phase`) selon la méthode simplifiée :
+>
+>      1. Avant décollage (altitude = 0) : **Taxi Départ**
+>      2. Première montée (altitude augmente jusqu’au palier) : **Climb**
+>      3. Croisière (altitude ≥ altCruise) : **Cruise**
+>      4. Descente (altitude < altCruise mais > 0) : **Descent**
+>      5. Après atterrissage (altitude = 0) : **Taxi Arrivée**
+>    * Intégrer ce calcul dans la souscription à `flightData`, ou dans un getter `getPhase(altitude: number, i: number): string`.
+> 7. **Exemple de squelettes de fichiers** :
+>
+>    * **`window-hublot.page.ts`**
+>
+>      ```ts
+>      import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+>      import * as THREE from 'three';
+>      import { Subscription, interval } from 'rxjs';
+>      import { WindowService } from '../services/window.service';
+>      import { FlightData } from '../models/flight-data.model';
+>
+>      @Component({
+>        selector: 'app-window-hublot',
+>        templateUrl: './window-hublot.page.html',
+>        styleUrls: ['./window-hublot.page.scss'],
+>        standalone: true,
+>        imports: [ /* IonicModule, CommonModule, etc. */ ]
+>      })
+>      export class WindowHublotPage implements AfterViewInit, OnDestroy {
+>        @ViewChild('hublotCanvas') canvasRef: ElementRef<HTMLCanvasElement>;
+>
+>        flightData: FlightData;
+>        elapsedTime: string = '00:00:00';
+>        weatherText: string = 'Ensoleillé';
+>
+>        private renderer: THREE.WebGLRenderer;
+>        private scene: THREE.Scene;
+>        private camera: THREE.PerspectiveCamera;
+>        private animationId: number;
+>        private dataSub: Subscription;
+>        private timerSub: Subscription;
+>
+>        constructor(private windowService: WindowService) {}
+>
+>        ngAfterViewInit() {
+>          this.initThreeScene();
+>          // Souscrire aux données du vol
+>          this.dataSub = this.windowService.flightData$.subscribe(data => {
+>            this.flightData = data;
+>            this.updateOverlay();
+>          });
+>          // Timer pour elapsedTime
+>          this.timerSub = interval(1000).subscribe(() => {
+>            if (this.flightData?.firstSeen) {
+>              const diffSec = Math.floor(Date.now() / 1000) - this.flightData.firstSeen;
+>              this.elapsedTime = this.formatHHMMSS(diffSec);
+>            }
+>          });
+>          // Commencer l’animation Three.js
+>          this.animate();
+>          // Écouter resize
+>          window.addEventListener('resize', this.onResize.bind(this));
+>        }
+>
+>        private initThreeScene() {
+>          const canvas = this.canvasRef.nativeElement;
+>          this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+>          this.renderer.setPixelRatio(window.devicePixelRatio);
+>          this.renderer.setSize(window.innerWidth, window.innerHeight);
+>
+>          this.scene = new THREE.Scene();
+>          // Ajouter skybox / background gradient
+>          const colorTop = new THREE.Color(0x87CEEB);
+>          const colorBottom = new THREE.Color(0xffffff);
+>          this.scene.background = new THREE.Color(0x87CEEB);
+>          // Ajouter un plan nuage ou un sprite nuage
+>          const cloudGeometry = new THREE.PlaneGeometry(500, 500);
+>          const cloudMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+>          const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+>          cloudMesh.position.set(0, 100, -200);
+>          this.scene.add(cloudMesh);
+>
+>          // Caméra
+>          this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+>          this.camera.position.set(0, 2, 5); 
+>
+>          // Lumière
+>          const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+>          hemiLight.position.set(0, 200, 0);
+>          this.scene.add(hemiLight);
+>
+>          // (Optionnel) Créer un plan sol pour horizon
+>          const planeGeo = new THREE.PlaneGeometry(1000, 1000);
+>          const planeMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+>          const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+>          planeMesh.rotation.x = -Math.PI / 2;
+>          planeMesh.position.y = -10;
+>          this.scene.add(planeMesh);
+>        }
+>
+>        private animate() {
+>          this.animationId = requestAnimationFrame(() => this.animate());
+>          // Mettre à jour la position des nuages ou un effet en fonction de flightData.progressPercent
+>          if (this.flightData) {
+>            // Par exemple, décaler le nuage : cloudMesh.position.x -= 0.01 * (this.flightData.progressPercent / 100);
+>          }
+>          this.renderer.render(this.scene, this.camera);
+>        }
+>
+>        private onResize() {
+>          if (!this.camera || !this.renderer) return;
+>          const w = window.innerWidth;
+>          const h = window.innerHeight;
+>          this.camera.aspect = w / h;
+>          this.camera.updateProjectionMatrix();
+>          this.renderer.setSize(w, h);
+>        }
+>
+>        private updateOverlay() {
+>          // Mettre à jour weatherText, éventuellement à partir de flightData.weather
+>          if (this.flightData.weatherCondition) {
+>            this.weatherText = this.flightData.weatherCondition;
+>          }
+>        }
+>
+>        private formatHHMMSS(totalSec: number): string {
+>          const h = Math.floor(totalSec / 3600);
+>          const m = Math.floor((totalSec % 3600) / 60);
+>          const s = totalSec % 60;
+>          return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
+>        }
+>
+>        ngOnDestroy() {
+>          // Arrêter l’animation
+>          cancelAnimationFrame(this.animationId);
+>          window.removeEventListener('resize', this.onResize.bind(this));
+>          // Se désabonner
+>          if (this.dataSub) this.dataSub.unsubscribe();
+>          if (this.timerSub) this.timerSub.unsubscribe();
+>          // Disposer du renderer
+>          this.renderer.dispose();
+>        }
+>      }
+>      ```
+>
+>    * **`window-hublot.page.html`**
+>
+>      ```html
+>      <ion-header>
+>        <ion-toolbar>
+>          <ion-title>Vue Hublot</ion-title>
+>        </ion-toolbar>
+>      </ion-header>
+>
+>      <ion-content>
+>        <div class="hublot-container">
+>          <canvas #hublotCanvas></canvas>
+>          <div class="hublot-overlay">
+>            <p>Altitude : {{ flightData?.altitude | number:'1.0-0' }} ft</p>
+>            <p>Vitesse : {{ flightData?.v_sol_kmh | number:'1.0-0' }} km/h ({{ (flightData?.v_sol_kmh / 1.852) | number:'1.0-0' }} kt)</p>
+>            <p>Phase : {{ flightData?.phase }}</p>
+>            <p>Distance restante : {{ flightData?.d_remaining_km | number:'1.0-0' }} km</p>
+>            <p>ETA : {{ flightData?.eta | date:'HH:mm' }}</p>
+>            <p>Temps écoulé : {{ elapsedTime }}</p>
+>            <p>Météo : {{ weatherText }}</p>
+>          </div>
+>        </div>
+>      </ion-content>
+>      ```
+>
+>    * **`window-hublot.page.scss`**
+>
+>      ```scss
+>      .hublot-container {
+>        position: relative;
+>        width: 100%;
+>        height: 100%;
+>        background: black;
+>      }
+>      canvas {
+>        position: absolute;
+>        top: 0;
+>        left: 0;
+>        width: 100%;
+>        height: 100%;
+>      }
+>      .hublot-overlay {
+>        position: absolute;
+>        top: 16px;
+>        left: 16px;
+>        color: #ffffff;
+>        z-index: 10;
+>        p {
+>          margin: 4px 0;
+>          font-size: 14px;
+>          text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+>        }
+>      }
+>      ```
+>
+> **Instructions à Cursor :**
+>
+> * Crée ou modifie les fichiers `window-hublot.page.ts`, `window-hublot.page.html` et `window-hublot.page.scss` afin d’implémenter la vue hublot décrite ci-dessus.
+> * Utilise Three.js depuis `node_modules/three` sans wrapper Angular.
+> * Veille à respecter le cycle de vie (resize, ngOnDestroy) et à mettre à jour l’overlay en temps réel en s’abonnant à `WindowService.flightData$`.
+> * Évite toute dépendance externe non déjà installée (utilise Ionic / Angular natif + Three.js).
+> * Génère uniquement le code nécessaire pour cette page, en gardant la même structure de dossier (`src/app/pages/window-hublot.*`) et en déclarant la page au bon endroit si besoin (ajout dans le module ou dans `app-routing.module.ts` sous la route `/window/hublot`).
+>
+> Merci d'implémenter le code complet et commenté pour chaque fichier, ainsi que de faire les éventuelles mises à jour  dans le routing ou le module Angular.
+
+---

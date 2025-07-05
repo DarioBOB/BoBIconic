@@ -1,0 +1,973 @@
+// Variables modernes
+$primary-color: #1bb6b1;
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$danger-color: #f44336;
+$medium-color: #607d8b;
+$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+$gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+$gradient-danger: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+
+// Mixins modernes
+@mixin glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@mixin card-shadow-modern {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  &:hover {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px) scale(1.02);
+  }
+}
+
+@mixin gradient-text($gradient) {
+  background: $gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Header moderne
+.modern-header {
+  ion-toolbar {
+    --background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .header-title {
+    .title-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .title-icon {
+        font-size: 24px;
+        @include gradient-text($gradient-primary);
+      }
+      
+      span {
+        font-weight: 700;
+        font-size: 1.2rem;
+        @include gradient-text($gradient-primary);
+      }
+    }
+  }
+  
+  .action-btn {
+    --color: #666;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      --color: $primary-color;
+      transform: scale(1.1);
+    }
+  }
+  
+  .add-btn {
+    --color: white;
+    --background: $gradient-primary;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.1) rotate(90deg);
+    }
+  }
+}
+
+// Content moderne
+.trips-content-modern {
+  --background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+}
+
+// Hero Section
+.hero-section {
+  position: relative;
+  padding: 40px 20px;
+  margin-bottom: 0;
+  overflow: hidden;
+  
+  .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: $gradient-primary;
+    opacity: 0.1;
+    z-index: 0;
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .hero-title {
+    text-align: center;
+    margin-bottom: 40px;
+    
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 0;
+      @include gradient-text($gradient-primary);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: #666;
+      margin: 8px 0 0;
+      font-weight: 400;
+    }
+  }
+}
+
+// Métriques
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+  
+  .metric-card {
+    @include glass-effect;
+    @include card-shadow-modern;
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-8px);
+    }
+    
+    .metric-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      
+      &.ongoing {
+        background: $gradient-success;
+      }
+      
+      &.upcoming {
+        background: $gradient-primary;
+      }
+      
+      &.past {
+        background: $gradient-warning;
+      }
+      
+      &.total {
+        background: $gradient-danger;
+      }
+    }
+    
+    .metric-content {
+      flex: 1;
+      
+      .metric-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #333;
+        line-height: 1;
+      }
+      
+      .metric-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 4px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Navigation moderne
+.modern-tabs {
+  background: white;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  
+  .tabs-container {
+    display: flex;
+    gap: 8px;
+    max-width: 1200px;
+    margin: 0 auto;
+    
+    .tab-item {
+      flex: 1;
+      padding: 16px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      text-align: center;
+      
+      &:hover {
+        background: rgba(27, 182, 177, 0.05);
+      }
+      
+      &.active {
+        background: $gradient-primary;
+        color: white;
+        
+        .tab-icon {
+          color: white;
+        }
+        
+        .tab-label {
+          color: white;
+        }
+        
+        .tab-count {
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+        }
+      }
+      
+      .tab-icon {
+        font-size: 24px;
+        color: #666;
+        margin-bottom: 8px;
+      }
+      
+      .tab-content {
+        .tab-label {
+          font-weight: 600;
+          font-size: 0.9rem;
+          color: #333;
+          margin-bottom: 4px;
+        }
+        
+        .tab-count {
+          background: rgba(27, 182, 177, 0.1);
+          color: $primary-color;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          display: inline-block;
+        }
+      }
+      
+      .tab-indicator {
+        position: absolute;
+        bottom: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 3px;
+        background: white;
+        border-radius: 2px;
+      }
+    }
+  }
+}
+
+// Container moderne
+.trips-container-modern {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Loading moderne
+.loading-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  
+  .loading-spinner {
+    margin-bottom: 24px;
+    
+    ion-spinner {
+      width: 60px;
+      height: 60px;
+      --color: $primary-color;
+    }
+  }
+  
+  .loading-text {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 24px;
+  }
+  
+  .loading-progress {
+    width: 200px;
+    
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(27, 182, 177, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      
+      .progress-fill {
+        height: 100%;
+        background: $gradient-primary;
+        border-radius: 2px;
+        animation: progress 2s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+@keyframes progress {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+// Error moderne
+.error-modern {
+  @include glass-effect;
+  @include card-shadow-modern;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  margin: 40px 0;
+  
+  .error-icon {
+    font-size: 4rem;
+    color: $danger-color;
+    margin-bottom: 24px;
+  }
+  
+  .error-content {
+    h2 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    
+    p {
+      color: #666;
+      margin-bottom: 24px;
+    }
+  }
+}
+
+// État vide moderne
+.empty-state-modern {
+  @include glass-effect;
+  @include card-shadow-modern;
+  border-radius: 20px;
+  padding: 60px 40px;
+  text-align: center;
+  margin: 40px 0;
+  
+  .empty-icon {
+    font-size: 4rem;
+    color: $primary-color;
+    margin-bottom: 24px;
+  }
+  
+  .empty-content {
+    h2 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    
+    p {
+      color: #666;
+      margin-bottom: 32px;
+    }
+    
+    .empty-action {
+      --background: $gradient-primary;
+      --color: white;
+      border-radius: 25px;
+      font-weight: 600;
+    }
+  }
+}
+
+// Cartes de voyage ultra-modernes
+.trip-card-ultra {
+  @include card-shadow-modern;
+  border-radius: 24px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  background: white;
+  animation: slideInUp 0.6s ease-out;
+  
+  &.ongoing {
+    border-left: 4px solid $success-color;
+  }
+  
+  &.upcoming {
+    border-left: 4px solid $primary-color;
+  }
+  
+  &.past {
+    border-left: 4px solid $medium-color;
+  }
+  
+  &.card-0 { animation-delay: 0.1s; }
+  &.card-1 { animation-delay: 0.2s; }
+  &.card-2 { animation-delay: 0.3s; }
+  
+  .trip-cover {
+    height: 200px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #2b2b2b;
+    position: relative;
+    
+    .cover-actions {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 2;
+      display: flex;
+      gap: 8px;
+    }
+
+    .cover-action-btn {
+      @include glass-effect;
+      --background-hover: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .cover-icon {
+        width: 24px;
+        height: 24px;
+        
+        path, circle, polyline {
+          stroke: white;
+        }
+      }
+    }
+
+    .edit-cover-btn-persistent {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      @include glass-effect;
+      --color: white;
+      --background-hover: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      z-index: 2;
+
+      ion-icon {
+        color: white !important;
+        font-size: 24px;
+      }
+    }
+
+    &:hover {
+      .cover-overlay {
+        background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%);
+      }
+    }
+
+    .cover-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%);
+      transition: background 0.4s ease;
+    }
+    
+    .cover-content {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 1;
+      
+      .trip-badge {
+        @include glass-effect;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        
+        &.ongoing {
+          background: rgba(76, 175, 80, 0.9);
+        }
+        
+        &.upcoming {
+          background: rgba(27, 182, 177, 0.9);
+        }
+        
+        &.past {
+          background: rgba(96, 125, 139, 0.9);
+        }
+      }
+      
+      .trip-priority {
+        @include glass-effect;
+        padding: 6px 10px;
+        border-radius: 16px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: white;
+        background: rgba(255, 152, 0, 0.9);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+  }
+  
+  .trip-main-content {
+    padding: 24px;
+    
+    .trip-header-modern {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      cursor: pointer;
+      
+      .trip-info-modern {
+        flex: 1;
+        
+        .trip-title-modern {
+          font-size: 1.4rem;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 12px 0;
+          @include gradient-text($gradient-primary);
+        }
+        
+        .trip-meta {
+          display: flex;
+          gap: 16px;
+          margin-bottom: 8px;
+          
+          .trip-location, .trip-duration {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9rem;
+            color: #666;
+            
+            ion-icon {
+              color: $primary-color;
+            }
+          }
+        }
+        
+        .trip-dates-modern {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.9rem;
+          color: #666;
+          
+          ion-icon {
+            color: $primary-color;
+          }
+        }
+      }
+      
+      .trip-actions-modern {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+        
+        .trip-stats {
+          display: flex;
+          gap: 12px;
+          
+          .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: #666;
+            background: rgba(27, 182, 177, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            
+            ion-icon {
+              color: $primary-color;
+            }
+          }
+        }
+        
+        .action-buttons {
+          display: flex;
+          gap: 4px;
+          
+          ion-button {
+            --padding-start: 8px;
+            --padding-end: 8px;
+            --color: #666;
+            
+            &:hover {
+              --color: $primary-color;
+            }
+          }
+        }
+        
+        .toggle-icon {
+          transition: transform 0.3s ease;
+          
+          &.expanded {
+            transform: rotate(180deg);
+          }
+          
+          ion-icon {
+            color: $primary-color;
+            font-size: 20px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Timeline moderne
+.trip-timeline-modern {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 24px;
+  
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+    }
+  }
+  
+  .timeline-loading {
+    text-align: center;
+    padding: 40px;
+  }
+  
+  .timeline-container-modern {
+    position: relative;
+    padding-left: 32px;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, $primary-color, rgba(27, 182, 177, 0.3));
+    }
+    
+    .timeline-item-modern {
+      position: relative;
+      margin-bottom: 24px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .timeline-marker {
+        position: absolute;
+        left: -32px;
+        top: 0;
+        
+        .marker-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid $primary-color;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: $primary-color;
+          font-size: 16px;
+          box-shadow: 0 4px 12px rgba(27, 182, 177, 0.2);
+        }
+        
+        .marker-line {
+          position: absolute;
+          left: 50%;
+          top: 32px;
+          transform: translateX(-50%);
+          width: 2px;
+          height: 24px;
+          background: rgba(27, 182, 177, 0.3);
+        }
+      }
+      
+      .timeline-content-modern {
+        @include glass-effect;
+        border-radius: 16px;
+        padding: 20px;
+        @include card-shadow-modern;
+        
+        .plan-header-modern {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 12px;
+          
+          .plan-title-modern {
+            flex: 1;
+            
+            h4 {
+              font-size: 1.1rem;
+              font-weight: 600;
+              color: #333;
+              margin: 0 0 8px 0;
+            }
+            
+            .plan-type-badge {
+              display: inline-block;
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-size: 0.7rem;
+              font-weight: 600;
+              color: white;
+              
+              &.flight {
+                background: $gradient-primary;
+              }
+              
+              &.hotel {
+                background: $gradient-success;
+              }
+              
+              &.activity {
+                background: $gradient-warning;
+              }
+              
+              &.car_rental {
+                background: $gradient-danger;
+              }
+            }
+          }
+          
+          .plan-actions {
+            display: flex;
+            gap: 4px;
+            
+            ion-button {
+              --padding-start: 6px;
+              --padding-end: 6px;
+              --color: #666;
+              
+              &:hover {
+                --color: $primary-color;
+              }
+            }
+          }
+        }
+        
+        .plan-details-modern {
+          .plan-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+            
+            ion-icon {
+              color: $primary-color;
+            }
+          }
+          
+          .plan-description {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 8px;
+            
+            ion-icon {
+              color: $primary-color;
+              margin-top: 2px;
+            }
+          }
+          
+          .plan-status {
+            .status-indicator {
+              display: inline-flex;
+              align-items: center;
+              gap: 4px;
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-size: 0.8rem;
+              font-weight: 600;
+              
+              &.upcoming {
+                background: rgba(27, 182, 177, 0.1);
+                color: $primary-color;
+              }
+              
+              &.ongoing {
+                background: rgba(76, 175, 80, 0.1);
+                color: $success-color;
+              }
+              
+              &.completed {
+                background: rgba(96, 125, 139, 0.1);
+                color: $medium-color;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .timeline-empty {
+    text-align: center;
+    padding: 40px;
+    
+    .empty-timeline {
+      ion-icon {
+        font-size: 3rem;
+        color: $primary-color;
+        margin-bottom: 16px;
+      }
+      
+      p {
+        color: #666;
+        margin-bottom: 16px;
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 20px;
+    
+    .hero-title h1 {
+      font-size: 2rem;
+    }
+  }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    
+    .metric-card {
+      padding: 16px;
+      
+      .metric-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+      
+      .metric-content .metric-value {
+        font-size: 1.5rem;
+      }
+    }
+  }
+  
+  .modern-tabs .tabs-container {
+    gap: 4px;
+    
+    .tab-item {
+      padding: 12px 8px;
+      
+      .tab-icon {
+        font-size: 18px;
+      }
+      
+      .tab-content .tab-label {
+        font-size: 0.8rem;
+      }
+    }
+  }
+  
+  .trip-card-ultra {
+    .trip-cover {
+      height: 150px;
+    }
+    
+    .trip-main-content {
+      padding: 16px;
+      
+      .trip-header-modern {
+        flex-direction: column;
+        gap: 16px;
+        
+        .trip-actions-modern {
+          align-items: flex-start;
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .trip-card-ultra .trip-main-content .trip-header-modern .trip-info-modern .trip-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+} 

@@ -1,0 +1,285 @@
+ion-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  
+  span {
+    display: block;
+    line-height: 1.2;
+    
+    &.en {
+      font-size: 0.8em;
+      opacity: 0.8;
+    }
+  }
+}
+
+.search-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+ion-item {
+  --background: var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.error-message {
+  color: var(--ion-color-danger);
+  text-align: center;
+  margin: 16px 0;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+.flight-info {
+  ion-card {
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  ion-card-header {
+    background: var(--ion-color-primary);
+    color: white;
+    padding: 16px;
+  }
+
+  ion-card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  ion-list {
+    padding: 0;
+  }
+
+  ion-item {
+    --background: transparent;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 48px;
+  }
+
+  ion-label {
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+
+  ion-note {
+    color: var(--ion-color-dark);
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+.window-callsign-input {
+  font-family: inherit;
+  font-size: 1.3em;
+  font-weight: bold;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-transform: uppercase;
+  flex: 1 1 auto;
+  min-width: 150px;
+  max-width: 300px;
+  margin-right: 1em;
+}
+
+.window-date {
+  font-family: inherit;
+}
+
+.window-search-btn {
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-left: 1em;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .window-header-bar {
+    /* ... existing code ... */
+  }
+}
+
+// Styles pour la section de restauration des données
+.restore-data-container {
+  margin: 16px 0;
+  
+  ion-card {
+    background: var(--ion-color-light-tint);
+    border: 1px solid var(--ion-color-light-shade);
+  }
+  
+  .restore-data-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+  }
+  
+  .restore-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+  }
+  
+  .restore-text {
+    flex: 1;
+    
+    p {
+      margin: 0;
+      line-height: 1.4;
+      
+      &:first-child {
+        font-weight: 500;
+        color: var(--ion-color-dark);
+        font-size: 0.9rem;
+      }
+      
+      &.restore-callsign {
+        color: var(--ion-color-primary);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-top: 4px;
+      }
+    }
+  }
+  
+  .restore-button {
+    --color: var(--ion-color-primary);
+    --background: transparent;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+}
+
+// Styles pour la section voyage en cours
+.ongoing-trip-container {
+  margin-bottom: 16px;
+  
+  ion-card {
+    background: linear-gradient(135deg, var(--ion-color-primary-tint), var(--ion-color-primary));
+    color: white;
+  }
+  
+  ion-card-header {
+    background: transparent;
+    padding: 16px;
+  }
+  
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+  
+  .ongoing-trip-info {
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .trip-dates {
+      margin: 8px 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .trip-status {
+      margin: 8px 0 0 0;
+      
+      ion-badge {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+      }
+    }
+  }
+}
+
+// Styles pour la section d'information démo
+.demo-info-container {
+  margin: 16px 0;
+  
+  ion-card {
+    background: var(--ion-color-warning-tint);
+    border: 1px solid var(--ion-color-warning-shade);
+  }
+  
+  .demo-info-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+  }
+  
+  .demo-icon {
+    font-size: 24px;
+    color: var(--ion-color-warning);
+    flex-shrink: 0;
+  }
+  
+  .demo-text {
+    flex: 1;
+    
+    p {
+      margin: 0;
+      line-height: 1.4;
+      font-weight: 500;
+      color: var(--ion-color-dark);
+      font-size: 0.9rem;
+    }
+  }
+  
+  .demo-button {
+    --color: var(--ion-color-warning);
+    --background: transparent;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .restore-data-content,
+  .demo-info-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    
+    .restore-text,
+    .demo-text {
+      order: 2;
+    }
+    
+    .restore-button,
+    .demo-button {
+      order: 3;
+    }
+  }
+} 

@@ -1,0 +1,31 @@
+<ion-app>
+  <!-- Menu latéral moderne, multilingue, avec logout -->
+  <app-side-menu *ngIf="!isAdmin"></app-side-menu>
+
+  <!-- Header global, unique -->
+  <ion-header>
+    <ion-toolbar color="light">
+      <ion-buttons slot="start">
+        <ion-menu-button color="primary"></ion-menu-button>
+        <ion-button (click)="goHome()" color="primary">
+          <ion-icon name="home"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-title style="display: flex; align-items: center; justify-content: space-between;">
+        <span>BoredOnBoard</span>
+        <span style="font-size: 0.95em; color: #555; font-weight: normal;">
+          🕒 {{ currentDateTime | date:'full':'':currentLang }}
+        </span>
+      </ion-title>
+      <ion-buttons slot="end">
+        <!-- Barre utilisateur supprimée ici -->
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <div style="display: flex; justify-content: flex-end; align-items: center; padding: 0.5rem 1.5rem 0.5rem 1.5rem;">
+    <app-user-status-bar *ngIf="!isAuthPage" [user]="user"></app-user-status-bar>
+  </div>
+  <ion-content id="main-content">
+    <ion-router-outlet></ion-router-outlet>
+  </ion-content>
+</ion-app>

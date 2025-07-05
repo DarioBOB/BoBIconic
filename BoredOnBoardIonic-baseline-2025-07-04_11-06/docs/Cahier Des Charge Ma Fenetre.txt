@@ -1,0 +1,1045 @@
+Cahier des Charges Fonctionnel : Partie Visualisation des Informations de Vols et Fonctionnalité « Ma Fenêtre »
+________________________________________
+1. Introduction
+1.1. Contexte
+Ce document a pour objectif de formaliser de manière exhaustive les exigences fonctionnelles relatives à la partie « Visualisation des Informations de Vols » d’une application In-Flight Entertainment (IFE) dédiée aux passagers. L’application est développée en Ionic/Cursor (basée sur Angular 19), afin d’assurer une compatibilité multi-plateforme : écrans intégrés aux sièges d’avion, tablettes et smartphones Android/iOS. Elle reprend les meilleures pratiques observées chez les grandes compagnies aériennes tout en introduisant la fonctionnalité innovante « Ma Fenêtre », conçue pour enrichir l’expérience des passagers.
+L’importance croissante du BYOD (Bring Your Own Device) à bord des avions, couplée aux avancées technologiques telles que les réseaux Wi-Fi embarqués et les capteurs GPS, impose de concevoir une application capable de fonctionner en mode connecté (wifi, 3/4/5G selon disponibilité au sol) mais également en mode Avion, c’est-à-dire en l’absence totale de connectivité réseau, à l’aide des données GPS locales et du cache embarqué.
+1.2. Objectifs
+•	Offrir une interface immersive et intuitive pour que chaque passager, quel que soit son profil (novice ou utilisateur régulier), puisse obtenir en temps réel ou quasi-temps réel des informations pertinentes sur le vol.
+•	Intégrer la fonctionnalité « Ma Fenêtre », qui simule la vue par le hublot en combinant des données de carte, des points d’intérêt (POIs) géolocalisés et une animation panoramique en fonction de l’altitude, renforçant ainsi l’attrait du suivi de vol.
+•	Garantir la continuité de service en mode Avion : l’application doit basculer automatiquement en mode hors connexion en cas de perte de réseau, et continuer à afficher les informations essentielles (position GPS, indicateurs de vol, carte hors ligne) grâce à un cache local et à la géolocalisation.
+•	Assurer la portabilité et la responsivité sur un large éventail de matériels : écrans IFE intégrés (tailles ≥ 10″, résolutions multiples), tablettes (7″ – 12″), smartphones (4,7″ – 7″), avec des contraintes de performance et d’ergonomie pour chaque profil.
+•	Utiliser les technologies Ionic et Capacitor afin de bénéficier des plugins (Geolocation, Network, Storage, Local Notifications, Secure Storage, Filesystem) pour gérer GPS, détection d’état réseau, stockage chiffré et notifications locales.
+1.3. Portée et Exclusions
+Le périmètre fonctionnel détaillé dans ce document porte uniquement sur les aspects relatifs à la visualisation des informations de vol et à la partie « Ma Fenêtre ». Il ne couvre pas :
+•	Les traitements avioniques bas niveau (acquisition directe des données moteur, bus avioniques, etc.) ; ces données sont exposées via des API ou modules certifiés.
+•	Les fonctionnalités de divertissement non liées au suivi de vol (films, musique, jeux), qui sont gérées par d’autres modules de l’IFE.
+•	Les achats à bord, la facturation, ou la billetterie électronique, gérés par un module de commerce embarqué distinct.
+•	Les aspects relatifs à la sécurité passagers, l’émission ou la réception de messages SOS, etc.
+________________________________________
+2. Références, Outils et Glossaire
+2.1. Références Normatives et Cadres de Référence
+•	ARINC 759 : Spécification pour l’architecture réseau In-Flight Entertainment.
+•	ARINC 828 : Spécification pour la transmission de données météorologiques à bord.
+•	DO-178C : Norme pour le développement de logiciels embarqués critiques en aéronautique.
+•	ISO 9241 : Norme sur l’ergonomie des interactions homme-système, comprenant des recommandations sur la lisibilité, les contrastes, etc.
+•	WCAG 2.1 : Directives pour l’accessibilité des contenus Web (niveau AA minimal requis).
+•	Material Design Guidelines : Recommandations sur l’interface utilisateur mobile (boutons, espacements, typographie).
+2.2. Outils Technologiques
+•	Ionic Framework & Angular 19 : Plateforme choisie pour le développement multiplateforme (Web, iOS, Android) avec un ensemble de composants UI natifs.
+•	Capacitor (Plugins) :
+o	Geolocation : Accès aux capteurs de localisation pour obtenir position, altitude, vitesse, même en mode Avion.
+o	Network : Détection de l’état réseau (online, offline, type de connexion) pour basculer entre mode connecté et hors ligne.
+o	Storage / SQLite : Stockage local des données de vol et des tuiles cartographiques de manière chiffrée.
+o	Local Notifications : Envoi de notifications locales (rappel atterrissage, alertes météo) sur mobile.
+o	Secure Storage : Stockage chiffré des jetons API, des plans de vol et des informations sensibles.
+o	Filesystem : Gestion des fichiers (tuiles vectorielles/raster, CSV exportés).
+•	Leaflet ou Mapbox GL JS : Bibliothèques cartographiques open source pour l’affichage des cartes (avec modules de cache pour le hors ligne).
+•	Chart.js / ngx-charts : Bibliothèque pour afficher des graphiques interactifs (altitude vs temps, progression du vol).
+•	Three.js : Librairie de rendu 3D pour la simulation de la vue « hublot » panoramique.
+•	Cordova CLI : Outil de build et packaging multiplateforme (Android .apk, iOS .ipa).
+•	Git : Gestion de version du code source, intégration continue (CI/CD) via par exemple GitHub Actions.
+•	Postman / Insomnia : Pour tester les APIs externes (Aviationstack, OpenSky, OpenWeatherMap).
+2.3. Glossaire
+•	IFE : In-Flight Entertainment, système embarqué fournissant contenu multimédia et services aux passagers.
+•	GPS : Global Positioning System, capteur local pour déterminer la position géographique de l’appareil.
+•	ETA (Estimated Time of Arrival) : Heure d’arrivée estimée, calculée en temps réel.
+•	ETE (Estimated Time En Route) : Durée de vol restante estimée.
+•	POI (Point Of Interest) : Point d’intérêt géographique (ville, monument, lac, relief) affiché sur la carte.
+•	Capacitor : Pont entre application web (Ionic/Angular) et fonctionnalités natives (plugins).
+•	Mode Avion : État où l’appareil n’a pas de connectivité réseau externe (Wi-Fi, 3/4G/5G désactivés) ; GPS peut rester actif si permission donnée.
+•	Cache : Jeu de données stocké localement (Ionic Storage / SQLite / Filesystem) pour permettre un fonctionnement hors ligne.
+•	Tuiles Cartographiques : Images ou vecteurs de sections de la carte stockées en local pour un rendu hors ligne.
+________________________________________
+3. Enjeux et Contraintes
+3.1. Contraintes Techniques Multiplateformes
+•	Compatibilité Ionic/Cursor : Le développement s’appuie sur Angular 19 et Ionic Framework ; les composants UI doivent être conçus pour fonctionner sur Android ≥ 10 et iOS ≥ 13, ainsi que sur WebView des écrans IFE.
+•	Responsive Design : Prendre en charge trois grandes catégories d’affichage :
+1.	Écrans IFE intégrés : Tailles 10″ – 23″, résolutions variées (HD, Full HD, 4K). Peut être tactile (capteur capacitif) ou non tactile (boutons physiques).
+2.	Tablettes : Tailles 7″ – 12″, orientation portrait/paysage.
+3.	Smartphones : Tailles 4,7″ – 7″, densités DPI variables, orientation portrait/paysage.
+•	Performance :
+o	Temps de réponse aux interactions utilisateur < 300 ms sur mobile de gamme moyenne (CPU 4 cœurs, 2 Go RAM).
+o	Rafraîchissement des données textuelles (indicateurs de vol) < 500 ms.
+o	Rafraîchissement carte (tuiles déja en cache) < 1 s ; si récupération de nouvelle tuile en ligne, < 3 s.
+o	Fréquence maximale de mise à jour de la carte : toutes les 30 s, sans bloquer l’UI.
+•	Stockage local :
+o	Utilisation d’Ionic Storage (IndexedDB/WebSQL dans le navigateur, SQLite sur mobile) pour stocker :
+	Dernières positions GPS (au moins 10 dernières mises à jour).
+	Plan de vol complet (waypoints, aéroports, horaires) pour le mode Avion.
+	Tuiles cartographiques (au moins zone circulaire de 300 km de rayon autour de l’itinéraire).
+	Données météorologiques (cache max 10 minutes).
+o	Si SQLite est disponible sur l’appareil, privilégier SQLite pour les données volumineuses (CSV export, tables POI).
+•	Accès GPS : via Capacitor Geolocation :
+o	Obtenir latitude, longitude, altitude, vitesse sol, vitesse verticale (le cas échéant).
+o	Même en mode Avion, si permission accordée, le GPS doit pouvoir fournir des fixes.
+o	Mettre en place un contrôle pour limiter la fréquence des appels GPS (au minimum toutes les 15 s, pour économiser batterie).
+•	Détection État Réseau : via Capacitor Network :
+o	Distinguer au minimum trois états : online (Wi-Fi ou mobile), offline (mode Avion), réseau faible (perte fréquente).
+o	Bascule automatique entre modes : retrait du bandeau en ligne, affichage d’un bandeau « Mode Avion ».
+•	Appels API Externes :
+o	Aviationstack : obtention des données de vol en temps réel (position, altitude, vitesse, statut). Nécessité d’un token API (limite de requêtes/seconde).
+o	OpenSky Network : données ADS-B, trajectoire historique, compatibilité avec les requêtes GET/HTTPS.
+o	OpenWeatherMap / AerisWeather : récupération des couches météo (radar, isobares, fronts).
+o	Gestion des erreurs (timeout, 429 Too Many Requests) : mise en cache de la dernière donnée valide, affichage d’une info « Météo non disponible ».
+•	Sécurité des Jetons API :
+o	Utiliser Capacitor Secure Storage pour stocker les clés d’API (AES-256), éviter les fuites via le bundle.
+o	Configurer le CSP (Content Security Policy) dans index.html pour autoriser uniquement les domaines tiers (domains : api.aviationstack.com, opensky-network.org, openweathermap.org).
+3.2. Contraintes Utilisateurs & Ergonomie
+•	Profil des Passagers :
+o	Tranche d’âge 8–85 ans : l’UI doit être claire pour des enfants (via icônes simples) et pour des seniors (polices suffisamment grandes, contrastes élevés).
+o	Utilisateurs novices : ne pas supposer la connaissance de termes aéronautiques (proposer des infobulles explicatives pour « ETE », « Fuel », « Heading », etc.).
+o	Utilisateurs experts : afficher des détails supplémentaires (température OAT, QNH, niveau de vol, etc.) sur demande (mode « avancé » via un paramètre)
+•	Lisibilité & Accessibilité :
+o	Contraste des textes ≥ 4,5:1 (WCAG 2.1 AA).
+o	Taille minimale de police recommandée : 16 px (base), possibilité de zoom jusqu’à 200 % (responsive).
+o	Touch targets (boutons, toggles) ≥ 44 px de hauteur/largeur sur mobile (recommandation Apple HIG).
+o	Couleurs codées : éviter les combinaisons « rouge/vert » seules pour signifier OK / attention (utiliser également des icônes ou légendes textuelles).
+•	Navigation Tactile vs Non Tactile :
+o	Tactile : support du pinch-to-zoom (zoom continu via échelle), pan par glissement (swipe), tap pour sélectionner éléments (waypoint, POI).
+o	Non tactile (IFE) : boutons « + »/« – » pour zoom, flèches directionnelles pour pan (vu que l’IFE peut être disposé avec un joystick ou un ring knob).
+o	Bouton « Recentrer » toujours visible (Ionic fab-button), pour revenir instantanément à la position avion.
+•	Internationalisation & Localisation :
+o	Au minimum Français et Anglais, stockés dans des fichiers JSON de traduction.
+o	Toutes les valeurs numériques (unités de vitesse, altitude) affichées dans le format local : km/h vs nœuds, m vs pieds. Possibilité de forcer manuellement les unités via le menu Paramètres.
+•	Notification & Feedback :
+o	Utilisation de toasts (Ionic ToastController) pour messages brefs : « Carte chargée », « Météo non disponible », « Mode Avion ».
+o	Utilisation de popovers (Ionic PopoverController) pour explications détaillées lors du tap sur un terme technique.
+o	Transitions animées (Ionic NavController) fluides < 200 ms.
+3.3. Contraintes Environnementales
+•	Luminosité Variable : à bord, l’éclairage peut être tamisé ou très lumineux :
+o	Plus de 200 nits requis pour l’écran en plein soleil sur smartphone, 300+ nits pour IFE.
+o	Interface sombre (dark mode) pour les vols de nuit, limiter l’éblouissement.
+•	Vibrations & Secousses :
+o	Aucune animation critique (ex : transition carte → hublot) ne doit être sensible aux petites secousses ; éviter l’usage d’éléments flottants (drag & drop) qui pourraient se déplacer lors de turbulences.
+o	Tester sur simulateur de vibrations (module hardware ou simulateur mobile) pour s’assurer de l’absence de fausses interactions.
+•	Niveau Sonore Ambiant :
+o	Informations cruciales doivent être disponibles visuellement ; ne pas dépendre des notifications sonores seul (au cas où le passager ne porte pas de casque).
+o	Si notifications sonores implémentées, prévoir un contrôle du volume indépendant de la session multimédia.
+________________________________________
+4. Architecture Générale et Description du Fonctionnement
+4.1. Architecture Fonctionnelle Globale
++-------------------------+        +----------------------+
+|      Interface UI       |<--API--| Module de Traitement |
+|  (Ionic/Angular +       |       +----------------------+
+|  Capacitor Plugins)     |--DB--->| Base Locale (Cache)   |
++-------------------------+        +----------------------+
+       |        |     ^                         ^
+       |        |     |                         |
+       V        V     |                         |
++--------------+--------+                     |
+| Module Acquisition     |                     |
+| (Email Parser, APIs,   |---------------------+
+|  GPS via Geolocation)  |  
++------------------------+
+•	Interface UI (Ionic/Angular) : Composants visuels (Ionic Components, Leaflet/Mapbox, Chart.js, Three.js) gérant la présentation et les interactions.
+•	Capacitor Plugins : Fournissent l’accès aux ressources natives : GPS (Geolocation), état réseau (Network), stockage (Storage/SQLite/Secure Storage), notifications (Local Notifications), système de fichiers (Filesystem).
+•	Module Acquisition :
+o	Email Parser : Sur mobile, l’utilisateur peut autoriser l’accès à une boîte e-mail (IMAP/OAuth) pour extraire le numéro de vol, la date, l’horaire, l’itinéraire.
+o	APIs Externes : Aviationstack, OpenSky, OpenWeatherMap : récupération périodique (toutes les X minutes en fonction du paramètre) des données de vol et météo. Gestion de l’API Key, contrôle de quota.
+o	GPS : En mode Avion (hors ligne), vérification de la permission, récupération du signal GPS (fix) tant que disponible.
+•	Module de Traitement :
+o	Calcul ETA/ETE : À partir de la vitesse sol moyenne (filtrée), de la distance restante (calcul à partir des waypoints), des fuseaux horaires (TimeZone DB).
+o	Table POI : Contient, pour chaque segment de la route, la liste des POIs (villes, monuments, lacs, montagnes) triés par distance.
+o	Niveau de Zoom : Barème prédéfini (cf. section 5.10 F10.3) pour choisir automatiquement le niveau de zoom de la carte ou de la vue hublot.
+o	Alertes et Notifications : Surveillance des seuils : palier de croisière atteint, début de descente, turbulences (si données météo dynamiques), retard/avance ETA ± 10 min.
+•	Base Locale (Cache) :
+o	Stocke : données de vol (numéro, itinéraire, waypoints, horaires), dernières positions, données météo, tuiles cartographiques (zone de vol).
+o	Utilise un schéma SQLite (tables : Flights, Waypoints, POIs, Positions, Meteo, Tuiles) si disponible, sinon IndexedDB.
+o	Données périssables après 10 minutes (sauf dossier historique configurable pour exporter).
+4.2. Modes de Fonctionnement
+•	Mode Pré-décollage (en ligne ou en démonstration) :
+o	En ligne : l’application récupère l’email de réservation, appelle Aviationstack/OpenSky pour vérifier la validité du vol, affiche le plan de vol simulé, les horaires de porte, etc.
+o	Mode Démo (Hook mobile / IFE) : Si aucune donnée vol n’est disponible (cas d’usage en showroom, salon), une option « Afficher la démonstration » permet de charger des données mockées (JSON local) pour présenter les fonctionnalités sans être connecté.
+o	Liaison Wi-Fi au sol : aucune contrainte, rafraîchissement possible toutes les 5 s pour la carte et les indicateurs, afin de préparer l’affichage dès le décollage.
+•	Mode En Vol (connecté ou Avion) :
+o	Connecté :
+	Requête API périodique (15 s pour indicateurs moteur/altitude/vitesse, 30 s pour position, 5 min pour météo).
+	Récupération GPS en continu : position, altitude, vitesse verticale (via Geolocation).
+	Mise à jour du cache local (positions, indicateurs, tuiles, météo).
+	Lancement de la fonctionnalité « Ma Fenêtre » qui met à jour la carte, les POIs et la vue hublot.
+o	Avion :
+	Vérifier la permission GPS : si accordée, continuer à mettre à jour la position (fix GPS). Si GPS indisponible, afficher la dernière position du cache.
+	Météo : utiliser la dernière donnée valide du cache (jusqu’à 10 minutes). Si plus ancien, masquer la couche météo.
+	Tuiles cartographiques : utiliser uniquement celles déjà téléchargées (zone de vol ± 300 km).
+	Indicateurs (altitude, vitesse sol) : se baser sur GPS, pas sur l’API avionique.
+•	Mode Descente / Approche :
+o	Identifier le moment où la distance restante < 150 km ; passer en mode « approche » : réduire le niveau de zoom de la carte, centrer sur la destination, calculer ETA ajusté (prise en compte du plan de descente si disponible dans les données avioniques).
+o	Afficher un rappel à 15 min avant l’atterrissage prévu via une notification locale (mobile) ou un toast (IFE).
+o	Afficher la liste des waypoints finaux (paliers de descente) sous forme linéaire, avec altitude et vitesse verticale prévues.
+•	Mode Parking / Au Sol :
+o	Une fois l’avion immobilisé (GPS fixe sans déplacement significatif > 5 min), passer en mode « parking » : afficher la porte d’arrivée (si disponible), la durée du roulage (basée sur la distance entre le touchdown et la porte), et la météo au sol (dernier relevé).
+o	« Ma Fenêtre » : passer en vue statique du tarmac (altitude alt ≈ 0), masquer les POIs et afficher un message « Vol terminé, tuiles finales ».
+o	Proposer un export CSV de l’historique final (positions, altitudes, vitesse, timestamps) pour le partage post-vol.
+________________________________________
+5. Exigences Fonctionnelles Détaillées
+Chaque fonctionnalité est décrite selon le modèle : Description, Règles Métier, Écrans associés, Critères d’acceptation.
+5.1. F1 : Affichage des Informations Générales du Vol
+Description : Présenter en permanence (bandeau rétractable) les informations clés du vol : numéro, compagnies, aéroports, horaires, classe, porte, temps avant/depuis décollage.
+Règles Métier :
+•	F1.1 : Numéro de vol & Logo :
+o	Récupérer le numéro de vol (code IATA + numéro) depuis :
+1.	Email Parser : à partir de l’email de confirmation (IMAP), extraire « Flight »: XX1234.
+2.	API OpenSky : si l’email est indisponible, demander le numéro de vol manuellement et valider via API.
+o	Afficher le logo de la compagnie (SVG ou PNG scalable). Si indisponible, afficher un placeholder gris.
+•	F1.2 : Date & Heure de départ prévue :
+o	Date calibrée selon le fuseau de l’aéroport de départ (time zone DB).
+o	Afficher sous la forme « 25/12/2025 – 14:30 CET ».
+o	Si le vol est retardé (API renvoie un statut « delayed », « cancelled »), ajouter une pastille rouge/orange à côté de l’heure.
+•	F1.3 : Aéroports de départ & destination :
+o	Afficher le nom complet (ex : « Paris Charles de Gaulle ») + code IATA (CDG) + code OACI (LFPG).
+o	Dans le cas d’un vol avec escale, afficher « Paris CDG (LFPG) → Londres LHR (EGLL) → New York JFK (KJFK) ».
+o	Sur petit écran (mobile), n’afficher que « CDG → JFK », avec option « + détails » pour développer.
+•	F1.4 : Classe de service & personnalisation :
+o	Récupérer la classe de service via API IFE (si l’utilisateur s’est authentifié) ou parser dans l’email de réservation.
+o	Adapter les couleurs du bandeau :
+	Économique : bandeau bleu foncé, icône de siège économiquement stylisée.
+	Premium Economy : bandeau turquoise, icône correspondante.
+	Business : bandeau gris clair, icône siège inclinable.
+	Première : bandeau doré, icône siège couchette.
+o	Si aucune information de classe, appliquer un thème par défaut (bandeau gris).
+•	F1.5 : Porte d’embarquement & heure de fermeture :
+o	À l’aéroport de départ, extraire la porte (ex : « Gate A32 ») si informée dans l’email ou l’API.
+o	Afficher « Porte A32 – Fermeture : 14:00 ». Si manquant, afficher « Porte non assignée ».
+o	Si la porte change après mise en cache, envoyer un toast « Nouvelle porte : B14 ».
+•	F1.6 : Temps avant/depuis décollage :
+o	Avant décollage : Calculer le temps restant = Héure prévue – Heur actuel (UTC → fuseau local). Afficher « Décollage dans : 00 h 25 min ».
+o	Après décollage : Détecter via GPS ou API avionique (climb rate). Afficher « En vol depuis : 00 h 12 min ».
+o	Si l’écart dépasse 5 min (retard), ajouter une mention « Retard : +05 min » en rouge.
+•	F1.7 : Bandeau rétractable :
+o	Desktop / IFE : Bandeau fixe en haut, bouton de rétractation (flèche vers le haut).
+o	Mobile : Bandeau rétractable verticalement, hauteur = 25 % de l’écran lorsqu’étendu, 5 % lorsqu’il est réduit.
+o	L’icône de menu IFE (three bars) permet d’ouvrir/fermer le bandeau.
+o	Transition CSS fluide (ease-in-out 200 ms).
+Écrans associés :
+•	Tous les écrans de la section « Vol » (navmenu).
+•	Composant partagé (app-header) utilisé dans : « Ma Fenêtre », « Carte de vol », « Données de vol », « Statistiques ».
+Critères d’acceptation :
+•	Affichage initial < 2 s après le lancement de l’application.
+•	Données du bandeau reflètent les informations extraites du cache/API < 1 min d’écart.
+•	La rétractation/expansion du bandeau ne génère pas de latence perceptible (> 300 ms interdits).
+•	Sur mobile, la zone utile (visible à l’écran) ne perd pas plus de 30 % de son espace lors de l’extension du bandeau.
+________________________________________
+5.2. F2 : Carte Interactive du Trajet
+Description : Afficher dynamiquement la trajectoire de vol sur une carte vectorielle/bitmap, en temps réel lorsque connecté et mise à jour sur cache en mode Avion. Cette carte doit être zoomable, centrable, et afficher des informations de contexte (POIs, aéroports, zones de turbulence).
+Règles Métier :
+•	F2.1 : Icône Avion & Position en Temps Réel :
+o	Utiliser une icône SVG stylisée représentant un avion à l’échelle 1:1, orientée selon le cap (heading).
+o	Positionner l’icône au millimètre près en coordonnées géographiques (lat, lon) sur la carte.
+o	Mettre à jour la position géographique :
+	Connecté : soit via l’API avionique (Aviationstack/OpenSky), soit via le GPS (Geolocation) selon la priorité configurée.
+	Avion : uniquement via le GPS local, si disponible.
+o	Fréquence de mise à jour : toutes les 30 s (configurable dans Paramètres), avec interpolation linéaire pour animation fluide entre deux points.
+•	F2.2 : Plan de Vol Complet (Polyligne) :
+o	Charger la liste des waypoints (lat, lon) depuis la cache/API.
+o	Générer une polyligne SVG/GeoJSON reliant tous les waypoints, stylée :
+	Segment déjà parcouru : ligne continue, couleur #00AEEF (bleu clair).
+	Segment restant : ligne pointillée (dash pattern 5 px / 5 px), couleur #CCCCCC (gris moyen).
+o	Mettre à jour la séparation entre les deux segments au moment du survol d’un waypoint (détection distance < 2 km).
+•	F2.3 : Zoom Dynamique Automatique :
+o	Algorithme déterminant le niveau de zoom à partir de l’altitude actuelle :
+	Altitude > 30 000 ft : Zoom 7 (couverture mondiale, largeur ≈ 8 500 km).
+	20 000 ft – 30 000 ft : Zoom 8 (couverture ≈ 4 250 km).
+	10 000 ft – 20 000 ft : Zoom 10 (couverture ≈ 1 062 km).
+	< 10 000 ft : Zoom 12 (couverture ≈ 250 km).
+o	Ajuster automatiquement l’échelle lorsque l’avion passe d’une tranche à l’autre (zoom in / zoom out) via une transition animée (duration 500 ms, easing « easeInOutCubic »).
+o	Si l’utilisateur interagit manuellement (pinch/pan), désactiver temporairement le zoom dynamique pendant 30 s, puis le réactiver automatiquement.
+•	F2.4 : Contrôles Utilisateur :
+o	Pinch-to-Zoom (mobile, tactile) : deux doigts pour agrandir/réduire.
+o	Boutons Zoom (+/–) : coins inférieurs droit/gauche, dimension 48 px, opacité 0,8, icônes Ionic « add » et « remove ».
+o	Pan (mobile) : drag / move pour déplacer la carte.
+o	Pan (non tactile, IFE) : flèches directionnelles (4 directions), boucles pour déplacer la carte par incréments de 25 px.
+o	Bouton Recentrer : Ionic fab-button (icône « locate »), top-right corner, rappelle la position avion et réactive le zoom dynamique.
+•	F2.5 : Marqueurs Contextuels :
+o	Aéroports : Icônes d’aéroport (SVG, couleur #E74C3C), taille proportionnelle selon l’importance (hub vs aéroport régional).
+o	Zones de Turbulence : Icône nuage orange (#F39C12) à la latitude/longitude communiquée par l’API météo.
+o	Grands Objets Géographiques : Icônes smaller (ville capitale, montagnes, lacs) :
+	Ville (> 1 M hab.) : icône skyscraper, couleur #3498DB.
+	Montagne (> 2 500 m) : icône montagne, couleur #2ECC71.
+	Lac (> 50 km²) : icône goutte d’eau, couleur #2980B9.
+o	Infobulles : au survol / tap sur un marqueur, afficher une bulle blanche semi-transparente avec : nom (p. ex. « Paris »), coordonnées, altitude/km selon contexte.
+•	F2.6 : Fuseau Horaire Dynamique :
+o	Utiliser la Time Zone API (TimeZone DB ou équivalent embarqué) pour détecter le fuseau local en fonction des coordonnées GPS actuelles.
+o	A chaque saut de fuseau, afficher une infobulle temporaire en haut : « Nouveau fuseau : UTC+2 (Paris) », durée 5 s, avec icône horloge.
+•	F2.7 : Couches Supplémentaires :
+o	Satellite : basculer la couche de fond en mode satellite (tuiles raster).
+o	Relief : tuiles vectorielles avec élévation minimale (ombrage).
+o	Contours Politiques : fines lignes blanches délimitant les frontières de pays.
+o	Boutons de sélection de couches : Ionic segment buttons (3 choix : Carte, Satellite, Relief).
+•	F2.8 : Mode Avion – Cache Uniquement :
+o	Si l’état réseau passe offline, afficher une bannière discrète en haut (« Mode Avion – données en cache »).
+o	Conserver la dernière zone de tuiles chargées, désactiver le téléchargement de nouvelles tuiles.
+o	Masquer les marqueurs météo ; conserver les POIs et le plan de vol (données en cache).
+Écrans associés :
+•	Page « Carte de vol » (composant FlightMapPage) accessible depuis le menu « Vol ».
+•	Onglet « Carte interactive » de la fonctionnalité « Ma Fenêtre » (composant MyWindowMapTab).
+Critères d’acceptation :
+•	Chargement initial : si tuiles en cache, < 3 s ; sinon, < 5 s (appel API si en ligne).
+•	Fluidité pan/zoom : latence < 16 ms par frame (60 fps) sur un appareil mobile de gamme moyenne (Snapdragon 660 ou équivalent).
+•	Position Avion : erreur ≤ 5 km par rapport à la position GPS réelle (GPS DPI ± 3 m, projection cartographique).
+•	Transitions de zoom dynamique : fluides (duration ≤ 500 ms), sans saccade.
+•	Réactivité des contrôles : < 200 ms entre le tap/clic et l’action.
+________________________________________
+5.3. F3 : Indicateurs de Navigation en Temps Réel (Flight Data)
+Description : Fournir aux passagers un ensemble d’indicateurs de navigation essentiels : altitude, vitesse sol, cap, vitesse verticale, température extérieure, distance restante, ETA, progression sous forme graphique.
+Règles Métier :
+•	F3.1 : Altitude :
+o	Afficher l’altitude en pieds (ft) ou mètres (m), selon choix dans Paramètres.
+o	Mettre à jour toutes les 15 s (rafraîchissement minimal), provenant :
+	Connecté : via API avionique (Aviationstack/OpenSky).
+	Avion : via GPS (élévation).
+o	Afficher un suffixe : « ft » ou « m » et un icône de flèche (up/down) pour indiquer le mouvement vertical.
+•	F3.2 : Vitesse Sol (Ground Speed) :
+o	Afficher en nœuds (kn) ou km/h (km/h) selon préférence.
+o	Mise à jour toutes les 15 s.
+o	Si les données GPS ne contiennent pas de vitesse (capteur désactivé), calculer à partir de la distance parcourue entre deux points GPS successifs.
+•	F3.3 : Vitesse Verticale (Vertical Speed) :
+o	Afficher en ft/min ou m/s, provenance :
+	Connecté : données avioniques si available.
+	Avion : calcul via changement d’altitude / temps.
+o	Mise à jour toutes les 15 s.
+•	F3.4 : Cap (Heading) :
+o	Afficher le cap en degrés (ex : 275°) et une rose des vents stylisée (SVG, flèche pointant vers le nord vrai en haut).
+o	Utiliser un composant Ionics : ion-icon name="navigate" tourné selon la valeur.
+•	F3.5 : Température Extérieure :
+o	Afficher en °C ou °F selon préférence. Source :
+	Connecté : API avionique ou météo (OpenWeatherMap).
+	Avion : capteur barométrique (rare), sinon ne pas afficher et masquer.
+•	F3.6 : Distance Restante & ETE :
+o	Distance Restante (DTB : Distance To Go) : calculer à partir de la position actuelle (lat/lon) et du point de cheminement suivant (ou de la destination si aucun waypoint proche).
+o	Afficher en Nm (milles marins) ou km, mise à jour toutes les 30 s.
+o	Calculer l’ETE (durée restante) : distance restante / vitesse sol actuelle, arrondi au minute près.
+o	Afficher « Distance restante : 1 235 Nm – ETE : 02 h 45 min ».
+•	F3.7 : ETA Local & UTC :
+o	ETA Local : ajouter ETE à l’heure locale actuelle de la position de l’avion (TimeZone DB).
+o	ETA UTC : afficher en parallèle en petit (texte grisé).
+o	Si changement de fuseau à l’arrivée (ex : arriver à JFK depuis CDG), calculer l’ETA dans la TZ de destination : « Arrivée estimée : 16:30 EST (21:30 UTC) ».
+•	F3.8 : Progression du Vol (Barre) :
+o	Barre horizontale de 100 % : position actuelle / distance totale (depuis origine jusqu’à destination), remplissage en bleu #2980B9.
+o	Mettre à jour en continu (smooth transition) à chaque 1 % parcouru.
+•	F3.9 : Fallback Mode Avion :
+o	Si plus de 30 s sans donnée avionique (connecté) et GPS non dispo (Avion), afficher un avertissement dans la carte : « Données avioniques non disponibles : position approximative ».
+o	Continuer à afficher les données GPS restantes (altitude, vitesse horizontale, cap).
+•	F3.10 : Affichage & Ergonomie :
+o	Intégrer les indicateurs dans un composant Ionic Card (ombre légère, coins arrondis 8 px).
+o	Sur tablette et IFE (≥ 10″), utiliser une grille à deux colonnes (Ionic Grid) : indicateurs sur la gauche, graphique progression sur la droite.
+o	Sur mobile (< 7″), afficher en liste verticale (chaque indicateur sur sa propre ligne), progression sous forme de barre tout en bas.
+o	Utiliser une icône abrégée pour chaque indicateur : ion-icon name="speedometer", ion-icon name="thermometer", etc.
+Écrans associés :
+•	Page « Données de vol » (composant FlightDataPage).
+•	Onglet « Données textuelles sur le vol » de « Ma Fenêtre » (composant MyWindowDataTab).
+Critères d’acceptation :
+•	Rafraîchissement des indicateurs < 0,2 s sans geler l’UI.
+•	Valeurs cohérentes : erreur maximale 2 % sur distance restante comparée à calculs de référence.
+•	Responsive : deux colonnes sur tablette, une colonne sur mobile.
+•	Affichage clair en mode sombre et clair, icônes visibles sur > 4,5:1.
+________________________________________
+5.4. F4 : Plan de Vol et Informations Aéroportuaires
+Description : Fournir une vue détaillée du plan de vol, incluant la liste des waypoints intermédiaires, leurs coordonnées, altitudes et heures prévues, ainsi que des informations complémentaires sur les aéroports. Permettre l’export du plan de vol sous forme de tableau HTML/PDF.
+Règles Métier :
+•	F4.1 : Liste des Waypoints :
+o	Extraire depuis la cache / API la séquence de waypoints (nom, lat, lon, alt planifiée, ETA prévue au waypoint).
+o	Exemple de ligne de tableau :
+Waypoint	Lat	Lon	Alt (ft)	ETA (UTC)
+ABC123	48.8566 N	2.3522 E	35000	12:45 UTC
+o	Afficher un tableau HTML (composant ion-table) trié par ETA.
+o	Sur mobile, proposer un filtre (Input Search) pour rechercher un waypoint par nom.
+•	F4.2 : Sélection d’un Waypoint :
+o	Chaque ligne de tableau est tappable (mobile) ou cliquable (IFE/Desktop).
+o	Au clic/tap, centrer la carte sur la position du waypoint ; injecter une ancre (geo marker) de couleur différente (#E74C3C).
+o	Mettre en évidence la ligne correspondante (background #F0F0F0) dans le tableau.
+•	F4.3 : Informations Aéroportuaires :
+o	Pour l’aéroport de départ et de destination, afficher :
+	Nom complet (ex : « Paris Charles de Gaulle »).
+	Code IATA/OACI (CDG / LFPG).
+	Fuseau horaire (ex : « CET (UTC+1) »).
+	Longueur de piste principale (en mètres & ft).
+	Numéro de terminal principal (ex : « Terminal 1 »).
+	Fréquence radio d’approche (ex : « 123.45 MHz »).
+o	Sur mobile, grouper ces informations dans un carte Ionics avec l’icône d’aéroport.
+o	Sur tablette / IFE, afficher dans un panel latéral (2 colonnes, 2 lignes).
+•	F4.4 : Scénario avec Escale :
+o	Si le vol comporte une ou plusieurs escales, segmenter l’affichage :
+	Segment 1 : CDG → LHR : liste de waypoints, horaires, etc.
+	Segment 2 : LHR → JFK : liste de waypoints, horaires.
+o	Afficher la porte de correspondance à l’escale (via API ou email) : « Correspondance à LHR : Porte B22 ».
+o	Expliquer clairement que le vol est multi-étapes (onglets distincts ou accordéon pour chaque segment).
+•	F4.5 : Export HTML/PDF :
+o	Bouton « Télécharger Plan de Vol » en haut du tableau (composant ion-button).
+o	À l’activation :
+1.	Générer un fichier HTML (utiliser innerHTML du tableau, ajouter <style> pour mise en page).
+2.	Utiliser le plugin Ionic Print ou une librairie JS (jsPDF) pour convertir en PDF avec en-tête : nom vol, date, date génération.
+3.	Proposer le téléchargement direct (mobile) ou l’ouverture du PDF (IFE/Web).
+o	Durée maximum de génération : 5 s.
+•	F4.6 : Mode Avion – Cache :
+o	Si offline, afficher la liste des waypoints à partir du cache local (mise à jour avant décollage).
+o	Si le cache a expiré ( > 24 h), afficher un message « Plan de vol non disponible hors connexion ».
+Écrans associés :
+•	Page « Plan de vol » (composant FlightPlanPage).
+•	Onglet « Plan de vol » de « Ma Fenêtre » (composant MyWindowPlanTab).
+Critères d’acceptation :
+•	Affichage du tableau : < 2 s sur mobile de milieu de gamme.
+•	Sélection waypoint : recentre la carte < 1 s.
+•	Génération PDF/HTML : < 5 s.
+•	Scénario multi-steps : user peut naviguer entre segments via tab ou accordéon, < 200 ms délai.
+________________________________________
+5.5. F5 : Informations Météorologiques à Bord (Météo Vol)
+Description : Intégrer des couches météorologiques en surimpression sur la carte du vol, afficher des données météo au sol pour la destination, et alerter en cas de conditions extrêmes.
+Règles Métier :
+•	F5.1 : Couche Fronts Météo (En Ligne) :
+o	Récupérer via API OpenWeatherMap/AerisWeather les fronts (pluie, orage, neige) au format GeoJSON pour la zone actuelle (zone centrée sur position GPS ± 1 000 km).
+o	Afficher des polygones semi-transparents :
+	Pluie : polygones bleus (rgba(52, 152, 219, 0.4)).
+	Orages : polygones rouges/orange (rgba(231, 76, 60, 0.4)).
+	Neige : polygones blancs/gris (rgba(189, 195, 199, 0.4)).
+o	Superposer en-dessous des marqueurs avion/aéroports.
+o	Mettre à jour toutes les 5 min (paramètre configurable, min 5 min pour éviter quotas API).
+•	F5.2 : Carte Isobare :
+o	Option « Superposition Météo » (Toggle dans le menu Carte).
+o	Charger les isobares (ligne de même pression atmosphérique) depuis l’API OpenWeatherMap ou service embarqué.
+o	Afficher des lignes fines (courbe géodésique) avec légende (p. ex. « 1013 hPa »).
+o	Basculer sur des styles de ligne en mode sombre (blanc) ou clair (noir).
+•	F5.3 : Températures à Destination :
+o	Récupérer via l’API météo la température prévue à l’heure d’arrivée estimée (ETA).
+o	Afficher dans un panneau latéral (Ionic Grid) :
+	Température (°C/°F).
+	Conditions (ex : « Ensoleillé », « Orages »).
+	Vent (direction + vitesse), « Vent : SE 20 km/h ».
+o	Icônes correspondantes (soleil, nuages, pluie, neige, etc.).
+•	F5.4 : Alertes Météo Extrême :
+o	Si tempête (wind > 80 km/h), ouragan, tempête de neige ou avalanche (zone montagneuse) à la destination :
+	Afficher un bandeau rouge fixe en haut de l’écran « Météo extrême prévue à destination : Tempête — Prenez vos dispositions ».
+	Proposer un bouton « Détails météo » renvoyant vers la section météo dédiée.
+o	L’alerte se lève automatiquement si la condition n’est plus détectée.
+•	F5.5 : Mode Avion & Cache :
+o	Conserver le dernier jeu de données météo en cache (validité max : 10 min).
+o	Si expiration du cache, masquer la couche météo et afficher un toast « Météo non disponible hors ligne ».
+o	L’icône météo à côté du plan de vol (section F1) devient grisée si > 10 min sans mise à jour.
+Écrans associés :
+•	Page « Carte de vol » (couches météo).
+•	Section « Météo à destination » dans le menu « Vol » (composant FlightWeatherPage).
+•	Onglet « Carte » de « Ma Fenêtre » (couches météo + POIs).
+Critères d’acceptation :
+•	Icônes & polygones : clairement lisibles, avec légende intégrée.
+•	Temps de rafraîchissement : < 5 min pour obtenir une nouvelle donnée en ligne.
+•	Transition en mode Avion : < 1 s pour basculer vers cache uniquement.
+________________________________________
+5.6. F6 : Comportement en Mode Avion / Coupure de Données (Fallback)
+Description : Assurer la continuité de l’application lorsque l’appareil bascule en mode Avion ou perd la connectivité réseau. Les données essentielles doivent rester disponibles via le cache local et le GPS.
+Règles Métier :
+•	F6.1 : Détection de l’État Réseau :
+o	Utiliser le plugin Capacitor Network pour écouter les changements d’état :
+	networkStatus.connected == false → passer en mode Avion.
+	networkStatus.connected == true → revenir en mode Connecté.
+o	En mode Avion, désactiver tout appel API, masquer les boutons de rafraîchissement forcé (« Rafraîchir »).
+•	F6.2 : Affichage du Bandeau Mode Avion :
+o	Lorsque offline, afficher un bandeau discret en rouge/orange en haut : « Mode Avion – données en cache », persistante jusqu’au retour en ligne.
+o	Le bandeau inclut un bouton « Test Connexion » qui, s’il est cliqué, vérifie l’état réseau.
+•	F6.3 : Position GPS et Dernières Données :
+o	Récupérer la dernière position GPS valide (stockée dans le cache) et continuer à interroger le GPS (si accordé).
+o	Si le GPS ne fournit plus de fix (> 30 s sans signal), afficher un toast « GPS non disponible ».
+o	Mettre à jour la carte et les indicateurs (F2, F3) à partir des données GPS.
+•	F6.4 : Cache Local (10 min) :
+o	Stocker automatiquement dans le cache :
+	Plan de vol complet (waypoints, aéroports, horaires, lastUpdated).
+	Dernières 10 positions GPS avec timestamp.
+	Indicateurs avioniques (altitude, vitesse, cap) les plus récents.
+	Données météo (couche).
+o	TTL (Time To Live) : 10 minutes pour chaque catégorie ; après expiration, marquer comme périmé et avertir l’utilisateur.
+•	F6.5 : Icônes Dynamiques Grisées :
+o	Si pas de mise à jour avionique depuis > 5 min (connecté) ou GPS non disponible (Avion), griser les icônes (avion, progression, météo) : opacité 0,5.
+o	Proposer un toast « Données en cache – certaines informations peuvent être incomplètes ».
+•	F6.6 : Retour en Ligne Automatique :
+o	À la reconnection, détecter automatiquement via Network plugin ; afficher un toast vert : « Données en ligne rétablies ».
+o	Rafraîchir immédiatement : plan de vol (F4), indicateurs (F3), carte (F2).
+o	Supprimer le bandeau Mode Avion.
+•	F6.7 : Mode Avion dans « Ma Fenêtre » :
+o	Onglet « Vue hublot » (F10.9) : si GPS disponible, afficher la carte statique centrée sur la dernière position ; sinon, afficher un message « Vue hublot non disponible hors connexion ».
+o	Onglet « Carte interactive » : même comportement que F2 en mode Avion.
+o	Onglet « Données textuelles » : charger les données du cache pour altitude, vitesse, cap, désactiver les boutons de rafraîchissement manuels (ou afficher « Hors ligne »).
+Écrans associés :
+•	Tous les écrans liés à la section « Vol ».
+•	Composant global NetworkInterceptor pour appliquer le fallback.
+Critères d’acceptation :
+•	Détection mode Avion : bascule VISUELLE sous 2 s après perte réseau.
+•	Aucune erreur fatale : pas de crash de l’app (> 99,8 % du temps).
+•	Récupération retour en ligne : toutes les données rafraîchies en < 5 s.
+________________________________________
+5.7. F7 : Paramètres & Personnalisation Utilisateur
+Description : Fournir un écran de paramètres permettant au passager d’ajuster son expérience de suivi de vol : langue, unités, thème, fréquence de rafraîchissement, notifications, etc.
+Cahier des Charges Fonctionnel : Partie Visualisation des Informations de Vols et Fonctionnalité « Ma Fenêtre »
+________________________________________
+5.7. Fonctionnalité F7 : Paramètres et Personnalisation Utilisateur
+Règles Métier :
+• F7.1 : Langue de l’Application : l’utilisateur peut choisir la langue de l’interface (Français, Anglais, Espagnol optionnel). Les textes, commandes, légendes et infobulles doivent être traduits en temps réel dès la sélection. Les fichiers de traduction (JSON ou XLIFF) doivent contenir toutes les clés utilisées dans l’app (libellés, messages d’erreur, légendes, descriptions de POIs, etc.).
+• F7.2 : Units de Mesure : l’utilisateur peut choisir entre Système métrique (mètres, kilomètres, °C) et Système impérial (pieds, miles marins, °F). Ce choix s’applique à l’altitude, la distance restante, la vitesse sol et verticale, la température extérieure, ainsi qu’à l’affichage des indicateurs. Dès qu’il est modifié, toutes les valeurs chiffrées se recalculent et s’affichent avec l’unité choisie sans rechargement complet de l’application.
+• F7.3 : Thème Clair/Sombre : l’utilisateur peut passer du thème clair au thème sombre via un toggle. Les différentes couches de cartes (jour/nuit) et les composants graphiques (couleurs de fond, icônes, barres, textes) s’adaptent automatiquement. Cette modification doit s’appliquer instantanément sur toutes les pages — y compris « Ma Fenêtre » — sans redémarrage.
+• F7.4 : Fréquence d’Actualisation : l’utilisateur définit la fréquence de rafraîchissement des données avioniques et cartographiques dans les paramètres (valeurs disponibles : 15 s, 30 s, 1 min, 2 min). Le choix s’applique à tous les indicateurs (altitude, vitesse, ETA, ETE) et aux mises à jour de carte. Lorsqu’un nouvel intervalle est sélectionné, l’application adapte immédiatement son timer interne et planifie la prochaine mise à jour selon la nouvelle cadence.
+• F7.5 : Alertes Visuelles : l’utilisateur active ou désactive les alertes suivantes : turbulence, passage de fuseau horaire, palier de croisière atteint, début de descente, variation d’ETA > 10 min (retard/avance). Des toggles dédiés (Ionic Toggle) permettent de paramétrer chaque type d’alerte. Par défaut, toutes les alertes sont activées. Les changements sont persistants jusqu’à ce que l’application soit entièrement réinitialisée ou que l’utilisateur modifie à nouveau.
+• F7.6 : Mise en Veille de l’Écran : si aucune interaction n’a lieu sur les écrans de vol pendant une durée paramétrable (par défaut 5 min, options : 3 min, 5 min, 10 min), l’écran baisse progressivement sa luminosité pour économiser l’énergie. L’application affiche un message « Économie d’énergie activée » dans un bandeau discret. Toute interaction (tap ou bouton) ramène l’écran à la luminosité normale.
+• F7.7 : Mode GPS Unique / Avion : l’utilisateur peut forcer l’application en mode « GPS uniquement » (modes connecté + GPS mais sans appel aux APIs externes) ou en mode « Avion complet » (sans requêtes réseau, uniquement cache). Cette option est accessible dans « Paramètres avancés » et s’applique à la session en cours. En mode « GPS uniquement », l’application ne tente pas de récupérer les données météo ou trajectoire en ligne, mais se contente de mettre à jour la carte et les indicateurs via GPS ; en mode « Avion complet », elle désactive également le GPS s’il est nécessaire de minimiser la consommation.
+• F7.8 : Stockage Local Sélectionnable : sur mobile, l’utilisateur choisit entre Ionic Storage (simplifié) ou SQLite (plus performant) pour stocker le cache local (données vol, cartes, POIs). Si l’espace local devient insuffisant, l’application alerte l’utilisateur via un toast « Espace de stockage insuffisant » et propose de purger les caches obsolètes (données > 10 min). Sur IFE, l’option SQLite est toujours prioritaire.
+• F7.9 : Profil Utilisateur : si le passager s’authentifie (via identifiant passager IFE ou compte compagnon de vol), ses préférences (langue, unités, thème, fréquence, alertes) sont sauvegardées et restaurées sur tout le vol, et si disponible, sur plusieurs appareils (synchronisation via API interne). En mode invité, les préférences sont stockées uniquement localement et perdues à la fermeture de l’application.
+• F7.10 : Réinitialiser les Paramètres : bouton « Réinitialiser par défaut » pour revenir aux paramètres usine (langue : Français, unités : métriques, thème : clair, fréquence : 30 s, toutes alertes activées, stockage : Ionic Storage). Confirmer par pop-up « Voulez-vous vraiment réinitialiser ? » avec option « Annuler | Valider ».
+Écrans associés :
+•	Page « Paramètres vol » accessible depuis le menu principal IFE ou le menu hamburger en mobile.
+•	Sections dédiées pour chaque paramètre (langue, unités, thème, actualisation, alertes, stockage, profil).
+Critères d’acceptation :
+•	Les modifications (F7.1–F7.5) s’appliquent immédiatement (< 0,5 s) sans rechargement complet.
+•	L’option de stockage local (F7.8) bascule sans perte de données pertinentes durant le vol.
+•	Le mode « GPS uniquement » et « Avion complet » désactive ou réduit correctement les appels réseau et GPS.
+•	Les préférences sont persistantes pendant toute la durée du vol et restaurées sur reconnexion ou nouvel appareil si profil authentifié.
+•	Le bouton « Réinitialiser » ramène réellement à la configuration par défaut (testé en laboratoire, comparaison des valeurs).
+5.8. Fonctionnalité F8 : Historique et Statistiques du Vol
+Règles Métier :
+• F8.1 : Durée de Vol Écoulée : calculer le temps écoulé depuis le décollage (timer démarré automatiquement à partir du moment où l’altitude dépasse 1 000 ft). Afficher le timer en format hh:mm:ss et mettre à jour chaque seconde. Lorsque l’altitude retombe en dessous de 1 000 ft à l’approche, arrêter le timer et conserver la valeur finale.
+• F8.2 : Distance Cumulée Parcourue : intégrer la distance chaque seconde via la formule : distance = vitesse_sol × (∆t), avec ∆t en secondes. Calculer la distance cumulée en kilomètres ou miles marins selon unité choisie. Mettre à jour toutes les 15 s pour économiser la batterie/CUP mobile. L’affichage en mobile doit être sous forme d’un compteur (ex : « Distance parcourue : 2 345 km »).
+• F8.3 : Vitesse Moyenne Effective : calculer comme distance cumulée / durée écoulée (en km/h ou nœuds). Mettre à jour toutes les 30 s et afficher en-dessous de la distance cumulée, avec label « Vitesse moyenne : XXX km/h (YYY nœuds) ».
+• F8.4 : Graphique Altitude vs Temps : afficher un graphique en courbe minimaliste (librairie Chart.js ou ngx-charts) représentant l’altitude (axe vertical) en fonction du temps écoulé (axe horizontal). Le graphique se met à jour en temps réel sur de nouveaux points (toutes les 15 s), avec implémentation d’un buffer circulaire pour conserver au maximum 120 entrées (soit 30 min d’historique). Les échelles s’adaptent automatiquement (zoom vertical si variation > 5 000 ft), et un tooltip affiche la valeur exacte au point survolé.
+• F8.5 : Export CSV : bouton « Exporter CSV » génère un fichier CSV contenant l’historique des données collectées (timestamp, latitude, longitude, altitude, vitesse, cap, température) à chaque minute. La génération se fait en arrière-plan (Web Worker sur mobile ou thread séparé sur IFE) pour ne pas bloquer l’UI. L’utilisateur peut ensuite télécharger ce fichier (sur mobile) ou l’envoyer par email via l’API interne IFE (sur tablette/IFE). Une fois généré, le nom du fichier suit la convention « StatsVol_<numéro_vol>.csv ».
+• F8.6 : Stockage Temporaire et Purge Automatique : une fois exporté ou 24 h après le vol, les données statistiques sont automatiquement purgées du cache local pour libérer de l’espace. Une section « Historique des exports » affiche la liste des fichiers CSV générés pour la durée du vol.
+• F8.7 : Indicateurs Visuels de Performance : pendant les phases critiques (décollage, montée, palier, descente, atterrissage), colorer la courbe altitude vs temps en fonction des paliers (vert pour montée, bleu pour palier, rouge pour descente), via un gradient dynamique. En cas d’échec de lecture de données (< 3 s sans donnee), afficher un segment en gris.
+Écrans associés :
+•	Page « Statistiques vol » dans le menu « Vol ».
+•	Affichage sous forme de deux sections : statistiques cumulées (durée, distance, vitesse moyenne) et graphique (altitude vs temps), avec bouton « Exporter CSV ».
+Critères d’acceptation :
+•	Le timer (F8.1) démarre et s’affiche en < 1 s après franchissement 1 000 ft.
+•	La distance cumulée (F8.2) et vitesse moyenne (F8.3) sont exactes (écart < 1 % par rapport à référence avionique) en conditions simulées.
+•	Le graphique (F8.4) s’affiche en < 2 s et se met à jour sans latence > 200 ms.
+•	Le fichier CSV se génère en < 5 s sur mobile milieu de gamme et est téléchargeable/envoyable.
+•	Les couleurs du graphique changent correctement selon les paliers (< 100 ms de latence sur changement).
+5.9. Fonctionnalité F9 : Notifications et Alertes Contextuelles
+Règles Métier :
+• F9.1 : Passage de Fuseau Horaire : dès que la longitude traversée implique un changement de fuseau, afficher une bannière non intrusive « Nouvel horaire local : UTC+X ». Cette bannière doit rester visible 5 s puis disparaître automatiquement, ou immédiatement si l’utilisateur appuie sur « OK ». Mettre à jour l’horloge locale affichée sur tous les écrans de vol.
+• F9.2 : Palier de Croisière Atteint : dès que l’altitude dépasse la valeur programmée pour le palier (issue du plan de vol), afficher un message « Palier de croisière atteint : [altitude] ft » accompagné d’un bref survol de l’indicateur dans l’onglet « Données de vol ». Cette alerte colorée en vert clair disparaît après 8 s ou sur clic.
+• F9.3 : Début de la Descente : dès que l’altitude commence à décroître continuellement (au moins 500 ft de chute sur 30 s), afficher un message « Descente en cours : angle vertical estimé = [xx] ft/min ». L’alerte doit être accompagnée d’un indicateur animé (flèche vers le bas) dans la barre de statut.
+• F9.4 : Turbulence Modérée : si le module météo (API ou cache) signale une zone de turbulence dans un rayon de 50 km, afficher un pop-up « Turbulences modérées dans X min » (couleur orange). Le pop-up reste 7 s et propose un bouton « Désactiver cette alerte » pour les passagers sensibles.
+• F9.5 : Variations d’ETA > 10 min : comparer l’ETA estimé en temps réel avec l’ETA planifié : si l’écart > 10 min (positif ou négatif), afficher une alerte « Retard estimé : +XX min » (rouge) ou « Arrivée anticipée : -XX min » (vert). Cette notification reste jusqu’à ce que l’utilisateur la ferme.
+• F9.6 : Rappel Pré-Atterrissage : envoyer une notification locale (mobile : push, IFE : toast) 15 min avant l’heure d’atterrissage estimée. Le message « Préparez vos affaires, atterrissage dans 15 min » apparaît en bas de l’écran. Le passager peut retarder ou ignorer le rappel.
+• F9.7 : Changement de Canal IFE : si l’utilisateur passe à un autre module IFE (jeux, films, etc.) pendant un événement critique (alerte de turbulence, descente, etc.), afficher un pop-up minimaliste en surimpression dès qu’il revient dans « Vol » pour signaler l’événement manqué.
+Écrans associés :
+•	Superpositions (« toast », bannière, pop-up) sur tous les écrans « Vol ».
+•	Intégration dans « Ma Fenêtre » pour indiquer le rappel pré-atterrissage et autres alertes.
+Critères d’acceptation :
+•	Toutes les alertes apparaissent en < 1 s après détection de l’événement.
+•	Les alertes restent visibles la durée indiquée ou jusqu’à action de l’utilisateur.
+•	Aucun conflit n’interrompt la diffusion sonore ou visuelle (pas d’empilement inapproprié de pop-ups).
+5.10. Fonctionnalité F10 : Fonctionnalité « Ma Fenêtre »
+Structure Générale :
+La fonctionnalité « Ma Fenêtre » s’appuie sur un composant Ionic Tabs à trois onglets (Ionic TabBar) : « Données Textuelles », « Carte Interactive », « Vue Hublots ». Chaque onglet contient plusieurs sous-sections, boutons et filtres spécifiques.
+F10.1 : Données Textuelles sur le Vol (Onglet 1)
+•	Afficher un résumé rapide en haut : numéro de vol, origine, destination, progression (barre simple 0–100 %).
+•	Section « Données Générales » : reprise de F1 (numéro de vol, horaire, aéroports, classe). Permet un accès rapide aux paramètres (F7) via icône roue dentée en haut à direita.
+•	Section « Indicateurs » : reprise de F3 (altitude, vitesse, ETA, ETE) sous forme de liste responsive, adaptée à l’orientation portrait/paysage.
+•	Section « POIs à Survol » : liste des 5 POIs les plus proches triés par distance, avec mini-carte miniature, distance et ETA de survol. Chaque POI affiche un bouton « Voir sur carte » qui fait passer à l’onglet Carte Interactive centré sur le POI.
+F10.2 : Carte Interactive (Onglet 2)
+•	Contient la carte Leaflet/Mapbox remplissant 70 % de la hauteur, avec couche de cartes jour/nuit selon heure locale.
+•	Sur la carte :
+• Icône avion indiquant position actuelle (SVG rotatif selon cap).
+• Polyligne du plan de vol (ligne continue pour la partie parcourue, pointillée pour la partie restante).
+• Marqueurs pour aéroports de départ et arrivée, avec infobulles affichant nom, code et heure locale actuelle.
+• Marqueurs POIs (icônes personnalisées) avec filtre par catégories (villes, montagnes, lacs).
+•	Contrôles :
+• Boutons « Zoom + / Zoom – » en bas à direita pour écrans non tactiles.
+• Pinch-to-zoom et glisser (pan) pour écrans tactiles.
+• Bouton flottant « Recentrer » (Ionic Fab) en bas à gauche qui ramène au centre de l’avion en < 500 ms.
+• Dropdown « Couche » en haut à esquerda pour basculer entre « Carte standard », « Satellite », « Relief ».
+•	Mise à jour automatique de la position toutes les 30 s (mode connecté) ou en continu via GPS (mode Avion).
+•	Légende fixe en bas à gauche expliquant les icônes (avion, POIs, turbulence, aéroports).
+•	Section latérale ou encart flottant (en mode paysage) affiche en temps réel l’ETA, ETE, distance restante et température extérieure.
+F10.3 : Vue Hublots (Onglet 3)
+•	Simule une vue panoramique grâce à un rendu Three.js simple ou Canvas 2D.
+•	À partir de la latitude, longitude, altitude, extraire une texture de la Terre (carré d’images stockées localement) et projeter une portion correspondant à la zone survolée.
+•	Afficher des POIs majeurs sur la vue hublot (icônes semi-translucides) à l’emplacement approximatif sur l’horizon, calculés via la formule de projection géographique (rhumb line).
+•	Mettre à jour la vue toutes les 30 s pour correspondre à la nouvelle position GPS ; lors de transitions de paliers (montée/descente), effectuer un fondu doux de 500 ms entre deux textures d’altitude différentes (zoom simulé).
+•	Superposer un tableau semi-transparent en bas avec l’altitude, la vitesse sol, le cap et l’heure locale au bas de l’écran, en police blanche légèrement ombrée pour lisibilité.
+F10.3.1 : Gestion des POIs dans la Vue Hublot
+•	Utiliser la base POI locale (stockée sur appareil) contenant latitude/longitude, nom, description. Pour chaque POI visible (distance < 500 km et altitude adaptée), calculer l’angle d’élévation = arctan((altitude_POI – altitude_avion)/(distance_ sol)). Si angle > -5° (au-dessus de l’horizon), afficher l’icône du POI à l’emplacement correspondant dans la texture.
+F10.3.2 : Options de Qualité
+•	Sur mobile de faible puissance, proposer un bouton « Qualité réduite » qui diminue la résolution de la texture (de 2048×1024 à 1024×512) pour améliorer la fluidité (≥ 30 fps). Sur tablette/IFE haut de gamme, charger la haute résolution par défaut.
+F10.3.3 : Mode Avion dans Vue Hublot
+•	Si le GPS signale moins de 3 satellites détectés, désactiver la projection en direct et afficher un fond statique « Vue hublot indisponible » avec option « Réessayer » qui tente de relancer la géolocalisation.
+F10.4 : Contrôles et Interactions Partagés
+•	Barre de navigation fixe en haut avec titre « Ma Fenêtre » et icône « ‹ Vol › » pour revenir au menu principal.
+•	Swipe horizontal (gesture) pour passer d’un onglet à l’autre avec animation fluide (300 ms).
+•	Long press (2 s) sur un POI ouvre une modale affichant la description détaillée, la distance actuelle, une photo ou illustration (stockée localement ou préchargée en arrière-plan).
+•	Double tap sur la zone centrale pour basculer en plein écran (masquer header et footer), disponible uniquement sur mobile.
+•	En mode paysage, afficher la section « Liste des POIs » dans un panneau coulissant depuis la droite (25 % de la largeur), avec possibilité de la masquer via swipe.
+F10.5 : Paramétrage du Zoom Automatique
+•	Définir quatre paliers d’altitude applicables dans les onglets « Carte » et « Vue Hublots » :
+– > 30 000 ft : paramètre zoom = 8 (vue globale, rayon d’affichage environ 800 km).
+– 20 000–30 000 ft : zoom = 10 (rayon ~ 400 km).
+– 10 000–20 000 ft : zoom = 12 (rayon ~ 150 km).
+– < 10 000 ft : zoom = 14 (rayon ~ 50 km).
+•	À chaque palier franchi, effectuer une transition de zoom de 700 ms pour éviter un effet de saut ; synchroniser la mise à jour du polygone de trajectoire et les marqueurs POI.
+F10.6 : Légende et Filtres POIs
+•	Ajouter une icône « i » cliquable en haut à droite pour ouvrir la légende POI : couleurs et formes des icônes (ville : carrés bleus, montagne : triangles verts, lac : cercles bleus, monument : étoiles dorées).
+•	Filtre POIs : ensemble de toggles en bas de l’onglet « Carte » pour afficher/masquer les catégories POI. La sélection s’applique dynamiquement, sans rechargement complet de la carte.
+F10.7 : Couches Météo et Turbulence
+•	Sur la carte, activer via un bouton « Météo » en haut à droite une couche superposée (semi-transparente) affichant les formations nuageuses, fronts, zones de turbulence via des icônes personnalisées (icône nuage orage, gradient de couleurs pour intensité).
+•	Les données météo proviennent d’une API externe en mode connecté (rafraîchissement toutes les 5 min) ; en mode Avion, afficher la dernière couche reçue en cache (si < 10 min), sinon masquer la couche et afficher « Météo indisponible ».
+•	Lorsqu’une zone de turbulence est détectée à moins de 100 km de la trajectoire, afficher un anneau rouge clignotant autour de l’icône avion sur la carte pendant 10 s, accompagné d’une vibration légère (sur mobile si autorisé) ; puis passer en icône statique rouge tant que la zone reste proche.
+F10.8 : Export et Partage de « Ma Fenêtre »
+•	Bouton « Partager Ma Fenêtre » en haut à gauche (icône partage) : génère un paquet contenant capture d’écran de l’onglet actif (via Capacitor Screenshot) et fichier texte JSON structuré (timestamp, position, altitude, vitesse, liste POIs).
+•	Sur mobile, afficher une liste de cibles de partage (WhatsApp, Email, SMS, Bluetooth) via le plugin Social Sharing. L’utilisateur choisit la plateforme et envoie l’image + JSON.
+•	Sur IFE, stocker la capture dans le répertoire « /exports/ » et afficher un toast « Export enregistré : /exports/MaFenêtre_<numéro_vol>_.png ».
+Critères d’acceptation (Ma Fenêtre) :
+•	Chargement initial de l’onglet < 2 s sur mobile et IFE.
+•	Transition entre les onglets < 200 ms.
+•	Simulation hublot fluide (≥ 30 fps) sur tablette milieu de gamme, ≥ 25 fps sur mobile milieu de gamme.
+•	Zoom automatique correct (< 1 s pour transition de palier).
+•	Affichage et filtrage des POIs sans latence perceptible (< 300 ms).
+•	Capture et partage fonctionnent correctement sur mobile et IFE (taille d’image < 1 Mo, JSON < 100 Ko).
+________________________________________
+6. Exigences Non Fonctionnelles
+•	N1 : Performance Générale :
+• Temps de réponse aux interactions < 300 ms.
+• Rafraîchissement des données textuelles < 500 ms.
+• Rafraîchissement carte < 1 s (tuiles en cache), sinon < 3 s.
+• Empreinte mémoire maximale (heap) < 250 Mo sur mobile milieu de gamme.
+•	N2 : Fiabilité et Disponibilité :
+• Disponibilité du module IFE > 99,8 % pendant le vol.
+• Temps de démarrage « cold start » < 5 s sur tablette ou smartphone milieu de gamme.
+•	N3 : Sécurité et Confidentialité :
+• Aucune donnée vol critique ne doit transiter hors de l’IFE (CSP, CORS strict).
+• Chiffrement AES256 des caches sensibles (plan de vol, historique, API keys).
+• Tokens API stockés dans Secure Storage (Capacitor Secure Storage) et renouvelés via OAuth si nécessaire.
+•	N4 : Portabilité et Compatibilité :
+• Support Android ≥ 10 (SDK 29) et iOS ≥ 13.
+• Compatibilité avec écrans IFE non tactiles (boutons physiques), tablettes et smartphones tactiles.
+• Tests sur devices bas de gamme (2 Go RAM, CPU quad-core, GPU Adreno 506/PowerVR GE8320).
+•	N5 : Accessibilité (a11y) :
+• Contraste ≥ 4,5:1 sur tous les textes.
+• Navigation au clavier sur IFE (focus visible sur éléments interactifs).
+• Texte redimensionnable via paramètres système (Dynamic Type iOS, Font Scale Android).
+• Étiquettes ARIA sur tous les boutons et icônes interactives.
+________________________________________
+7. Interfaces / Intégrations
+7.1. Sources de Données
+•	Parsing Email Réservation : module IMAP/OAuth pour récupérer numéro de vol, horaires, classe, aéroports.
+•	APIs Externes :
+• Aviationstack pour données vol en temps réel (position, altitude, vitesse).
+• OpenSky Network pour trames ADS-B (position, plan de vol, route).
+• OpenWeatherMap ou AerisWeather pour cartes météo et données turbulence.
+•	GPS Local (Capacitor Geolocation) : position & vitesse en mode Avion (requiert autorisation explicite).
+•	Cache Cartographique : tuiles vectorielles/raster stockées dans IndexedDB ou filesystem (Capacitor Filesystem), préchargées autour de l’itinéraire.
+7.2. Interfaces Utilisateur
+•	Écrans Tactiles : gestes pinch, swipe, tap, drag (Ionic Gestures).
+•	Écrans Non Tactiles IFE : boutons physiques ± zoom, flèches pan, bouton central « Retour ».
+•	Local Notifications : Capacitor Local Notifications pour rappels pré-atterrissage & alertes.
+7.3. Interfaces Tierces
+•	API IFE Interne : authentification passager (classe, profil), envoi CSV via messagerie interne.
+•	Plugins Capacitor : Geolocation, Network, Storage, Secure Storage, Local Notifications, Filesystem, Screenshot, Social Sharing.
+________________________________________
+8. Sécurité et Gestion des Erreurs
+8.1. Gestion des Erreurs Techniques
+•	E1 : Erreur GPS : si < 3 satellites ou permission refusée, afficher « Position non disponible » et passer au mode cache (afficher dernière position connue).
+•	E2 : Échec API Vol : si appel à Aviationstack/OpenSky échoue (timeout, 4xx/5xx), afficher « Données vol non disponibles » et basculer vers cache local.
+•	E3 : Échec Chargement Carte : si tuiles manquantes/corrompues, afficher « Carte indisponible » et tenter rechargement au prochain cycle (lorsque le réseau revient).
+•	E4 : Stockage Local Saturé : si Ionic Storage/SQLite atteint le quota, afficher « Espace local insuffisant » et proposer de purger les données > 10 min.
+•	E5 : Erreur JSON/CSV : lors de l’export (CSV ou JSON), si erreur de génération, afficher « Export impossible » et journaliser localement (log Ionic Logger).
+•	E6 : Erreur Thème/Traduction : si la requête de fichier de traduction échoue, revenir au français par défaut et afficher « Chargement des langues impossible » en badge.
+8.2. Sécurité des Données
+•	S1 : Chiffrement Local : utiliser AES256 pour chiffrer les données sensibles dans le cache (plan de vol, historique, POIs), via Capacitor Secure Storage ou SQLite avec chiffrement.
+•	S2 : Isolation des Communications : restreindre les domaines autorisés (CSP) et contrôler les appels réseau (CORS) pour empêcher toute fuite de donnactéristiques.
+•	S3 : Authentification Passager : si l’utilisateur s’authentifie, lier le profil passager aux préférences et restreindre l’accès à certaines fonctionnalités (exploitation de données de vol enrichies).
+•	S4 : Permissions : demander au démarrage (ou lors du besoin réel) l’accès à la géolocalisation et aux notifications ; expliquer clairement la finalité de la demande pour la conformité RGPD.
+________________________________________
+9. Tests et Recettes Fonctionnelles
+9.1. Tests Unitaires (Ionic/Jasmine/Karma)
+•	Vérifier l’application des paramètres (F7) : modifications de langue, unités, thème, fréquence, alertes.
+•	Tester la logique de calcul ETA/ETE, distance cumulée, vitesse moyenne (F8).
+•	Valider la génération du CSV et JSON (F8, F10.8).
+•	Simuler l’état réseau (online/offline) pour vérifier le comportement cache (F6).
+•	Tester l’affichage des POIs, projections vue hublot (F10).
+9.2. Tests d’Intégration
+•	Validation des appels API Aviationstack/OpenSky et traitement des données.
+•	Test du parsing d’email pour extraire les informations de vol (numéro, horaires, aéroports).
+•	Vérifier l’intégration Capacitor Plugins (Geolocation, Network, Storage, Notifications, Screenshot, Social Sharing).
+•	Scénarios de mode Avion complet puis retour online (F6).
+9.3. Tests d’Acceptation Utilisateur (UAT)
+•	Panel de 20 passagers (18–75 ans) sur tablettes, smartphones et IFE.
+•	Évaluer la compréhension et l'utilisation des paramètres (F7) : bascule thématique/langue/alertes.
+•	Vérifier la fluidité de la vue hublot (≥ 30 fps sur tablette, ≥ 25 fps mobile).
+•	Tester la fonction d’export et de partage « Ma Fenêtre ».
+•	Mesurer le temps de réaction (< 300 ms) et la lisibilité dans différentes conditions d’éclairage (< 300 lux et > 1 000 lux).
+9.4. Critères de Non-Régression
+•	Aucune nouvelle fonctionnalité ne doit augmenter le temps de démarrage initial de + 0,5 s.
+•	Maintenir la couverture des tests unitaires ≥ 85 %.
+•	Vérifier que le cache local ne dépasse jamais l’espace autorisé (quota device).
+•	S’assurer que les performances (rafraîchissement, transitions) restent conformes aux exigences (N1).
+________________________________________
+Fin du Cahier des Charges Fonctionnel – Sections F7 à F10 – mis à jour le 3 juin 2025.
+ 
+Algorithmes et Structures de Stockage pour l’Application de Visualisation de Vols
+________________________________________
+1. Introduction
+Ce document décrit les principaux algorithmes et structures de stockage nécessaires pour implémenter les fonctionnalités de suivi de vol, calcul de courbe de trajectoire, gestion des Points d’Intérêt (POIs), et autres composants essentiels de l’application Ionic/Cursor en mode connecté et en mode Avion.
+________________________________________
+2. Structures de Stockage Local
+2.1. Cache des Données de Vol
+2.1.1. Schéma de la Table FlightCache
+•	id (string, clé primaire) : Identifiant unique, p.ex. numéro de vol + date.
+•	timestamp (datetime) : Date et heure de mise en cache (UTC).
+•	latitude (float) : Position GPS en degrés.
+•	longitude (float) : Position GPS en degrés.
+•	altitude_ft (int) : Altitude en pieds.
+•	speed_kts (float) : Vitesse sol en nœuds.
+•	vertical_speed_fpm (int) : Vitesse verticale en ft/min.
+•	heading_deg (int) : Cap en degrés.
+•	temperature_c (float) : Température extérieure.
+•	eta_utc (datetime) : Heure d’arrivée estimée en UTC.
+•	ete_seconds (int) : Temps restant en secondes.
+•	distance_nm (float) : Distance restante en NM.
+•	phase (string) : Phase de vol (au sol, décollage, montée, croisière, descente, atterrissage).
+•	poi_ids (list of strings) : Liste d’identifiants de POIs pertinents pour ce point (références à POICache).
+•	weather_icon (string) : Code icône météo (p.ex. "rain", "clear").
+Implémentation : stocker cette table dans SQLite via Capacitor Community SQLite ou Ionic Storage (IndexedDB sur web). Les poi_ids peuvent être enregistrés comme JSON string.
+2.1.2. Schéma de la Table POICache
+•	poi_id (string, clé primaire) : Identifiant unique POI (p.ex. osm_id ou UUID).
+•	name (string) : Nom du POI.
+•	latitude (float) : Position du POI en degrés.
+•	longitude (float) : Position du POI en degrés.
+•	altitude_ft (int) : Altitude en pieds (si pertinent).
+•	category (string) : Catégorie POI (ville, montagne, lac, monument, etc.).
+•	description (string) : Texte descriptif.
+•	icon (string) : Chemin vers l’icône locale ou URI.
+Implémentation : table SQLite distincte. Permet les requêtes spatiales basiques en filtrant par latitude/longitude.
+2.1.3. Cache Cartographique (Tiles)
+•	tile_key (string, clé primaire) : Format "{z}/{x}/{y}" pour tuiles raster, ou identifiant de tuile vectorielle.
+•	data (blob) : Données de tuile (image PNG ou objet vectoriel sérialisé).
+•	timestamp (datetime) : Dernière mise à jour.
+Implémentation : IndexedDB ou Capacitor Filesystem pour stocker les blobs de tuiles. Un mécanisme LRU (Least Recently Used) supprime automatiquement les tuiles les plus anciennes lorsque l’espace alloué atteint un seuil configurable (par ex. 100 MB).
+2.2. Table Settings
+•	key (string, clé primaire) : Clé de paramètre ("language", "units", "theme", "refreshInterval", "alertTurbulence", etc.).
+•	value (string) : Valeur correspondante (p.ex. "fr", "metric", "dark", "30s", "true").
+Implémentation : Ionic Storage (IndexedDB) pour rapidité de lecture/écriture.
+2.3. Table ExportHistory
+•	export_id (string, clé primaire) : UUID généré à la création de l’export.
+•	flight_id (string) : Référence au vol.
+•	filepath (string) : Chemin vers le fichier CSV/JSON sur le filesystem.
+•	timestamp (datetime) : Date de création.
+Implémentation : SQLite ou IndexedDB en fonction de la plateforme.
+________________________________________
+3. Algorithmes Clés
+3.1. Calcul de la Courbe de Trajectoire (Itinéraire)
+L’objectif : générer une polyligne lisse à afficher sur la carte, reliant les waypoints du plan de vol et interpoler la position actuelle.
+3.1.1. Récupération des Waypoints
+1.	Récupérer depuis l’API avionique (ou cache) la liste de waypoints :
+o	Chaque waypoint contient lat, lon, altitude_cruise_ft, eta_waypoint.
+2.	Trier par ordre croissant de la séquence de vol.
+3.1.2. Interpolation de la Position Actuelle
+•	À partir de FlightCache, on connaît : position (lat, lon), timestamp, et indices sur la liste de waypoints :
+o	prev_waypoint et next_waypoint tels que prev_waypoint.timestamp <= current_time <= next_waypoint.timestamp.
+•	Calcul de la fraction f = (current_time – prev.time) / (next.time – prev.time).
+•	Position interpolée :
+o	lat_current = lat_prev + f * (lat_next – lat_prev)
+o	lon_current = lon_prev + f * (lon_next – lon_prev)
+•	Altitude interpolée via même formule sur altitude_descent/cruise.
+Implantation : ce calcul est effectué toutes les refreshInterval (p.ex. 30 s) en mode connecté. En mode Avion pur, on se base sur GPS brut, sans interpolation.
+3.1.3. Lissage de la Polyligne
+•	Pour éviter les virages trop anguleux, appliquer la simplification de la polyligne selon l’algorithme de Douglas-Peucker :
+1.	D = seuil de tolérance en degrés (~ 0,0001 ° pour 10 m de précision).
+2.	Traiter récursivement : conserver les extrémités et les points dont la distance perpendiculaire à la ligne > D.
+3.	Résultat : liste simplifiée de lat/lon.
+Implantation : utiliser une version JavaScript de Douglas-Peucker avant d’envoyer à la carte. Permet de réduire le nombre de segments et d’améliorer la performance.
+3.2. Calcul et Recherche des POIs
+3.2.1. Chargement Initial des POIs
+•	Charger en local (POICache) tous les POIs dans un rayon initial (p.ex. 800 km autour de l’aéroport de départ).
+•	Structure en mémoire :
+o	Grille spatiale (graticule) divisée en cellules de 1 ° × 1 °, chaque cellule contient une liste de poi_id.
+o	Permet de limiter la recherche aux cellules adjacentes à la position actuelle.
+Implantation : créér un dictionnaire JavaScript :
+const spatialIndex = {
+  "lat_cell_lon_cell": [poi_id1, poi_id2, ...],
+  // p.ex. "48_2": ["poi123", "poi456"],
+  // pour lat ∈ [48,49), lon ∈ [2,3)
+};
+3.2.2. Recherche des POIs à Proximité (Mode Connecté ou Avion)
+1.	Convertir la position actuelle (lat, lon) en cellule : cell_lat = floor(lat), cell_lon = floor(lon).
+2.	Pour N = 1 (rayon de 1 ° ≈ 111 km), chercher dans les cellules ℵ adjacentes (3×3 si N=1).
+3.	Pour chaque poi_id dans ces cellules, récupérer lat_poi, lon_poi depuis POICache.
+4.	Calculer la distance approximative (p.ex. haversine) :
+5.	function haversine(lat1, lon1, lat2, lon2) {
+6.	  const R = 6371; // rayon Terre en km
+7.	  const dLat = (lat2 - lat1) * Math.PI / 180;
+8.	  const dLon = (lon2 - lon1) * Math.PI / 180;
+9.	  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+10.	            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+11.	            Math.sin(dLon/2) * Math.sin(dLon/2);
+12.	  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+13.	  return R * c; // en km
+14.	}
+15.	Ne conserver que les POIs dont distance <= rayon recherché (paramétrable, p.ex. 500 km à haute altitude).
+16.	Trier les résultats par distance croissante et prendre les K premiers (p.ex. K=5).
+Implantation : exécuter ce processus à chaque mise à jour de la position ou toutes les 30 s, en fonction du refreshInterval. En mode Avion, n’effectuer que si désormais position : si GPS est disponible.
+3.2.3. Calcul de l’Angle d’Élévation pour la Vue Hublot
+•	Formule :
+θ=arctan⁡(hPOI−haviondsol)\theta = \arctan\left(\frac{h_{POI} - h_{avion}}{d_{sol}}\right)
+où :
+o	havion=altitude_avion(ft)×0.3048h_{avion} = altitude\_avion(ft)\times 0.3048 → en mètres.
+o	hPOI=altitude_POI(ft)×0.3048h_{POI} = altitude\_POI(ft)\times 0.3048.
+o	dsol=distance_sol(lat_avion,lon_avion,lat_poi,lon_poi)d_{sol} = distance\_sol(lat\_avion, lon\_avion, lat\_poi, lon\_poi) en mètres (via haversine).
+•	Si θ>−5°\theta > -5° (soit > –0.087 rad), alors le POI est visible.
+•	Pour afficher la position sur la texture, en convertir en coordonnées pixel :
+1.	Obtenir la position de l’horizon : center_x = width/2, center_y = height/2.
+2.	Calculer azimuth (direction) :
+ϕ=atan2(sin⁡(Δλ)cos⁡φpoi,cos⁡φavionsin⁡φpoi−sin⁡φavioncos⁡φpoicos⁡(Δλ))\phi = \text{atan2}(\sin(\Delta \lambda) \cos\varphi_{poi}, \cos\varphi_{avion} \sin\varphi_{poi} - \sin\varphi_{avion} \cos\varphi_{poi} \cos(\Delta \lambda))
+où φ\varphi latitudes en radian, Δλ=lon_poi−lon_avion\Delta\lambda = lon\_poi - lon\_avion.
+3.	Projeter sur la texture panoramique :
+	x_pixel = center_x + θ/maxθ\theta / max_\theta × (width/2) × sin(\phi),
+	y_pixel = center_y - θ/maxθ\theta / max_\theta × (height/2) × cos(\phi),
+où max_θ est l’angle maximal visible (p.ex. 30°).
+Implantation : exécuter ce calcul pour chaque POI avant d’afficher la vue hublot.
+3.3. Calcul de l’ETA, ETE, et Distance
+3.3.1. Distance Restante (en NM)
+•	Si en mode connecté avec plan de vol : distance totale planifiée – distance parcourue calculée via intégration des segments entre waypoints jusqu’au current_position.
+•	Si en mode Avion pur (GPS) :
+1.	Charger next_waypoint (lat_next, lon_next).
+2.	distance_to_next_nm = haversine(current_lat, current_lon, lat_next, lon_next) × 0.539957 (conversion km → NM).
+3.	Pour les waypoints suivants, additionner distances entre waypoints successifs.
+Implémentation :
+function computeDistanceRemaining(currentLat, currentLon, waypoints) {
+  let total = 0;
+  // distance vers next waypoint
+  const [latNext, lonNext] = waypoints[0];
+  total += haversine(currentLat, currentLon, latNext, lonNext) * 0.539957;
+  // distances entre waypoints
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    const [latA, lonA] = waypoints[i];
+    const [latB, lonB] = waypoints[i + 1];
+    total += haversine(latA, lonA, latB, lonB) * 0.539957;
+  }
+  return total; // NM
+}
+3.3.2. ETA (Heure d’Arrivée Estimée)
+•	En mode connecté (avec prédiction avionique) : récupérer directement eta_utc depuis l’API ou calcul interne (voir ci-dessous).
+•	Formule interne (si non fournie) :
+1.	distance_remaining_nm (cf. §3.3.1).
+2.	vitesse_actuelle_kts (depuis FlightCache.speed_kts).
+3.	si vitesse_actuelle_kts > seuil (p.ex. 100 kts),
+ETA_utc = current_time_utc + (distance_remaining_nm / vitesse_actuelle_kts) heures.
+•	Sinon, utiliser une vitesse de croisière moyenne (p.ex. 450 kts) pour prévoir.
+Implantation : arrondir l’ETA à la minute la plus proche. Stocker en UTC, puis convertir à l’affichage en heure locale destination selon son fuseau.
+3.3.3. ETE (Temps de Vol Restant)
+•	ETE_seconds = floor(distance_remaining_nm / vitesse_actuelle_kts * 3600) si vitesse_actuelle_kts > seuil, sinon utiliser V_cruise.
+•	Mettre à jour toutes les 30 s pour relativiser l’affichage.
+Implantation : si le vol est presque au sol (altitude < 2000 ft), interrompre le calcul et afficher ETE = 0.
+3.4. Génération et Purge du Cache de Tuiles Cartographiques
+3.4.1. Stratégie LRU (Least Recently Used)
+•	Garder un index en mémoire de la forme :
+o	tileAccess: dictionnaire {tile_key: lastAccessTimestamp}.
+•	À chaque accès à une tuile (lecture sur carte), mettre à jour tileAccess[tile_key] = nowTimestamp.
+•	Lors de l’insertion d’une nouvelle tuile (cache miss), vérifier l’espace disque : si dépassement du quota (p.ex. 100 MB), trier tileAccess par lastAccessTimestamp croissant, et supprimer progressivement les tuiles les plus anciennes jusqu’à retrouver l’espace.
+Implantation : stocker tileAccess dans IndexedDB, actualiser périodiquement (p.ex. toutes les 5 min) pour éviter un grand nombre d’écritures.
+3.4.2. Préchargement de Tuiles Autour de l’Itinéraire
+•	Avant le décollage, en mode connecté, précharger les tuiles pour les zooms [8, 10, 12, 14] autour du plan de vol :
+o	Pour chaque waypoint, calculer sa cellule « tile » selon système XYZ (Web Mercator).
+o	Volume préchargé défini par un rayon de M cellules (p.ex. M=2) selon chaque zoom.
+•	Lister toutes les clés de tuile et demander leur téléchargement en asynchrone :
+•	for (const zoom of [8, 10, 12, 14]) {
+•	  for (const waypoint of waypoints) {
+•	    const [tileX, tileY] = latLonToTile( waypoint.lat, waypoint.lon, zoom );
+•	    for (let dx = -M; dx <= M; dx++) {
+•	      for (let dy = -M; dy <= M; dy++) {
+•	        const key = `${zoom}/${tileX + dx}/${tileY + dy}`;
+•	        prefetchTile(key);
+•	      }
+•	    }
+•	  }
+•	}
+•	Fonction latLonToTile(lat, lon, zoom) selon formules Web Mercator.
+Implantation : adapter M en fonction de la bande passante et de l’espace disque disponible. Les tuiles doivent avoir une priorité inférieure aux requêtes en temps réel.
+________________________________________
+4. Gestion des DONNÉES en Mode Avion
+En mode Avion complet, seule la géolocalisation GPS (si disponible) et le cache local sont utilisés. Les algorithmes suivants s’appliquent :
+4.1. Mise à Jour de la Position
+•	À chaque intervalle (configurable : 15 s, 30 s, 1 min selon F7.4), demander la nouvelle position GPS via Capacitor Geolocation.getCurrentPosition().
+•	Si accuracy > 50 m, accepter la position, sinon ignorer pour éviter le bruit.
+•	Enregistrer dans FlightCache une nouvelle entrée : {timestamp, latitude, longitude, altitude, speed, heading}. Conserver la structure comme en §2.1.
+4.2. Interaction avec le Cache de Vol
+•	Lors de la réception de la nouvelle position, appeler :
+1.	computeDistanceRemaining(...) (cf. §3.3.1)
+2.	computeETA(...) (cf. §3.3.2)
+3.	computeETE(...) (cf. §3.3.3)
+4.	findNearbyPOIs(...) (cf. §3.2.2)
+•	Stocker ensuite la nouvelle entrée dans FlightCache, purger les anciennes > 10 min (F6.4.3).
+4.3. Mise à Jour du Cache Cartographique
+•	Aucun nouveau téléchargement, sauf si GPS placé dans une nouvelle cellule non présente :
+o	Si telle cellule (x,y,z) existe déjà dans tileAccess, lire depuis le cache.
+o	Sinon, afficher un fond gris clair et ajouter la tuile à la liste de requêtes (une fois la connexion rétablie, les préchargements reprendront).
+________________________________________
+5. Synchronisation en Mode Connecté
+Lorsque la connexion réseau est active, combiner les données avioniques (APIs) et les données GPS.
+5.1. Récupération des Données Avioniques
+•	Toutes les refreshInterval, envoyer une requête API à Aviationstack ou OpenSky avec le flight_id pour récupérer :
+o	position actuelle (lat, lon, alt),
+o	vitesse sol, vitesse verticale, cap,
+o	plan de vol actualisé (waypoints et ETA),
+o	données météo (icônes, températures).
+•	Parsing du JSON : extraire et stocker dans FlightCache (cf. §2.1) la nouvelle entrée.
+5.2. Fusion GPS + Avionique
+•	Lorsque les timestamps diffèrent de < 5 s, privilégier les données avioniques (plus précises). Sinon, accepter les données GPS.
+•	En cas de données avioniques manquantes : si timestamp avionique > cache (trop ancien), remplacer par GPS.
+•	L’algorithme de fusion se déroule comme :
+•	function mergeFlightData(gpsData, apiData) {
+•	  const delta = Math.abs(apiData.timestamp - gpsData.timestamp);
+•	  if (apiData && delta < 5000) {
+•	    return apiData;  // priorité avionique
+•	  } else if (gpsData) {
+•	    return {
+•	      ...gpsData,
+•	      eta_utc: computeETA(gpsData),
+•	      ete_seconds: computeETE(gpsData),
+•	      distance_nm: computeDistanceRemaining(gpsData),
+•	    };
+•	  } else {
+•	    return null;
+•	  }
+•	}
+5.3. Mise à Jour du Plan de Vol
+•	À chaque requête API, comparer la liste waypoints reçue avec la version locale :
+o	Si modification (changement d’altitude, redirection, ajout/suppression d’un waypoint), remplacer la liste locale et recalculer la courbe (cf. §3.1).
+o	Conserver un historique des changements dans une table WaypointHistory :
+	flight_id, waypoint_index, old_lat, old_lon, new_lat, new_lon, timestamp_change.
+5.4. Mise à Jours des POIs en Temps Réel
+•	Faire une requête API en parallèle pour récupérer POIs dynamiques (p.ex. points de repère temporaires, points météo spéciaux) uniquement si l’utilisateur affiche l’onglet POIs (optimisation).
+•	Fusionner ces POIs avec le cache local :
+o	Si poi_id nouveau : insérer dans POICache.
+o	Si existant mais mises à jour (changement nom, position, description) : mettre à jour les colonnes correspondantes.
+________________________________________
+6. Gestion des Alertes et Notifications
+6.1. Turbulence
+•	À chaque mise à jour météo (toutes les 5 min ou en mode Avion via cache), vérifier si la position actuelle se trouve à < 100 km d’une zone de turbulence.
+•	Si oui, émettre une alerte (F9.4) : appeler notifyWithLocalNotification("Turbulence", "Turbulences modérées dans X min").
+6.2. Passage de Fuseau Horaire
+•	À chaque nouvelle position (fusion GPS/API), calculer le fuseau local :
+•	function getTimeZone(lat, lon) {
+•	  // utiliser une bibliothèque comme tz-lookup ou un service interne
+•	}
+•	Si newTimeZone != currentTimeZone, mettre à jour currentTimeZone et émettre l’alerte F9.1.
+6.3. Palier de Croisière Atteint
+•	Lecture du plan de vol local (waypoints) pour identifier le waypoint où commence le croisière (altitude_cruise_ft).
+•	Lorsqu’on détecte altitude >= altitude_cruise_ft et phase != 'croisiere', changer phase à "croisiere" et émettre l’alerte F9.2.
+6.4. Début de Descente
+•	Si phase == 'croisiere' et on détecte une baisse significative de l’altitude (delta < -500 ft sur 30 s), passer phase à "descente" et émettre F9.3.
+6.5. Variation d’ETA > 10 min
+•	À chaque mise à jour d’ETA (fusion GPS/API), comparer la nouvelle ETA à l’ETA_planifiee initiale.
+•	Si écart >= 600 s, émettre F9.5 (retard ou avance).
+6.6. Rappel Pré-Atterrissage
+•	Régler un timer local via Capacitor Scheduled Notifications :
+•	const notifyTime = eta_local_timestamp - 15 * 60 * 1000;
+•	scheduleLocalNotification({
+•	  id: "preLanding", 
+•	  title: "Préparez vos affaires", 
+•	  body: "Atterrissage dans 15 min", 
+•	  schedule: { at: new Date(notifyTime) }
+•	});
+•	Si l’utilisateur modifie l’ETA (via retracking), mettre à jour ou rééchelonner la notification.
+________________________________________
+7. Structures en Mémoire pour les Performances
+7.1. Index Spatio-Temporel pour FlightCache
+•	Pour pouvoir rechercher rapidement la dernière donnée (temps réel) et les 10 min d’historique :
+o	Maintenir un buffer circulaire en mémoire : inMemoryFlightBuffer : array de taille maximale = (maxHistorySeconds / refreshInterval) + margin (par ex. 600 s / 30 s + 5 ≈ 25 éléments).
+o	Chaque élément contient un pointeur vers la clé SQLite/IndexedDB (flightCacheId).
+•	À chaque insertion dans FlightCache, déplacer le pointeur circulaire, et si buffer plein, supprimer l’ID le plus ancien.
+Implantation : 
+class FlightBuffer {
+  constructor(maxSize) {
+    this.buffer = new Array(maxSize).fill(null);
+    this.head = 0;
+  }
+  add(flightCacheId) {
+    this.buffer[this.head] = flightCacheId;
+    this.head = (this.head + 1) % this.buffer.length;
+  }
+  getLatest() {
+    // head-1 modulo length
+  }
+}
+7.2. Mise en Cache et Indexation des POIs
+•	En mémoire :
+o	poiMap: dictionnaire { poi_id: POIObject }. Chargé lors de l’initialisation.
+o	spatialIndex (cf. §3.2.1).
+•	Lors de la recherche, récupérer d’abord l’array poi_ids des cellules adjacentes, puis accéder à chaque POIObject via poiMap[poi_id].
+________________________________________
+8. Architecture Modulaire des Services
+8.1. Service FlightService
+•	Responsabilités :
+o	Gestion du FlightCache (ajout, récupération, purge).
+o	Fusion GPS/API (méthode mergeFlightData).
+o	Calcul ETA/ETE (méthodes computeETA, computeETE).
+o	Buffer circulaire (inMemoryFlightBuffer).
+o	Exposition d’une observable RxJS (flightData$) pour notifier les composants.
+8.2. Service POIService
+•	Responsabilités :
+o	Initialisation et chargement du POICache depuis SQLite/IndexedDB.
+o	Construction de spatialIndex à l’initialisation.
+o	Méthode findNearbyPOIs(lat, lon, radiusKm, maxResults).
+o	Gestion des mises à jour depuis API (fusion/synchronisation).
+o	Exposition d’une observable RxJS (poiList$) pour les composants.
+8.3. Service MapService
+•	Responsabilités :
+o	Gestion du cache de tuiles (LRU).
+o	Préchargement des tuiles autour de l’itinéraire.
+o	Conversion lat/lon ↔ tileX/tileY (Web Mercator).
+o	Exposition d’une interface pour la carte Leaflet/Mapbox : getTileUrl(z, x, y), prefetchTiles(tiles), cleanupTiles().
+8.4. Service HorizonService
+•	Responsabilités :
+o	Génération de la vue hublot (Three.js ou Canvas).
+o	Calcul des positions POIs sur la texture (angle d’élévation, azimuth).
+o	Gestion des transitions de textures (fondu, résolution).
+o	Exposition d’un updateView(canvasContext, flightData, poiList).
+8.5. Service NotificationService
+•	Responsabilités :
+o	Émission de notifications locales (Capacitor Local Notifications).
+o	Gestion des timers de rappel (preLanding).
+o	Exposition de méthodes idiomatiques : notify(type, payload) (type ∈ {turbulence, timezone, cruise, descent, etaChange}).
+________________________________________
+9. Diagrammes de Classe Simplifiés
+graph TD
+  FlightService --> FlightCache
+  FlightService --> InMemoryFlightBuffer
+  FlightService --> APIservice
+  FlightService --> GeolocationPlugin
+
+  POIService --> POICache
+  POIService --> SpatialIndex
+  POIService --> APIservice
+
+  MapService --> TileCache
+  MapService --> LRUIndex
+
+  HorizonService --> POIService
+  HorizonService --> FlightService
+
+  NotificationService --> FlightService
+  NotificationService --> TimeZoneService
+
+  subgraph LocalStorage
+    FlightCache
+    POICache
+    TileCache
+    Settings
+    ExportHistory
+  end
+
+  subgraph Plugins
+    GeolocationPlugin
+    LocalNotificationPlugin
+  end
+
+  APIservice[External APIs] --> FlightService
+  APIservice --> POIService
+  APIservice --> MapService
+________________________________________
+10. Optimisations et Bonnes Pratiques
+•	Prioriser l’écriture en cache de données critiques (position, vitesse, ETA) avant tout affichage à l’écran pour éviter latence.
+•	Déléguer les calculs intensifs (interpolation, lissage, haversine, etc.) à des Web Workers / threads Ionic Native lors de l’exécution sur mobile.
+•	Minimiser les lectures/écritures SQLite en batch (transaction par 5–10 insertions) pour réduire l’I/O.
+•	Éviter le recalcul complet de la trajectoire si seul le dernier segment a changé : n’appliquer l’algorithme de Douglas-Peucker que sur les nouveaux points.
+•	Pour la gestion des POIs, utiliser Map et objets immuables pour faciliter la détection de changements et la mise à jour des composants Angular.
+•	Fractionner l’affichage de la carte en couches (base, POIs, météo) pour pouvoir rafraîchir uniquement la couche nécessaire.
+________________________________________
+Fin du document « Algorithmes et Structures de Stockage ».
+

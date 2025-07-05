@@ -1,0 +1,345 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      {{ 'WINDOW.TITLE' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Section voyage en cours -->
+  <div *ngIf="hasOngoingTrip && ongoingTripInfo" class="ongoing-trip-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="airplane-outline" color="primary"></ion-icon>
+          {{ 'WINDOW.ONGOING_TRIP.TITLE' | translate }}
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="ongoing-trip-info">
+          <h3>{{ ongoingTripInfo.title }}</h3>
+          <p class="trip-dates">
+            {{ ongoingTripInfo.startDate | date:'shortDate' }} - {{ ongoingTripInfo.endDate | date:'shortDate' }}
+          </p>
+          <p class="trip-status">
+            <ion-badge color="success">{{ 'WINDOW.ONGOING_TRIP.STATUS' | translate }}</ion-badge>
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Section de recherche -->
+  <div class="search-container">
+    <!-- Barre de recherche - affichée si pas de voyage en cours OU en mode démo -->
+    <div *ngIf="!hasOngoingTrip || (isDemoUser && showManualSearch)" class="window-header-bar">
+      <ion-input
+        class="window-callsign-input"
+        [(ngModel)]="callsign"
+        [placeholder]="'WINDOW.SEARCH.PLACEHOLDER' | translate"
+        (keyup.enter)="searchFlight()"
+        maxlength="10"
+      ></ion-input>
+      <span *ngIf="callsign.length > 8" class="window-callsign-span">{{ callsign }}</span>
+      <span class="window-date" *ngIf="flightInfo && flightInfo.flightDate">• {{ flightInfo.flightDate | date:dateFormat:undefined:locale }}</span>
+      <ion-button class="window-search-btn" (click)="searchFlight()" [disabled]="loading">
+        {{ 'WINDOW.SEARCH.BUTTON' | translate }}
+      </ion-button>
+    </div>
+
+    <!-- Message pour mode démo avec voyage en cours -->
+    <div *ngIf="hasOngoingTrip && isDemoUser && !showManualSearch" class="demo-info-container">
+      <ion-card>
+        <ion-card-content>
+          <div class="demo-info-content">
+            <ion-icon name="information-circle-outline" class="demo-icon"></ion-icon>
+            <div class="demo-text">
+              <p>{{ 'WINDOW.DEMO.ONGOING_TRIP_INFO' | translate }}</p>
+            </div>
+            <ion-button fill="clear" (click)="showManualSearch = true" class="demo-button">
+              {{ 'WINDOW.DEMO.SEARCH_OTHER' | translate }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Section de restauration des données précédentes -->
+    <div *ngIf="hasPreviousData() && !flightInfo && !loading && (!hasOngoingTrip || isDemoUser)" class="restore-data-container">
+      <ion-card>
+        <ion-card-content>
+          <div class="restore-data-content">
+            <ion-icon name="refresh-outline" class="restore-icon"></ion-icon>
+            <div class="restore-text">
+              <p>{{ 'WINDOW.RESTORE.PREVIOUS_DATA' | translate }}</p>
+              <p class="restore-callsign">{{ getSavedCallsign() }}</p>
+            </div>
+            <ion-button fill="clear" (click)="restorePreviousData()" class="restore-button">
+              {{ 'WINDOW.RESTORE.BUTTON' | translate }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error | translate }}
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ 'WINDOW.SEARCH.LOADING' | translate }}</p>
+    </div>
+
+    <div *ngIf="flightInfo" class="flight-info">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Informations du vol</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item *ngIf="flightInfo.photoUrl">
+              <img [src]="flightInfo.photoUrl" alt="Photo avion" style="max-width:100%; margin:auto; display:block;">
+            </ion-item>
+            <ion-item>
+              <ion-label>Numéro de vol</ion-label>
+              <ion-note slot="end">{{ flightInfo.flightNumber || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.callsign">
+              <ion-label>Callsign</ion-label>
+              <ion-note slot="end">{{ flightInfo.callsign }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Compagnie</ion-label>
+              <ion-note slot="end">{{ flightInfo.airline || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Type avion</ion-label>
+              <ion-note slot="end">{{ flightInfo.aircraft || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.registration">
+              <ion-label>Immatriculation</ion-label>
+              <ion-note slot="end">{{ flightInfo.registration }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Départ</ion-label>
+              <ion-note slot="end">
+                {{ flightInfo.departure || 'Non renseigné' }}
+                <span *ngIf="flightInfo.originIata"> ({{ flightInfo.originIata }})</span>
+                <span *ngIf="flightInfo.originCity"> - {{ flightInfo.originCity }}</span>
+                <span *ngIf="flightInfo.originCountry">, {{ flightInfo.originCountry }}</span>
+              </ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.originTimezone">
+              <ion-label>Fuseau départ</ion-label>
+              <ion-note slot="end">{{ flightInfo.originTimezone }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Arrivée</ion-label>
+              <ion-note slot="end">
+                {{ flightInfo.arrival || 'Non renseigné' }}
+                <span *ngIf="flightInfo.destinationIata"> ({{ flightInfo.destinationIata }})</span>
+                <span *ngIf="flightInfo.destinationCity"> - {{ flightInfo.destinationCity }}</span>
+                <span *ngIf="flightInfo.destinationCountry">, {{ flightInfo.destinationCountry }}</span>
+              </ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.destinationTimezone">
+              <ion-label>Fuseau arrivée</ion-label>
+              <ion-note slot="end">{{ flightInfo.destinationTimezone }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.departureTerminal">
+              <ion-label>Terminal départ</ion-label>
+              <ion-note slot="end">{{ flightInfo.departureTerminal }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.departureGate">
+              <ion-label>Porte départ</ion-label>
+              <ion-note slot="end">{{ flightInfo.departureGate }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.arrivalTerminal">
+              <ion-label>Terminal arrivée</ion-label>
+              <ion-note slot="end">{{ flightInfo.arrivalTerminal }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.arrivalGate">
+              <ion-label>Porte arrivée</ion-label>
+              <ion-note slot="end">{{ flightInfo.arrivalGate }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.scheduledDeparture">
+              <ion-label>Heure prévue départ (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.scheduledDeparture }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.realDeparture">
+              <ion-label>Heure réelle départ (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.realDeparture }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.scheduledArrival">
+              <ion-label>Heure prévue arrivée (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.scheduledArrival }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.realArrival">
+              <ion-label>Heure réelle arrivée (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.realArrival }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.duration">
+              <ion-label>Durée</ion-label>
+              <ion-note slot="end">{{ flightInfo.duration }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Statut</ion-label>
+              <ion-note slot="end">{{ flightInfo.statusText || flightInfo.status || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.delay">
+              <ion-label>Retard</ion-label>
+              <ion-note slot="end">{{ flightInfo.delay }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.distance">
+              <ion-label>Distance</ion-label>
+              <ion-note slot="end">{{ flightInfo.distance }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.altitude">
+              <ion-label>Altitude</ion-label>
+              <ion-note slot="end">{{ flightInfo.altitude }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.speed">
+              <ion-label>Vitesse</ion-label>
+              <ion-note slot="end">{{ flightInfo.speed }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.seat">
+              <ion-label>Siège</ion-label>
+              <ion-note slot="end">{{ flightInfo.seat }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.baggage">
+              <ion-label>Bagages</ion-label>
+              <ion-note slot="end">{{ flightInfo.baggage }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo">
+              <ion-label>Météo à l'arrivée</ion-label>
+              <ion-note slot="end" style="width:100%;">
+                <ng-container *ngIf="flightInfo.arrivalWeather && (flightInfo.arrivalWeather.temperature !== undefined || flightInfo.arrivalWeather.weather)">
+                  <div class="weather-main">
+                    <span class="weather-icon" [innerHTML]="getWeatherEmoji(flightInfo.arrivalWeather.weather)"></span>
+                    <span class="weather-temp">{{ flightInfo.arrivalWeather.temperature !== undefined ? flightInfo.arrivalWeather.temperature + '°C' : '?' }}</span>
+                  </div>
+                  <div class="weather-desc">{{ getWeatherDesc(flightInfo.arrivalWeather.weather) }}</div>
+                  <div class="weather-details">
+                    <span *ngIf="flightInfo.arrivalWeather.wind">💨 {{ formatWind(flightInfo.arrivalWeather.wind) }}</span>
+                    <span *ngIf="flightInfo.arrivalWeather.pressure">🔽 {{ flightInfo.arrivalWeather.pressure }} hPa</span>
+                    <span *ngIf="flightInfo.arrivalWeather.dewpoint">💧 {{ flightInfo.arrivalWeather.dewpoint }}°C</span>
+                    <span *ngIf="flightInfo.arrivalWeather.time">🕒 {{ flightInfo.arrivalWeather.time | date:'short' }}</span>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="!flightInfo.arrivalWeather || (flightInfo.arrivalWeather && flightInfo.arrivalWeather.temperature === undefined && !flightInfo.arrivalWeather.weather)">
+                  <span style="color: #888;">Aucune donnée météo disponible</span>
+                </ng-container>
+              </ion-note>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
+
+<script>
+  // Détecte la langue utilisateur pour Angular (si besoin)
+  window.locale = navigator.language || navigator.userLanguage || 'fr';
+</script>
+
+<style>
+.window-header-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #1a237e;
+  background: #f5f7fa;
+  border-radius: 1em;
+  margin: 1em auto 1em auto;
+  padding: 0.5em 1.5em;
+  max-width: 900px;
+  box-shadow: 0 2px 8px #0001;
+  letter-spacing: 0.03em;
+}
+.window-callsign-input {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-transform: uppercase;
+  width: 110px;
+  min-width: 80px;
+  max-width: 140px;
+  margin-right: 1em;
+}
+.window-date {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: #1976d2;
+  margin-left: 0.7em;
+  margin-right: 0.7em;
+  white-space: nowrap;
+}
+.window-search-btn {
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-left: 1em;
+}
+@media (max-width: 600px) {
+  .window-header-bar {
+    flex-direction: column;
+    font-size: 1.1em;
+    padding: 0.5em 0.5em;
+  }
+  .window-callsign-input, .window-date, .window-search-btn {
+    margin: 0.2em 0;
+  }
+}
+.weather-card {
+  background: linear-gradient(120deg, #e3f2fd 60%, #bbdefb 100%);
+  border-radius: 1em;
+  padding: 1em 1.5em;
+  box-shadow: 0 2px 8px #0002;
+  margin: 0.5em 0;
+  text-align: center;
+}
+.weather-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2em;
+  font-weight: bold;
+  margin-bottom: 0.2em;
+}
+.weather-icon {
+  font-size: 2.2em;
+  margin-right: 0.3em;
+}
+.weather-temp {
+  font-size: 2.2em;
+  font-weight: bold;
+}
+.weather-desc {
+  font-size: 1.1em;
+  color: #1976d2;
+  margin-bottom: 0.3em;
+}
+.weather-details {
+  font-size: 1em;
+  color: #333;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2em;
+  justify-content: center;
+  margin-bottom: 0.2em;
+}
+.weather-raw {
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 0.5em;
+}
+</style> 

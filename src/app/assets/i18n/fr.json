@@ -1,0 +1,21 @@
+{
+  "TRIPS": {
+    "NO_TRIPS_FOUND": "Aucun voyage trouvé pour cet utilisateur.",
+    "UNTITLED": "Voyage sans titre",
+    "TITLE": "Mes voyages",
+    "SUBTITLE": "Tous vos voyages, passés, présents et à venir.",
+    "ONGOING": "En cours",
+    "UPCOMING": "À venir",
+    "PAST": "Passés",
+    "ERROR_TITLE": "Erreur lors du chargement des voyages",
+    "NO_ONGOING": "Aucun voyage en cours",
+    "NO_UPCOMING": "Aucun voyage à venir",
+    "NO_PAST": "Aucun voyage passé",
+    "NO_ONGOING_DESC": "Vous n'avez pas de voyage en cours. Commencez-en un nouveau !",
+    "NO_UPCOMING_DESC": "Aucun voyage à venir n'est planifié. Ajoutez-en un !",
+    "NO_PAST_DESC": "Aucun voyage passé n'est enregistré.",
+    "STATUS_ONGOING": "En cours",
+    "STATUS_UPCOMING": "À venir",
+    "STATUS_PAST": "Terminé"
+  }
+} 

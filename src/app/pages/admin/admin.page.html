@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      <ion-icon name="settings-outline"></ion-icon>
+      {{ 'ADMIN.TITLE' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        {{ 'ADMIN.ADMINISTRATION' | translate }}
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button expand="block" routerLink="/admin/logs" color="secondary">
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        {{ 'ADMIN.LOGS' | translate }}
+      </ion-button>
+      
+      <ion-button expand="block" color="primary">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        {{ 'ADMIN.USERS' | translate }}
+      </ion-button>
+      
+      <ion-button expand="block" color="tertiary">
+        <ion-icon name="analytics-outline" slot="start"></ion-icon>
+        {{ 'ADMIN.STATISTICS' | translate }}
+      </ion-button>
+      
+      <ion-button expand="block" color="warning">
+        <ion-icon name="settings-outline" slot="start"></ion-icon>
+        {{ 'ADMIN.SETTINGS' | translate }}
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content> 

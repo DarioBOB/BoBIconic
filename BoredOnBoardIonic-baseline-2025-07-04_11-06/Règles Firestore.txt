@@ -1,0 +1,50 @@
+### Règles Firestores
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isDemo() {
+      return request.auth.uid == 'fUBBVpboDeaUjD6w2nz0xKni9mG3' || 
+             request.auth.token.email.matches('.*@demo[.]com');
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId || isAdmin();
+      allow write: if isAdmin() || request.auth.uid == userId;
+    }
+
+    match /trips/{tripId} {
+      allow read: if isDemo() && resource.data.createdByDemo == true
+                || isAdmin()
+                || (resource.data.userId == request.auth.uid && !isDemo());
+      allow write: if isDemo() && request.resource.data.createdByDemo == true
+                 || isAdmin()
+                 || (request.resource.data.userId == request.auth.uid && !isDemo());
+    }
+
+    match /plans/{planId} {
+      allow read: if isDemo() && resource.data.createdByDemo == true
+                || isAdmin()
+                || (
+                  exists(/databases/$(database)/documents/trips/$(resource.data.tripId)) &&
+                  get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.userId == request.auth.uid &&
+                  !isDemo()
+                );
+      allow write: if isDemo() && request.resource.data.createdByDemo == true
+                 || isAdmin()
+                 || (
+                   exists(/databases/$(database)/documents/trips/$(request.resource.data.tripId)) &&
+                   get(/databases/$(database)/documents/trips/$(request.resource.data.tripId)).data.userId == request.auth.uid &&
+                   !isDemo()
+                 );
+    }
+
+    match /trips/{tripId}/plans/{planId} {
+      allow read, write: if isDemo() && (get(/databases/$(database)/documents/trips/$(tripId)).data.createdByDemo == true)
+                      || isAdmin()
+                      || (get(/databases/$(database)/documents/trips/$(tripId)).data.userId == request.auth.uid && !isDemo());
+    }
+  }
+}

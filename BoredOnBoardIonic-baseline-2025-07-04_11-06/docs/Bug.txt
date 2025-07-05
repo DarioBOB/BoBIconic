@@ -1,0 +1,892 @@
+Voici un retour pas-à-pas sur votre `WindowHublotComponent` pour vérifier qu’il réalise bien ce qu’il doit faire (afficher une carte satellite dans un hublot, calculer le zoom en fonction de l’altitude, orienter la vue vers la gauche ou la droite selon le côté du hublot, etc.). Je commente chaque section du code, note ce qui fonctionne bien et signale les endroits où il y a un écart entre l’intention et l’implémentation.
+
+---
+
+## 1. Déclaration du composant
+
+```ts
+import {
+  Component,
+  Input,
+  AfterViewInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  ElementRef,
+  ViewChild
+} from '@angular/core';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+@Component({
+  selector: 'app-window-hublot',
+  standalone: true,
+  template: `
+    <div class="hublot-frame">
+      <div #mapContainer class="hublot-map"></div>
+    </div>
+  `,
+  styles: [`
+    .hublot-frame {
+      position: relative;
+      width: 54.4vw;
+      max-width: 476px;
+      aspect-ratio: 0.72/1;
+      height: auto;
+      min-width: 272px;
+      min-height: 374px;
+      border-radius: 48% / 60%;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 60% 40%, #e3e9f6 0%, #bfc9db 60%, #222 100%);
+      box-shadow: 0 0 40px 8px #0008, 0 2px 32px #0006, inset 0 0 40px #000a;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 6px solid #fff;
+      outline: 2px solid #b0b8c6;
+      outline-offset: -8px;
+      transition: box-shadow 0.3s;
+    }
+    .hublot-frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 48% / 60%;
+      border: 2.5px solid #fff8;
+      pointer-events: none;
+      box-shadow: 0 0 24px 2px #fff4 inset;
+    }
+    .hublot-map {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    @media (max-width: 900px) {
+      .hublot-frame { width: 64.6vw; max-width: 272px; min-width: 170px; min-height: 170px; }
+    }
+    @media (max-width: 600px) {
+      .hublot-frame { width: 71.4vw; max-width: 204px; min-width: 136px; min-height: 136px; }
+    }
+  `]
+})
+export class WindowHublotComponent implements AfterViewInit, OnDestroy, OnChanges {
+  @Input() lat!: number;
+  @Input() lon!: number;
+  @Input() altitude: number = 11000;
+  @Input() side: 'left' | 'right' = 'left';
+  @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
+
+  private mapInstance!: L.Map;
+  private tileLayer!: L.TileLayer;
+  private centerMarker?: L.Marker;
+
+  ngAfterViewInit(): void {
+    this.initMap();
+    window.addEventListener('resize', this.handleResize);
+    setTimeout(() => this.handleResize(), 300);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.mapInstance && (changes['lat'] || changes['lon'] || changes['altitude'])) {
+      this.updateMapView();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.mapInstance) {
+      this.mapInstance.remove();
+    }
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  // ... (fonctions internes ci-dessous)
+}
+```
+
+### Ce qui est correct / conforme à l’intention
+
+1. **Structure HTML et CSS du hublot**
+
+   * Le wrapper `<div class="hublot-frame">…</div>` crée bien un ovale avec un dégradé et un « relief » CSS, ce qui correspond visuellement à un hublot d’avion.
+   * L’élément `<div #mapContainer class="hublot-map">` occupe 100 % de l’intérieur du hublot et servira de conteneur Leaflet.
+   * Les media queries ajustent dynamiquement la taille du hublot en fonction de la largeur d’écran, ce qui est cohérent si vous voulez un design réactif (responsive).
+
+2. **Cycle de vie Angular**
+
+   * **`ngAfterViewInit()`** : appel à `initMap()` dès que le DOM est prêt, puis enregistrement d’un listener sur le redimensionnement `window.resize` pour appeler `invalidateSize()` (ce qui est bien pour Leaflet afin qu’il recalcule sa taille si le conteneur change).
+   * **`ngOnChanges()`** : à chaque changement de `@Input()` (latitude, longitude ou altitude), on recalcule la vue (`updateMapView()`).
+   * **`ngOnDestroy()`** : on détache l’instance Leaflet et on retire le listener resize. Parfait pour éviter des fuites mémoire si la page est détruite.
+
+3. **Intégration de Leaflet**
+
+   * Import de `'leaflet/dist/leaflet.css'` dans le composant (pour que les styles de Leaflet soient pris en compte).
+   * Création de la carte via `L.map(this.mapContainer.nativeElement, { … })` sans contrôles (dragging, zoom par molette, etc.) pour que le passager ne puisse pas déplacer la carte manuellement.
+   * Ajout d’une couche satellite (`World_Imagery`) + couche de relief (hillshade) pour renforcer la perception 3D du terrain.
+   * Ajout d’un `L.marker` central (même s’il n’a pas d’icône visible, il sert peut-être de référence si on veut rajouter plus tard une icône pour l’avion ou un repère sur la carte).
+
+4. **Inputs utilisés dans la logique**
+
+   * `@Input() lat`, `@Input() lon`, `@Input() altitude`: c’est exactement ce qu’il faut pour centrer la carte sur la bonne position “sol” sous l’avion.
+   * `@Input() side: 'left' | 'right'`: permet de savoir s’il s’agit du hublot de gauche ou de droite, pour orienter la vue vers un angle décalé (gonflant ou décalant la position lat/lon en fonction d’un cap).
+
+En l’état, l’ossature correspond à ce qu’on souhaite :
+
+* un conteneur ovale (hublot)
+* à l’intérieur, une carte Leaflet satellitaire
+* un “zoom” en fonction de `altitude`
+* un décalage lat/lon selon `side` pour simuler qu’on regarde à gauche ou à droite du fuselage.
+
+---
+
+## 2. Validation détaillée des fonctions internes
+
+### 2.1 `initMap()`
+
+```ts
+private initMap(): void {
+  const lat = this.lat || 0;
+  const lon = this.lon || 0;
+  const alt = this.altitude || 11000;
+  const zoom = this.getZoomFromAltitude(alt, lat);
+
+  // Calcul de l'angle de vue basé sur l'altitude
+  const viewAngle = this.getViewAngle(alt);
+
+  // Calcul de la position exacte de l'avion
+  const planePosition = this.calculatePlanePosition(lat, lon, alt);
+
+  this.mapInstance = L.map(this.mapContainer.nativeElement, {
+    center: [planePosition.lat, planePosition.lon],
+    zoom,
+    zoomControl: false,
+    attributionControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    touchZoom: false,
+    maxBoundsViscosity: 1.0
+  });
+
+  // Limitation de la vue avec un rectangle
+  const bounds = this.getMaxBounds(planePosition.lat, planePosition.lon, viewAngle);
+  this.mapInstance.setMaxBounds(bounds);
+
+  // Couche satellite ESRI
+  this.tileLayer = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
+    {
+      attribution: 'Tiles © Esri',
+      maxZoom: 19,
+      tileSize: 256,
+      zoomOffset: 0,
+    }
+  );
+  this.tileLayer.addTo(this.mapInstance);
+
+  // Couche relief
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', 
+    {
+      opacity: 0.3,
+      maxZoom: 19
+    }
+  ).addTo(this.mapInstance);
+
+  this.centerMarker = L.marker([planePosition.lat, planePosition.lon], {
+    icon: L.divIcon({
+      html: '',
+      className: '',
+      iconSize: [1, 1],
+      iconAnchor: [0, 0],
+    }),
+  }).addTo(this.mapInstance);
+}
+```
+
+#### ✅ Ce qui fonctionne :
+
+1. **Appel à `getZoomFromAltitude()`**
+
+   * Vous calculez un zoom initial en sortie de `getZoomFromAltitude(alt, lat)`.
+   * Ensuite, vous centrez la carte sur `planePosition` (calculé par `calculatePlanePosition(...)`), ce qui prend en compte un éventuel décalage lat/lon pour le hublot gauche ou droit.
+
+2. **Angle de vue (`viewAngle`) et `maxBounds`**
+
+   * Vous pré-calculez un angle de vue (via `this.getViewAngle(alt)`), puis établissez un “rectangle de vue” en appelant `this.getMaxBounds(...)`. Cette limite (MaxBounds) empêche l’utilisateur (ou l’affichage) de se déplacer hors d’une zone raisonnable autour du centre, ce qui colle à l’idée de « l’écran du hublot » où l’on ne devrait pas voir plus loin que ce que l’on calcule.
+   * L’utilisation de `maxBoundsViscosity: 1.0` ancre la carte (elle recadre automatiquement si on essaie de zoomer/déplacer). Ça correspond à un hublot où on ne veut pas voir de « bordure blanche » (pas de centre hors-limites).
+
+3. **Ajout des tuiles ESRI et relief**
+
+   * La couche satellite HD (World\_Imagery) est bien ajoutée.
+   * La surcouche « hillshade » (ombrage du relief) avec `opacity: 0.3` donne un effet de profondeur très lisible quand on regarde la terre depuis 10 000–12 000 ft. C’est exactement ce qu’on attend.
+
+4. **Création d’un marker central invisible**
+
+   * Même si vous donnez un icone 1×1 px totalement vide, cela crée un “point fixe” en centre de carte. Utile pour mettre à jour ultérieurement la position du « centre du hublot ».
+
+#### ⚠️ Points à vérifier / améliorer :
+
+1. **Unités de `altitude`**
+
+   * **Problème principal :** dans `initMap()`, vous appelez `getZoomFromAltitude(alt, lat)` en passant `alt` tel quel, or plus bas dans **`calculatePlanePosition`** vous convertissez `altitude` de pieds en mètres (`const altitudeMeters = altitude * 0.3048;`).
+   * **Conséquence :**
+
+     * Si `altitude` est réellement donnée en pieds (par exemple 11 000 ft), alors `getZoomFromAltitude()` reçoit la valeur 11000 (ft) sans conversion. Comme votre formule dans `getZoomFromAltitude` est basée sur la “hauteur en mètres” pour calculer la resolution sol/m pixel, il faut impérativement convertir `altitude` en mètres avant de l’utiliser dans `getZoomFromAltitude()`. Sinon, vous sous-estimez d’environ 3× la hauteur, puisque 11000 ft = \~3352 m.
+     * Concrètement le zoom calculé sera trop ouvert (zoom trop faible) parce que `numerator/denominator` va prendre un “denominator” en yards (ft) au lieu de m.
+   * **Solution recommandée :**
+
+     ```ts
+     // Soit on modifie getZoomFromAltitude pour qu’il convertisse ft → m en interne,
+     // soit on transforme avant l’appel : 
+     const altitudeMeters = alt * 0.3048;
+     const zoom = this.getZoomFromAltitude(altitudeMeters, lat);
+     ```
+
+     Puis, dans la signature de `getZoomFromAltitude(…)`, indiquer clairement que l’on passe désormais **des mètres** (et pas des pieds).
+
+2. **Calcul de l’angle de vue (`getViewAngle`)**
+
+   ```ts
+   private getViewAngle(altitude: number): number {
+     // Angle de vue en degrés basé sur l'altitude
+     // Plus l'altitude est basse, plus l'angle est large
+     return Math.max(30, Math.min(60, 45 + (altitude - 11000) / 1000));
+   }
+   ```
+
+   * Ici, vous utilisez `altitude` directement (en Feet) pour déterminer l’angle.
+   * Ce n’est pas un gros “bug” en soi, mais c’est une **incohérence d’unités** :
+
+     * Vous faites `(altitude – 11000)/1000` → si altitude = 11 000 ft, on a 45°, si altitude = 12 000 ft, 46°, etc.
+     * Mais d’un point de vue physique, on ferait plutôt un calcul basé sur l’altitude **en mètres** pour passer d’un angle au-dessus de l’horizon.
+   * Si l’intention est seulement d’avoir un angle de vue qui varie *linéairement* en fonction de la différence d’altitude (en pieds), alors c’est acceptable. Vous pourriez néanmoins préciser dans le commentaire que cet angle est “arbitraire” et calibré sur un vol “typique” (11 000 ft) pour avoir 45°.
+
+3. **Calcul de la position du centre de carte (`calculatePlanePosition`)**
+
+   ```ts
+   private calculatePlanePosition(lat: number, lon: number, altitude: number): { lat: number, lon: number } {
+     const EARTH_RADIUS = 6378137; // en mètres
+     const altitudeMeters = altitude * 0.3048; // Conversion ft → m
+     
+     // Angle de vue en radians
+     const viewAngleRad = (this.getViewAngle(altitude) * Math.PI) / 180;
+
+     // Distance de vue en mètres
+     const viewDistance = altitudeMeters * Math.tan(viewAngleRad);
+
+     // Angle de vue en degrés (pour décaler lat/lon)
+     const viewAngleDeg = (viewDistance / EARTH_RADIUS) * (180 / Math.PI);
+
+     // Cap du vol (GVA-ATH)
+     const flightHeading = 135;
+     // Pour le hublot gauche, +90° ou -45° en fonction de side
+     const hublotHeading = this.side === 'left' ? (flightHeading - 45) : (flightHeading + 45);
+     const headingRad = (hublotHeading * Math.PI) / 180;
+
+     // On déplace lat/lon de viewAngleDeg * cos/sin * 0.5 — pourquoi 0.5 ? 
+     const latOffset = viewAngleDeg * Math.cos(headingRad) * 0.5;
+     const lonOffset = viewAngleDeg * Math.sin(headingRad) * 0.5;
+
+     return {
+       lat: lat + latOffset,
+       lon: lon + lonOffset
+     };
+   }
+   ```
+
+   * **Conversion altitude → mètres** est bien faite (`altitudeMeters = altitude * 0.3048`).
+   * **Calcul de la distance de vue (`viewDistance`)** :
+
+     $$
+       \text{viewDistance} = \text{hauteur\_m} \times \tan(\text{viewAngleRad})
+     $$
+
+     → cela donne la « distance horizontale » (en m) que l’on peut théoriquement voir à l’horizon.
+   * Ensuite,
+
+     $$
+       \text{viewAngleDeg} 
+       = \left(\frac{\text{viewDistance}}{R_\text{terre}}\right) \times \frac{180}{\pi}
+     $$
+
+     → cela convertit la « distance de vue » (en m) en un décalage angulaire en degrés qu’on retranscrit sur la latitude et la longitude (en supposant qu’un degré \~ rayon terrestre).
+   * **Points à surveiller** :
+
+     1. Vous multipliez par `0.5` pour la composante latOffset/lonOffset. Cette constante “0.5” n’est pas documentée :
+
+        * Si l’idée est de centrer la vue à mi-distance entre la position “au sol” et la position de l’horizon, OK, mais je recommande d’ajouter un petit commentaire pour expliquer pourquoi on fait `* 0.5`. Sinon, on pourrait penser que ce facteur 0.5 est sortant de nulle part.
+        * Si l’angle `viewAngleDeg` correspond à la “distance angulaire” jusqu’à l’horizon **complet**, alors pour placer le centre de la carte au milieu de l’écran (entre le “plancher” et l’horizon), `0.5 × viewAngleDeg` est compréhensible.
+     2. **Coordonnées en longitude** : un “degré” de longitude mesure moins de distance au sol lorsque la latitude augmente. Théoriquement, `lonOffset` devrait être divisé par `cos(lat)`, si vous voulez un calcul strict. Mais si `viewAngleDeg` est déjà très petit (quelques degrés), l’approximation “1° de longitude = 1° quel que soit lat” passe en général si vous n’êtes pas à des latitudes extrêmes.
+     3. **Angle de vol fixé à 135°**
+
+        * Vous avez codé en dur `const flightHeading = 135; // GVA-ATH`. Si c’est un vol statique, pas de problème.
+        * Mais si vous voulez que ce composant soit réutilisable pour tout vol = (heading différent), il faudrait recevoir ce cap (`flightHeading`) en `@Input()` ou via un service.
+   * En l’état, l’algorithme déplace bien le centre de la carte vers un point situé “au quart” du cercle horizon (à mi-chemin vers l’horizon, selon l’angle de 45° gauche/droite). C’est cohérent pour simuler qu’on regarde *à l’extérieur* du fuselage (ni vers l’avant pur, ni vers l’arrière pur, mais *45°* latéralement).
+
+### 2.2 `getZoomFromAltitude()`
+
+```ts
+private getZoomFromAltitude(altitude: number, lat: number): number {
+  const EARTH_RADIUS = 6378137;
+  const latRad = (lat * Math.PI) / 180;
+  const denominator = 256 * altitude;
+  const numerator = Math.cos(latRad) * 2 * Math.PI * EARTH_RADIUS;
+  let zoom = Math.log2(numerator / denominator);
+
+  // Ajustement du zoom pour une meilleure vue passager
+  zoom = Math.max(8, Math.min(15, zoom));
+  return Math.round(zoom);
+}
+```
+
+#### ✅ Ce qui fonctionne
+
+1. **Formule générale**
+
+   * Vous reprenez la relation classique de Leaflet/OSM entre “résolution” (en m/pixel) et niveau de zoom :
+
+     $$
+       \text{resolution} = \frac{\cos(lat) \times 2 \pi R_\text{terre}}{256 \times 2^{zoom}}.
+     $$
+   * En inversant,
+
+     $$
+       2^{zoom} = \frac{\cos(lat)\times 2\pi R_\text{terre}}{256 \times \text{resolution}}.
+     $$
+   * Si on veut que `resolution ≈ altitude` (en m/pixel), alors
+
+     $$
+       zoom = \log_2 \left( \frac{\cos(lat)\times 2\pi R}{256 \times altitude} \right).
+     $$
+   * Donc la logique mathématique est juste.
+
+2. **Clamping et arrondi**
+
+   * Vous forciez `zoom` à rester entre 8 et 15 (au lieu de la plage complète OSM \[0–19]).
+
+     * Cela a du sens si, pour un affichage « passager », vous ne voulez pas qu’on zoome trop (par ex. zoom < 8 donne un paysage trop “small-scale” / vue trop large, difficile à interpréter).
+     * De même, zoom > 15, c’est une vue très « bucolique » (proche du sol) qu’un passager à 11 000 ft ne verrait pas.
+   * L’arrondi en `Math.round` garantit un zoom entier (Leaflet attend un entier pour `setView(..., zoom)`).
+
+#### ⚠️ Ce qu’il faut corriger ou commenter :
+
+1. **Unité d’`altitude`**
+
+   * Comme signalé au paragraphe précédent, vous appelez `getZoomFromAltitude(alt, lat)` en passant `alt` en pieds. Mais la formule mathématique suppose que `altitude` est en **mètres**.
+   * **Solution** : soit vous convertissez **avant** l’appel, soit vous spécifiez clairement dans la signature que vous attendez des mètres. Par exemple :
+
+     ```ts
+     // Dans initMap et updateMapView
+     const altitudeMeters = alt * 0.3048;
+     const zoom = this.getZoomFromAltitude(altitudeMeters, lat);
+     ```
+
+     ou bien vous modifiez `getZoomFromAltitude` pour faire en première ligne :
+
+     ```ts
+     const altitudeMeters = altitude /* ft */ * 0.3048;
+     ```
+
+     de sorte qu’en interne, on travaille toujours en m.
+
+2. **Usage de `lat` dans le calcul**
+
+   * Vous tenez compte de `cos(latRad)` pour adapter la résolution en fonction de la latitude (très bien).
+   * Attention : si `lat` n’est pas initialisé (undefined) ou vaut 0, `latRad = 0` → cos(0) = 1, donc `numerator = 2πR`. Problème ? Non, c’est le comportement prévu : à l’équateur, 1° de longitude = distance maximale.
+   * Il faudra juste vous assurer que `@Input() lat` et `lon` soient toujours définis avant `ngAfterViewInit`, sinon le zoom initial sera calé sur (0,0). Vous gérez `this.lat || 0` dans `initMap()`, mais si vous êtes vraiment à (0,0) ou si la donnée n’est pas enviée, vous verrez la carte centrée sur l’Afrique centrale. Pour plus de sécurité, vous pouvez interdire la création de la map tant que `lat/lon` ne sont pas définis par le parent.
+
+3. **Plage de zoom 8–15**
+
+   * Cette plage a sans doute été choisie empirique pour un rendu “passager” type.
+   * Vous pouvez, si besoin d’un vol très haut (ex. 35 000 ft), descendre en zoom 7 ou 6 si vous souhaitez élargir la vue. Pour garder la cohérence, il faudrait maybe réviser ces bornes en fonction du vol maximal (dans tous les cas, c’est un détail, mais gardez en tête que limiter à `min=8` peut être trop “serré” pour un vol à 38 000 ft).
+
+### 2.3 `getViewAngle()`
+
+```ts
+private getViewAngle(altitude: number): number {
+  // Angle de vue en degrés basé sur l'altitude
+  // Plus l'altitude est basse, plus l'angle est large
+  return Math.max(30, Math.min(60, 45 + (altitude - 11000) / 1000));
+}
+```
+
+#### ✅ Ce qui fonctionne
+
+1. À 11 000 ft → `45 + (11000–11000)/1000 = 45°`.
+2. Si altitude = 12 000 ft → on a 46°, si 10 000 ft → 44°, etc.
+3. Vous limitez l’angle entre 30° et 60°. Ça produit un effet visuel où un « atterrissage » (alt très bas) ouvre grand l’angle (\~60°), et un vol en croisière (alt plus élevée) tend vers 30°.
+
+#### ⚠️ Points d’attention
+
+* **Incohérence d’unités** (bis) :
+
+  * La formule prend `altitude` en **pieds** (puisque `alt` provient de `@Input() altitude`, initialement à 11000).
+  * Un calcul d’angle “physique” pour l’horizon impliquerait plutôt d’utiliser `alt` en mètres. Toutefois, si l’objectif est juste un effet visuel ajusté (45° à 11 000 ft → ok), on peut laisser tel quel.
+  * Si vous voulez un résultat “exact” basé sur la géométrie (angle réel de l’horizon pour un observateur à h mètre), la formule de l’angle (entre la verticale et la ligne d’horizon) est :
+
+    $$
+      \alpha = \arccos\!\Bigl(\frac{R}{R + h}\Bigr)
+    $$
+
+    où $h$ est en mètres. Ici, vous utilisez une interpolation linéaire grossière, ce qui reste correct pour un effet “user-friendly”. Il faut juste être conscient que ce n’est pas un calcul géodésique exact, mais bien un pull “UX”.
+
+### 2.4 `getMaxBounds()` et `getViewRadius()`
+
+```ts
+private getMaxBounds(lat: number, lon: number, viewAngle: number): L.LatLngBounds {
+  // Calcul des limites de la vue basé sur l'angle et l'altitude
+  const radius = this.getViewRadius(lat, lon, viewAngle);
+  return L.latLngBounds(
+    [lat - radius, lon - radius],
+    [lat + radius, lon + radius]
+  );
+}
+
+private getViewRadius(lat: number, lon: number, viewAngle: number): number {
+  // Calcul du rayon de vue en degrés
+  const EARTH_RADIUS = 6378137;
+  const altitude = this.altitude || 11000;
+  const viewDistance = altitude * Math.tan(viewAngle * Math.PI / 180);
+  return (viewDistance / EARTH_RADIUS) * (180 / Math.PI);
+}
+```
+
+#### ✅ Ce qui fonctionne
+
+1. **`getViewRadius()`**
+
+   * Vous essayez d’estimer le rayon (en degrés géographiques) que l’on va pouvoir « voir » depuis l’altitude donnée, en projetant l’angle d’ouverture (viewAngle) sur le globe.
+   * La formule
+
+     $$
+       \text{viewDistance} = h \times \tan(\text{viewAngleRad})
+     $$
+
+     où h est l’altitude (dans la même unité que EARTH\_RADIUS, donc **mètres**).
+   * Ensuite,
+
+     $$
+       \text{rayon (en degrés)} 
+       = \left(\frac{\text{viewDistance}}{R_\text{terre}}\right) \times \frac{180}{\pi}.
+     $$
+
+     C’est une conversion “distance sur surface” → “degrés de latitude”.
+   * Si `altitude` est en mètres, la formule est cohérente.
+
+2. **`getMaxBounds()`**
+
+   * Vous créez un carré de lat/lon autour du centre `[lat, lon]` en utilisant ±`radius`. Cela limite la carte à un carré minimal englobant la zone visible.
+   * Leaflet interdisant tout centre ou zoom en dehors de ces limites, on maintient la carte “verrouillée” sur la zone qui correspond à la vue par le hublot.
+
+#### ⚠️ Problèmes d’unités à corriger
+
+1. Dans `getViewRadius()`, vous faites :
+
+   ```ts
+   const altitude = this.altitude || 11000;
+   const viewDistance = altitude * Math.tan(viewAngle * Math.PI / 180);
+   ```
+
+   Or :
+
+   * La variable `altitude` ici est **en pieds** (puisque `@Input() altitude` est supposé en ft).
+   * Vous multipliez cette “altitude en ft” par la tangente, puis vous divisez par `EARTH_RADIUS` qui est en **mètres**. Bref, vous mélangez pieds et mètres dans la même formule.
+   * **Correction** : on doit impérativement convertir `altitude` en **mètres** avant d’utiliser la tangente et la division par rayon terrestre. Par exemple :
+
+     ```ts
+     const altitudeMeters = this.altitude * 0.3048;
+     const viewDistance = altitudeMeters * Math.tan(viewAngle * Math.PI / 180);
+     return (viewDistance / EARTH_RADIUS) * (180 / Math.PI);
+     ```
+   * Sans cette conversion, `viewDistance` sera \~3,28× trop petit (puisque 1 ft ≈ 0.3048 m). Du coup, `radius` en degrés sera sous-estimé et vos limites de carte (`maxBounds`) seront bien trop étroites pour la vue réelle.
+
+---
+
+## 3. `updateMapView()`
+
+```ts
+private updateMapView(): void {
+  const lat = this.lat || 0;
+  const lon = this.lon || 0;
+  const alt = this.altitude || 11000;
+  const zoom = this.getZoomFromAltitude(alt, lat);
+  const viewAngle = this.getViewAngle(alt);
+
+  // Calcul de la position exacte de l'avion
+  const planePosition = this.calculatePlanePosition(lat, lon, alt);
+
+  // Mise à jour des limites de la vue
+  const bounds = this.getMaxBounds(planePosition.lat, planePosition.lon, viewAngle);
+  this.mapInstance.setMaxBounds(bounds);
+
+  this.mapInstance.setView([planePosition.lat, planePosition.lon], zoom);
+
+  if (this.centerMarker) {
+    this.centerMarker.setLatLng([planePosition.lat, planePosition.lon]);
+  }
+}
+```
+
+### Vérification
+
+1. Vous reprenez exactement la même logique que dans `initMap()` :
+
+   * Recalcul du zoom à partir de `alt` et `lat`.
+   * Recalcul de l’`angle` (pour redéfinir `maxBounds`).
+   * Recentrage de la carte `$mapInstance.setView(...)` → fait remonter la carte vers le nouveau centre et niveau de zoom.
+   * Mise à jour de la position du marker central (même s’il est invisible).
+2. **Erreurs possibles**
+
+   * À nouveau, on passe `alt` (ft) à `getZoomFromAltitude()` et `getViewRadius()` sans conversion. Il faut corriger en m.
+   * Si `lat/lon` évoluent très fréquemment (ex. fréquence > 1x par seconde), il peut y avoir “saccades” parce qu’on recalcule immédiatement le bounds à chaque petite variation d’altitude. On peut atténuer en ne recalculant le zoom que si le changement d’altitude dépasse un certain seuil (ex. ± 500 ft) ou un temps minimal. Mais c’est un détail perf, pas un mauvais fonctionnement.
+
+---
+
+## 4. Résumé des corrections à apporter
+
+1. **Unité d’`altitude`**
+
+   * Dans **toutes** les formules qui font intervenir `altitude` (`getZoomFromAltitude` et `getViewRadius`), il faut travailler en **mètres**, or vous recevez `altitude` en pieds.
+   * Choisissez l’une des deux approches :
+
+     * Soit toujours convertir en mètres dès la réception de l’`@Input() altitude` (ex. dans `ngOnChanges` ou `initMap`, faire `const altM = this.altitude * 0.3048;` et passer `altM` aux fonctions).
+     * Soit intégrer la conversion à l’intérieur même de `getZoomFromAltitude` et `getViewRadius` (p. ex. commencer la fonction par `const altMeters = altitude * 0.3048;`).
+   * **Sans cette conversion**, le zoom et le radius seront 3× décalés vers le haut (ou vers le bas), donc l’utilisateur ne verra pas la bonne portion de la carte.
+
+2. **Explication du facteur `0.5` dans `calculatePlanePosition`**
+
+   * Ajoutez un commentaire pour justifier pourquoi vous multipliez `viewAngleDeg` par `0.5`.
+   * Exemple :
+
+     ```ts
+     // On centre la carte à mi-chemin entre la position “sol” et l’horizon,
+     // d’où le 0.5 (pour que l’axe vertical de la vue tombe au milieu de l’écran).
+     ```
+   * Sans commentaire, un autre développeur pourrait penser que c’est un bug.
+
+3. **Paramétrer `flightHeading` dynamiquement (optionnel)**
+
+   * Vous laissez le cap `flightHeading = 135` en dur (“GVA-ATH”). Si plus tard vous voulez réutiliser le composant pour d’autres vols, il faudra passer ce cap en `@Input()` ou via un service partagé.
+   * Exemple :
+
+     ```ts
+     @Input() flightHeading: number = 135;
+     // …
+     const hublotHeading = this.side === 'left'
+       ? (this.flightHeading - 45)
+       : (this.flightHeading + 45);
+     ```
+
+4. **Conversion de la longitude selon la latitude (optionnel)**
+
+   * Pour de petites distances (quelques dizaines de kilomètres), ne pas corriger lonOffset par `cos(lat)` reste acceptable ; mais si vous voulez être plus précis :
+
+     ```ts
+     const lonOffsetInDeg = latOffset / Math.cos(lat * Math.PI / 180);
+     // ou directement appliquer : 
+     const lonOffset = viewAngleDeg * Math.sin(headingRad) / Math.cos(latRad) * 0.5;
+     ```
+   * Cela rendra la position exacte plus fidèle, surtout si vous volez près des hautes latitudes.
+
+---
+
+## 5. Exemple de code corrigé (unités durcies)
+
+Voici à quoi ressemblerait la version légèrement retouchée pour que **tout soit cohérent** en mètres :
+
+```ts
+import {
+  Component,
+  Input,
+  AfterViewInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  ElementRef,
+  ViewChild
+} from '@angular/core';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+@Component({
+  selector: 'app-window-hublot',
+  standalone: true,
+  template: `
+    <div class="hublot-frame">
+      <div #mapContainer class="hublot-map"></div>
+    </div>
+  `,
+  styles: [/* mêmes styles CSS que votre version */]
+})
+export class WindowHublotComponent implements AfterViewInit, OnDestroy, OnChanges {
+  @Input() lat!: number;
+  @Input() lon!: number;
+
+  /** altitude en pieds reçue depuis le parent */
+  @Input() altitude: number = 11000;
+
+  /** côté du hublot */
+  @Input() side: 'left' | 'right' = 'left';
+
+  @ViewChild('mapContainer', { static: true })
+  mapContainer!: ElementRef<HTMLDivElement>;
+
+  private mapInstance!: L.Map;
+  private tileLayer!: L.TileLayer;
+  private centerMarker?: L.Marker;
+
+  ngAfterViewInit(): void {
+    // Initialisation de la carte dès que la vue est rendue
+    this.initMap();
+    window.addEventListener('resize', this.handleResize);
+    // On force un petit délai pour que le conteneur soit bien dimensionné
+    setTimeout(() => this.handleResize(), 300);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Si la carte existe déjà et que lat/lon/altitude changent, on rafraîchit la vue
+    if (this.mapInstance && (changes['lat'] || changes['lon'] || changes['altitude'])) {
+      this.updateMapView();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.mapInstance) {
+      this.mapInstance.remove();
+    }
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  private initMap(): void {
+    const lat = this.lat || 0;
+    const lon = this.lon || 0;
+
+    // Conversion de l'altitude (ft → m)
+    const altitudeMeters = (this.altitude || 11000) * 0.3048;
+
+    // Calcul initial du zoom en mètres
+    const zoom = this.getZoomFromAltitude(altitudeMeters, lat);
+
+    // Calcul de l'angle de vue (angle arbitraire basé sur feet, mais ça reste design)
+    const viewAngle = this.getViewAngle(this.altitude);
+
+    // Calcul de la position au sol sous le centre du hublot
+    const planePosition = this.calculatePlanePosition(lat, lon, altitudeMeters, viewAngle);
+
+    // Création de la carte Leaflet
+    this.mapInstance = L.map(this.mapContainer.nativeElement, {
+      center: [planePosition.lat, planePosition.lon],
+      zoom,
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      touchZoom: false,
+      maxBoundsViscosity: 1.0
+    });
+
+    // Définir les limites de la carte pour qu'elle ne s'échappe pas du "hublot"
+    const bounds = this.getMaxBounds(planePosition.lat, planePosition.lon, viewAngle, altitudeMeters);
+    this.mapInstance.setMaxBounds(bounds);
+
+    // Couche satellite ESRI
+    this.tileLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: 'Tiles © Esri',
+        maxZoom: 19,
+        tileSize: 256,
+        zoomOffset: 0
+      }
+    );
+    this.tileLayer.addTo(this.mapInstance);
+
+    // Couche relief (ombrage) pour plus de profondeur
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
+      {
+        opacity: 0.3,
+        maxZoom: 19
+      }
+    ).addTo(this.mapInstance);
+
+    // Marker invisible au centre (utile si on veut positionner un icône plus tard)
+    this.centerMarker = L.marker([planePosition.lat, planePosition.lon], {
+      icon: L.divIcon({
+        html: '',
+        className: '',
+        iconSize: [1, 1],
+        iconAnchor: [0, 0]
+      })
+    }).addTo(this.mapInstance);
+  }
+
+  private updateMapView(): void {
+    const lat = this.lat || 0;
+    const lon = this.lon || 0;
+    const altitudeMeters = (this.altitude || 11000) * 0.3048;
+
+    const zoom = this.getZoomFromAltitude(altitudeMeters, lat);
+    const viewAngle = this.getViewAngle(this.altitude);
+
+    const planePosition = this.calculatePlanePosition(lat, lon, altitudeMeters, viewAngle);
+
+    const bounds = this.getMaxBounds(planePosition.lat, planePosition.lon, viewAngle, altitudeMeters);
+    this.mapInstance.setMaxBounds(bounds);
+
+    this.mapInstance.setView([planePosition.lat, planePosition.lon], zoom);
+    if (this.centerMarker) {
+      this.centerMarker.setLatLng([planePosition.lat, planePosition.lon]);
+    }
+  }
+
+  /**
+   * Calcule la position "au sol" devant la caméra (hublot),
+   * en tenant compte de l'altitude en m, de l'angle de vue, et du cap (side).
+   */
+  private calculatePlanePosition(
+    lat: number,
+    lon: number,
+    altitudeMeters: number,
+    viewAngle: number
+  ): { lat: number; lon: number } {
+    const EARTH_RADIUS = 6378137; // en mètres
+
+    // Angle de vue en radian à partir de getViewAngle (qui était en degrés)
+    const viewAngleRad = (viewAngle * Math.PI) / 180;
+
+    // distance horizontale (à la surface) qu'on devrait voir à l’horizon
+    const viewDistance = altitudeMeters * Math.tan(viewAngleRad);
+
+    // conversion en "degré de lat/lon" : (d / R) × (180/π)
+    const viewAngleDeg = (viewDistance / EARTH_RADIUS) * (180 / Math.PI);
+
+    // Cap du vol, paramétrable si besoin via @Input()
+    const flightHeading = 135;
+    // Orientation du hublot : 45° à gauche ou à droite
+    const hublotHeading = this.side === 'left'
+      ? (flightHeading - 45)
+      : (flightHeading + 45);
+    const headingRad = (hublotHeading * Math.PI) / 180;
+
+    // On centre la carte à mi-chemin entre la position sol et l'horizon
+    // d'où le * 0.5 pour "mettre le sol en bas de l'écran et l'horizon en haut"
+    const latOffset = viewAngleDeg * Math.cos(headingRad) * 0.5;
+
+    // Pour être parfaitement exact, on devrait aussi diviser lonOffset par cos(lat),
+    // mais ici, vue la petite amplitude, ce n'est qu'une approche approximative
+    const lonOffset = (viewAngleDeg * Math.sin(headingRad) * 0.5) / Math.cos(lat * Math.PI / 180);
+
+    return {
+      lat: lat + latOffset,
+      lon: lon + lonOffset
+    };
+  }
+
+  /**
+   * Calcule un zoom Leaflet en fonction de l'altitude (en m) et de la latitude.
+   * On limite ensuite entre 8 et 15 pour garder une plage "passager".
+   */
+  private getZoomFromAltitude(altitudeMeters: number, lat: number): number {
+    const EARTH_RADIUS = 6378137; // en mètres
+    const latRad = (lat * Math.PI) / 180;
+    const denominator = 256 * altitudeMeters;
+    const numerator = Math.cos(latRad) * 2 * Math.PI * EARTH_RADIUS;
+    let zoom = Math.log2(numerator / denominator);
+
+    // On force un zoom minimal/mxd pour rester dans l'intervalle souhaité
+    zoom = Math.max(8, Math.min(15, zoom));
+    return Math.round(zoom);
+  }
+
+  /**
+   * Angle de vue (en degrés) selon l'altitude en feet.
+   * Rappel : c'est une formule “UX” pour des vues plus immersives, pas un calcul géométrique parfait.
+   */
+  private getViewAngle(altitudeFeet: number): number {
+    // Ex : 11000 ft → angle = 45°, 12000 ft → 46°, etc. On borne dans [30°, 60°].
+    return Math.max(30, Math.min(60, 45 + (altitudeFeet - 11000) / 1000));
+  }
+
+  /**
+   * Calcule les limites (bounding box) de la carte en degrés, 
+   * en fonction du centre lat/lon, de l'angle de vue, et de l'altitude (m).
+   */
+  private getMaxBounds(
+    lat: number,
+    lon: number,
+    viewAngle: number,
+    altitudeMeters: number
+  ): L.LatLngBounds {
+    const radius = this.getViewRadius(altitudeMeters, viewAngle);
+    return L.latLngBounds(
+      [lat - radius, lon - radius],
+      [lat + radius, lon + radius]
+    );
+  }
+
+  /**
+   * Renvoie le “rayon” en degrés (lat/lon) qu'on peut voir depuis l'altitude meters
+   * avec l'angle de vue donné.
+   */
+  private getViewRadius(altitudeMeters: number, viewAngle: number): number {
+    const EARTH_RADIUS = 6378137;
+    const viewAngleRad = (viewAngle * Math.PI) / 180;
+    const viewDistance = altitudeMeters * Math.tan(viewAngleRad);
+    return (viewDistance / EARTH_RADIUS) * (180 / Math.PI);
+  }
+
+  private handleResize = () => {
+    if (this.mapInstance) {
+      this.mapInstance.invalidateSize();
+    }
+  };
+}
+```
+
+#### Corrections apportées dans cette version
+
+* **Conversion systématique** de `altitude` en mètres dans toutes les formules.
+* Ajout de quelques commentaires pour expliquer pourquoi *0.5* dans `calculatePlanePosition`.
+* Correction du calcul de `lonOffset` pour tenir compte de `cos(lat)` (plus exact).
+* Déplacement de la conversion feet → m dans `initMap()` et `updateMapView()` avant d’appeler les helpers.
+
+---
+
+## 6. Conclusion
+
+1. **Le squelette de votre composant** (template HTML + CSS + cycle de vie Angular) est tout-à-fait conforme à ce qu’on attend :
+
+   * vous créez un hublot ovale,
+   * vous lisez correctement les `@Input() lat`, `lon`, `altitude`, `side`,
+   * vous intégrez Leaflet sans contrôles,
+   * vous appliquez une couche satellite + relief.
+
+2. **Seuls les calculs liés à l’`altitude` posent “une petite incohérence d’unités”**.
+
+   * Dans vos formules (`getZoomFromAltitude` et `getViewRadius`), vous utilisez `altitude` comme si c’était déjà des **mètres**, alors qu’en entrée c’est clairement en **pieds** (vous le convertissez en m dans `calculatePlanePosition`, mais pas dans les deux autres fonctions).
+   * Il suffit de normaliser : convertir `altitude` en mètres avant de passer aux fonctions de zoom et de radius, ou bien intégrer la conversion dans chacune des fonctions.
+
+3. **Points d’amélioration** (facultatifs) :
+
+   * Documenter la raison du “\* 0.5” dans `calculatePlanePosition`.
+   * Permettre de passer le `flightHeading` si le vol n’est pas toujours GVA–ATH.
+   * Ajuster le clamp de `getZoomFromAltitude` (8–15) si vous voulez accepter des altitudes plus basses ou plus hautes (ex. zoom 7 pour 40 000 ft).
+   * (Optionnel) Corriger la longitude en divisant par `cos(lat)` pour plus de précision.
+
+Dès que vous appliquez cette correction d’unités (pieds → mètres) partout, alors **le code fait exactement ce qu’on attend** :
+
+* la carte se centre au bon endroit “entre le sol et l’horizon” selon l’angle calculé,
+* le zoom évolue naturellement avec la hauteur,
+* on a bien une vue orientée à 45° à gauche ou à droite du cap.
+
+En l’état, votre version initiale aurait simplement généré une vue “trop dézoomée” (puisque `numerator / (256×altitudeFeet)` n’est pas la même chose que `numerator / (256×altitudeMeters)`). Après avoir intégré la conversion, tout devient cohérent. N’hésitez pas à tester avec quelques altitudes réelles (ex. 5 000 ft, 10 000 ft, 15 000 ft) pour vérifier visuellement que le zoom et la zone couverte correspondent bien à ce que verrait un passager.

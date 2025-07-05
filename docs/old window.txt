@@ -1,0 +1,1019 @@
+```typescript
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
+import { DateTime, Duration } from 'luxon';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
+import { IonPopover } from '@ionic/angular';
+import * as L from 'leaflet';
+import { WindowMapTestComponent } from './window-map-test.component';
+import { FlightDataService } from '../services/flight/flight-data.service';
+import { FlightData } from '../services/flight/models/flight.interface';
+import { WindowHublotComponent } from '../components/window-hublot.component';
+// TODO: Adapter UserStatusBarComponent import
+// TODO: Adapter TranslatePipe import
+// TODO: Adapter AuthService import
+
+interface POI {
+  name: string;
+  description: string;
+  wiki_url: string;
+  lat: number;
+  lon: number;
+  side: 'left' | 'right';
+  type: 'nature' | 'montagne' | 'ville' | 'historique' | 'eau' | 'parc' | 'plage' | 'vallee' | 'archipel' | 'port' | 'quartier' | 'colline' | 'autre';
+}
+
+// Exemple de base de POIs (à compléter)
+const ALL_POIS: POI[] = [
+  // France/Suisse (départ)
+  { name: 'Crêt de la Neige', description: 'Point culminant du Jura, vue sur le Léman.', wiki_url: 'https://fr.wikipedia.org/wiki/Cr%C3%AAt_de_la_Neige', lat: 46.2967, lon: 5.9442, side: 'left', type: 'montagne' },
+  { name: 'Lac Léman', description: 'Le plus grand lac alpin d\'Europe.', wiki_url: 'https://fr.wikipedia.org/wiki/L%C3%A9man', lat: 46.4542, lon: 6.6028, side: 'left', type: 'eau' },
+  { name: 'Mont Salève', description: 'Le balcon de Genève.', wiki_url: 'https://fr.wikipedia.org/wiki/Le_Sal%C3%A8ve', lat: 46.1367, lon: 6.1806, side: 'left', type: 'montagne' },
+  { name: 'Mont Blanc', description: 'Plus haut sommet des Alpes.', wiki_url: 'https://fr.wikipedia.org/wiki/Mont_Blanc', lat: 45.8326, lon: 6.8652, side: 'right', type: 'montagne' },
+  { name: 'Vallée de l\'Arve', description: 'Vallée glaciaire de Haute-Savoie.', wiki_url: 'https://fr.wikipedia.org/wiki/Vall%C3%A9e_de_l%27Arve', lat: 46.0500, lon: 6.6000, side: 'right', type: 'vallee' },
+  { name: 'Chamonix', description: 'Station de montagne au pied du Mont Blanc.', wiki_url: 'https://fr.wikipedia.org/wiki/Chamonix', lat: 45.9237, lon: 6.8694, side: 'right', type: 'ville' },
+  // Italie nord
+  { name: 'Dolomites (Marmolada)', description: 'Massif alpin célèbre.', wiki_url: 'https://fr.wikipedia.org/wiki/Marmolada', lat: 46.4333, lon: 11.8667, side: 'left', type: 'montagne' },
+  { name: 'Lac de Garde', description: 'Le plus grand lac d\'Italie.', wiki_url: 'https://fr.wikipedia.org/wiki/Lac_de_Garde', lat: 45.6500, lon: 10.6667, side: 'left', type: 'eau' },
+  { name: 'Massif de Brenta', description: 'Alpes italiennes.', wiki_url: 'https://fr.wikipedia.org/wiki/Groupe_de_Brenta', lat: 46.1833, lon: 10.9000, side: 'left', type: 'montagne' },
+  { name: 'Plaine du Pô', description: 'Grande plaine fertile.', wiki_url: 'https://fr.wikipedia.org/wiki/Plaine_du_P%C3%B4', lat: 45.0000, lon: 10.0000, side: 'right', type: 'nature' },
+  { name: 'Vérone', description: 'Ville célèbre pour Roméo et Juliette.', wiki_url: 'https://fr.wikipedia.org/wiki/V%C3%A9rone', lat: 45.4386, lon: 10.9928, side: 'right', type: 'ville' },
+  { name: 'Mantoue', description: 'Ville d\'art en Lombardie.', wiki_url: 'https://fr.wikipedia.org/wiki/Mantoue', lat: 45.1564, lon: 10.7914, side: 'right', type: 'ville' },
+  // Italie centre/Adriatique
+  { name: 'Côte adriatique', description: 'Plages et ville de Ravenne.', wiki_url: 'https://fr.wikipedia.org/wiki/Ravenne', lat: 44.4184, lon: 12.2035, side: 'left', type: 'plage' },
+  { name: 'Venise', description: 'Ville sur l\'eau.', wiki_url: 'https://fr.wikipedia.org/wiki/Venise', lat: 45.4408, lon: 12.3155, side: 'left', type: 'ville' },
+  { name: 'Delta du Pô', description: 'Zone humide protégée.', wiki_url: 'https://fr.wikipedia.org/wiki/Delta_du_P%C3%B4', lat: 44.9500, lon: 12.3667, side: 'left', type: 'nature' },
+  { name: 'Côte dalmate', description: 'Côte croate et îles.', wiki_url: 'https://fr.wikipedia.org/wiki/C%C3%B4te_dalmate', lat: 44.8000, lon: 15.0000, side: 'right', type: 'plage' },
+  { name: 'Dubrovnik', description: 'Ville fortifiée UNESCO.', wiki_url: 'https://fr.wikipedia.org/wiki/Dubrovnik', lat: 42.6507, lon: 18.0944, side: 'right', type: 'historique' },
+  { name: 'Archipel des Kornati', description: 'Parc national croate.', wiki_url: 'https://fr.wikipedia.org/wiki/Parc_national_des_Kornati', lat: 43.8200, lon: 15.3300, side: 'right', type: 'archipel' },
+  // Albanie/Grèce
+  { name: 'Massif de Llogara', description: 'Montagnes du sud de l\'Albanie.', wiki_url: 'https://fr.wikipedia.org/wiki/Parc_national_de_Llogara', lat: 40.2047, lon: 19.6125, side: 'left', type: 'montagne' },
+  { name: 'Vallée de la Vjosa', description: 'Rivière sauvage d\'Albanie.', wiki_url: 'https://fr.wikipedia.org/wiki/Vjosa', lat: 40.1000, lon: 20.0000, side: 'left', type: 'vallee' },
+  { name: 'Parc national de Butrint', description: 'Site archéologique.', wiki_url: 'https://fr.wikipedia.org/wiki/Butrint', lat: 39.7458, lon: 20.0208, side: 'left', type: 'parc' },
+  { name: 'Îles Ioniennes', description: 'Archipel grec.', wiki_url: 'https://fr.wikipedia.org/wiki/%C3%8Eles_Ioniennes', lat: 39.6243, lon: 19.9217, side: 'right', type: 'archipel' },
+  { name: 'Golfe de Patras', description: 'Golfe de la mer Ionienne.', wiki_url: 'https://fr.wikipedia.org/wiki/Golfe_de_Patras', lat: 38.3333, lon: 21.7333, side: 'right', type: 'eau' },
+  { name: 'Côtes de l\'Épire', description: 'Région côtière montagneuse.', wiki_url: 'https://fr.wikipedia.org/wiki/%C3%89pire_(p%C3%A9riphr%C3%A9rie)', lat: 39.2000, lon: 20.6000, side: 'right', type: 'nature' },
+  // Grèce (arrivée)
+  { name: 'Golfe Saronique', description: 'Golfe maritime au sud d\'Athènes.', wiki_url: 'https://fr.wikipedia.org/wiki/Golfe_Saronique', lat: 37.8000, lon: 23.4000, side: 'left', type: 'eau' },
+  { name: 'Mont Hymette', description: 'Montagne au sud-est d\'Athènes.', wiki_url: 'https://fr.wikipedia.org/wiki/Hymette', lat: 37.9333, lon: 23.8167, side: 'left', type: 'montagne' },
+  { name: 'Port du Pirée', description: 'Principal port d\'Athènes.', wiki_url: 'https://fr.wikipedia.org/wiki/Le_Pir%C3%A9e', lat: 37.9421, lon: 23.6465, side: 'left', type: 'port' },
+  { name: 'Acropole et Parthénon', description: 'Site antique emblématique.', wiki_url: 'https://fr.wikipedia.org/wiki/Acropole_d%27Ath%C3%A8nes', lat: 37.9715, lon: 23.7267, side: 'right', type: 'historique' },
+  { name: 'Quartier de Plaka', description: 'Quartier historique d\'Athènes.', wiki_url: 'https://fr.wikipedia.org/wiki/Pláka', lat: 37.9747, lon: 23.7283, side: 'right', type: 'quartier' },
+  { name: 'Mont Lycabette', description: 'Colline dominant Athènes.', wiki_url: 'https://fr.wikipedia.org/wiki/Mont_Lycabette', lat: 37.9908, lon: 23.7439, side: 'right', type: 'colline' },
+];
+
+// Profil d'altitude réel (exemple Genève → Athènes, en pieds)
+const REAL_ALTITUDE_PROFILE = [
+  0,     // 0%
+  12000, // 10%
+  26000, // 20%
+  35000, // 30%
+  35000, // 40%
+  35000, // 50%
+  35000, // 60%
+  35000, // 70%
+  30000, // 80%
+  15000, // 90%
+  0      // 100%
+];
+
+function haversine(a: {lat: number, lon: number}, b: {lat: number, lon: number}): number {
+  const R = 6371;
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLon = (b.lon - a.lon) * Math.PI / 180;
+  const lat1 = a.lat * Math.PI / 180;
+  const lat2 = b.lat * Math.PI / 180;
+  const x = dLon * Math.cos((lat1 + lat2) / 2);
+  return Math.sqrt(dLat * dLat + x * x) * R;
+}
+
+function getClosestPOIs(position: {lat: number, lon: number}, side: 'left' | 'right', count: number): POI[] {
+  const candidates = ALL_POIS.filter(poi => poi.side === side);
+  candidates.sort((a, b) => haversine(position, a) - haversine(position, b));
+  return candidates.slice(0, count);
+}
+
+function interpolatePosition(start: {lat: number, lon: number}, end: {lat: number, lon: number}, fraction: number): {lat: number, lon: number} {
+  return {
+    lat: start.lat + (end.lat - start.lat) * fraction,
+    lon: start.lon + (end.lon - start.lon) * fraction
+  };
+}
+
+function getRealisticAltitude(progressPercent: number): number {
+  // Interpolation linéaire entre les tranches de 10%
+  const idx = Math.floor(progressPercent / 10);
+  const nextIdx = Math.min(idx + 1, REAL_ALTITUDE_PROFILE.length - 1);
+  const pctInStep = (progressPercent % 10) / 10;
+  const alt1 = REAL_ALTITUDE_PROFILE[idx];
+  const alt2 = REAL_ALTITUDE_PROFILE[nextIdx];
+  return alt1 + (alt2 - alt1) * pctInStep;
+}
+
+function generateWaypointsWithPOIs(
+  start: {lat: number, lon: number},
+  end: {lat: number, lon: number},
+  allPOIs: POI[],
+  nSteps: number = 10
+) {
+  const waypoints: any[] = [];
+  for (let i = 0; i <= nSteps; i++) {
+    const fraction = i / nSteps;
+    const pos = interpolatePosition(start, end, fraction);
+    const pct = Math.round(fraction * 100);
+    const altitude = getRealisticAltitude(pct);
+    const poisLeft = getClosestPOIs(pos, 'left', 3);
+    const poisRight = getClosestPOIs(pos, 'right', 3);
+    waypoints.push({
+      pct,
+      lat: pos.lat,
+      lon: pos.lon,
+      altitude,
+      poi_left: poisLeft.map(poi => ({ ...poi, altitude })),
+      poi_right: poisRight.map(poi => ({ ...poi, altitude }))
+    });
+  }
+  return waypoints;
+}
+
+// Retourne le chemin de l'icône de pin selon le type de POI
+function getPinIconForType(type: string): string {
+  switch (type) {
+    case 'montagne': return 'assets/pin_montagne.png';
+    case 'ville': return 'assets/pin_ville.png';
+    case 'eau': return 'assets/pin_eau.png';
+    case 'historique': return 'assets/pin_historique.png';
+    case 'nature': return 'assets/pin_nature.png';
+    case 'parc': return 'assets/pin_parc.png';
+    case 'plage': return 'assets/pin_plage.png';
+    case 'vallee': return 'assets/pin_vallee.png';
+    case 'archipel': return 'assets/pin_archipel.png';
+    case 'port': return 'assets/pin_port.png';
+    case 'quartier': return 'assets/pin_quartier.png';
+    case 'colline': return 'assets/pin_colline.png';
+    default: return 'assets/pin.png';
+  }
+}
+
+@Component({
+  selector: 'app-window',
+  standalone: true,
+  template: `
+    <ion-content>
+      <app-window-map-test
+        [lat]="flightData?.lat_t_deg"
+        [lon]="flightData?.lon_t_deg"
+        [altitude]="flightData?.altitude || 11000"
+        [poisVisibles]="getVisiblePOIs()"
+      ></app-window-map-test>
+
+      <div class="placeholder-container" *ngIf="flightData">
+        <h1>
+          ✈️ Vol démo Genève → Athènes
+          <ion-badge color="warning">DEMO</ion-badge>
+        </h1>
+
+        <div class="flight-info-block">
+          <div><b>Départ :</b> {{ flightData.departureCity }} ({{ flightData.departureAirport }})</div>
+          <div>
+            <b>Heure de départ :</b>
+            {{ flightData.departureTimeGeneva }} (GVA) / {{ flightData.departureTimeAthens }} (ATH)
+          </div>
+          <div><b>Arrivée :</b> {{ flightData.arrivalCity }} ({{ flightData.arrivalAirport }})</div>
+          <div>
+            <b>Heure d'arrivée :</b>
+            {{ flightData.arrivalTimeAthens }} (ATH) / {{ flightData.arrivalTimeGeneva }} (GVA)
+          </div>
+          <div>
+            <b>Numéro de vol :</b> {{ flightData.flightNumber }} |
+            <b>Compagnie :</b> {{ flightData.airline }}
+          </div>
+          <div><b>Avion :</b> {{ flightData.aircraft }}</div>
+        </div>
+
+        <div class="progress-block">
+          <h2>🕒 Statut du vol</h2>
+          <div>
+            <b>Heure actuelle à Genève :</b>
+            {{ flightData.nowGeneva }} (GVA) / {{ flightData.nowAthens }} (ATH)
+          </div>
+          <div>
+            <b>Heure actuelle à Athènes :</b>
+            {{ flightData.nowAthens }} (ATH) / {{ flightData.nowGeneva }} (GVA)
+          </div>
+          <div><b>Progression du vol :</b> {{ flightData.progressPercent }} %</div>
+          <div><b>Temps écoulé en vol :</b> {{ flightData.elapsed }}</div>
+          <div><b>Temps restant :</b> {{ flightData.remaining }}</div>
+          <div><b>Durée totale du vol :</b> {{ flightData.duration }}</div>
+          <div><b>Statut :</b> {{ flightData.status }}</div>
+          <div><b>Phase de vol :</b> {{ flightData.phase }}</div>
+          <div>
+            <b>Vitesse sol :</b>
+            {{ flightData.v_sol_kt }} kt ({{ flightData.v_sol_kmh }} km/h)
+          </div>
+          <div><b>Distance parcourue :</b> {{ flightData.d_elapsed_km }} km</div>
+          <div><b>Distance restante :</b> {{ flightData.d_remaining_km }} km</div>
+          <div><b>Fraction du trajet :</b> {{ flightData.fraction_f }} %</div>
+          <div>
+            <b>Coordonnées actuelles :</b>
+            {{ flightData.lat_t_deg }} N, {{ flightData.lon_t_deg }} E
+          </div>
+          <div>
+            <b>Altitude avion :</b>
+            {{ flightData.altitude | number:'1.0-0' }} ft
+            ({{ (flightData.altitude * 0.3048) | number:'1.0-0' }} m)
+          </div>
+
+          <div class="poi-section">
+            <b>Points d'intérêt à gauche :</b>
+            <ul>
+              <li *ngFor="let poi of currentPOI.left">
+                <a href="#" (click)="openPOIPopover(poi, $event); $event.preventDefault()">
+                  <b>{{ poi.name }}</b>
+                </a>
+                <div class="poi-desc">{{ poi.description }}</div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="poi-section">
+            <b>Points d'intérêt à droite :</b>
+            <ul>
+              <li *ngFor="let poi of currentPOI.right">
+                <a href="#" (click)="openPOIPopover(poi, $event); $event.preventDefault()">
+                  <b>{{ poi.name }}</b>
+                </a>
+                <div class="poi-desc">{{ poi.description }}</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!flightData">
+        <ion-icon name="map-outline" class="placeholder-icon"></ion-icon>
+        <h1>Ma Fenêtre</h1>
+        <p>Aucun vol démo en cours.</p>
+      </div>
+
+      <div *ngIf="showPOIModal && selectedPOI" class="poi-popup-overlay" (click)="closePOIPopover()">
+        <div class="poi-popup-waw" (click)="$event.stopPropagation()">
+          <div class="poi-popup-header">
+            <strong>{{ selectedPOI.name }}</strong>
+            <button class="poi-popup-close" (click)="closePOIPopover()">✕</button>
+          </div>
+          <div class="poi-popup-body">
+            <img *ngIf="selectedPOI.image_url" [src]="selectedPOI.image_url" [alt]="selectedPOI.name" />
+            <p class="poi-popup-desc">{{ selectedPOI.description }}</p>
+            <p class="poi-popup-coords">
+              📍 <em>Lat</em> {{ currentWaypoint?.lat | number:'1.4-4' }} N, <em>Lon</em> {{ currentWaypoint?.lon | number:'1.4-4' }} E
+            </p>
+          </div>
+          <div class="poi-popup-footer">
+            <a *ngIf="selectedPOI.wiki_url" href="{{ selectedPOI.wiki_url }}" target="_blank">
+              Voir sur Wikipédia ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloc de test tout en bas -->
+      <ion-card *ngIf="flightTestData">
+        <ion-card-header>
+          <ion-card-title>Données enrichies du vol test (GVA → ATH)</ion-card-title>
+          <ion-card-subtitle>Source : APIs Aviationstack & OpenSky</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <ion-label>Numéro de Vol</ion-label>
+              <ion-note slot="end">{{ flightTestData.flightNumber }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Compagnie</ion-label>
+              <ion-note slot="end">{{ flightTestData.airline }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Statut</ion-label>
+              <ion-note slot="end">{{ flightTestData.status.type }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Dernière Mise à Jour</ion-label>
+              <ion-note slot="end">{{ flightTestData.lastUpdated | date:'medium' }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Départ</ion-label>
+              <ion-note slot="end">
+                {{ flightTestData.route.departure.airport }} - {{ flightTestData.route.departure.city }}
+              </ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Arrivée</ion-label>
+              <ion-note slot="end">
+                {{ flightTestData.route.arrival.airport }} - {{ flightTestData.route.arrival.city }}
+              </ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Horaire Départ</ion-label>
+              <ion-note slot="end">
+                {{ flightTestData.route.departure.scheduledTime | date:'medium' }}
+              </ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Horaire Arrivée</ion-label>
+              <ion-note slot="end">
+                {{ flightTestData.route.arrival.scheduledTime | date:'medium' }}
+              </ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Distance</ion-label>
+              <ion-note slot="end">{{ flightTestData.route.distance.kilometers }} km</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Durée Prévue</ion-label>
+              <ion-note slot="end">
+                {{ flightTestData.route.duration.scheduledMinutes }} minutes
+              </ion-note>
+            </ion-item>
+          </ion-list>
+          <ion-list *ngIf="flightTestData.waypoints?.length">
+            <ion-item-divider>Waypoints (OpenSky)</ion-item-divider>
+            <ion-item *ngFor="let waypoint of flightTestData.waypoints">
+              <ion-label>
+                <h3>{{ waypoint.timestamp | date:'medium' }}</h3>
+                <p>
+                  Lat: {{ waypoint.latitude }}, Lon: {{ waypoint.longitude }}, Alt:
+                  {{ waypoint.altitude }}m
+                </p>
+                <p>Vitesse: {{ waypoint.speed }} km/h, Cap: {{ waypoint.heading }}°</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <ion-list *ngIf="flightTestData.codeshares?.length">
+            <ion-item-divider>Codes partagés</ion-item-divider>
+            <ion-item *ngFor="let code of flightTestData.codeshares">
+              <ion-label>{{ code }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Section POIs détaillée -->
+      <ion-card *ngIf="waypoints && waypoints.length">
+        <ion-card-header>
+          <ion-card-title>Points d'intérêt du vol (GVA → ATH)</ion-card-title>
+          <ion-card-subtitle>Affichage de tous les POIs par tranche de 10%</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item *ngFor="let wp of waypoints">
+              <ion-label>
+                <h3>
+                  Tranche {{ wp.pct }}% (Lat: {{ wp.lat | number:'1.4-4' }}, Lon:
+                  {{ wp.lon | number:'1.4-4' }}, Alt: {{ wp.altitude | number:'1.0-0' }} ft
+                  ({{ (wp.altitude * 0.3048) | number:'1.0-0' }} m), Zoom:
+                  {{ getMapZoomFromAltitude(wp.altitude) }})
+                </h3>
+                <div>
+                  <b>POIs à gauche :</b>
+                  <ul>
+                    <li *ngFor="let poi of wp.poi_left">
+                      <span
+                        [ngStyle]="
+                          isPOIVisible(poi, 'left') ? { color: '#1976d2', 'font-weight': 'bold' } : {}
+                        "
+                      >
+                        <img
+                          [src]="getPinIconForType(poi.type)"
+                          class="poi-type-icon"
+                          width="20"
+                          height="20"
+                          style="vertical-align: middle; margin-right: 6px;"
+                        />
+                        {{ poi.name }}
+                        <span *ngIf="isPOIVisible(poi, 'left')" class="poi-badge">Visible</span>
+                      </span>
+                      <br /><small>{{ poi.description }}</small>
+                      <br /><a [href]="poi.wiki_url" target="_blank">Wikipedia</a>
+                      <br />
+                      Coord: {{ poi.lat | number:'1.4-4' }}, {{ poi.lon | number:'1.4-4' }} |
+                      Altitude avion: {{ poi.altitude | number:'1.0-0' }} ft
+                      ({{ (poi.altitude * 0.3048) | number:'1.0-0' }} m) | Zoom:
+                      {{ getMapZoomFromAltitude(poi.altitude) }}
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <b>POIs à droite :</b>
+                  <ul>
+                    <li *ngFor="let poi of wp.poi_right">
+                      <span
+                        [ngStyle]="
+                          isPOIVisible(poi, 'right') ? { color: '#1976d2', 'font-weight': 'bold' } : {}
+                        "
+                      >
+                        <img
+                          [src]="getPinIconForType(poi.type)"
+                          class="poi-type-icon"
+                          width="20"
+                          height="20"
+                          style="vertical-align: middle; margin-right: 6px;"
+                        />
+                        {{ poi.name }}
+                        <span *ngIf="isPOIVisible(poi, 'right')" class="poi-badge">Visible</span>
+                      </span>
+                      <br /><small>{{ poi.description }}</small>
+                      <br /><a [href]="poi.wiki_url" target="_blank">Wikipedia</a>
+                      <br />
+                      Coord: {{ poi.lat | number:'1.4-4' }}, {{ poi.lon | number:'1.4-4' }} |
+                      Altitude avion: {{ poi.altitude | number:'1.0-0' }} ft
+                      ({{ (poi.altitude * 0.3048) | number:'1.0-0' }} m) | Zoom:
+                      {{ getMapZoomFromAltitude(poi.altitude) }}
+                    </li>
+                  </ul>
+                </div>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="hublots-bottom-row">
+        <app-window-hublot
+          [lat]="getHublotLat('left')"
+          [lon]="getHublotLon('left')"
+          [altitude]="flightData?.altitude || 11000"
+          side="left"
+        ></app-window-hublot>
+        <app-window-hublot
+          [lat]="getHublotLat('right')"
+          [lon]="getHublotLon('right')"
+          [altitude]="flightData?.altitude || 11000"
+          side="right"
+        ></app-window-hublot>
+      </div>
+    </ion-content>
+  `,
+  styles: [
+    `ion-content {
+      --background: #fff;
+      height: 100%;
+      min-height: 100vh;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+    }
+    app-window-map-test, #map, .leaflet-container {
+      height: 80vh !important;
+      width: 100vw !important;
+      min-height: 400px !important;
+      background: #fff !important;
+      margin: 0;
+      display: block;
+    }
+    .placeholder-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; text-align: center; } 
+    .placeholder-icon { font-size: 64px; color: #00BCD4; margin-bottom: 24px; } 
+    h1 { color: #00BCD4; font-size: 2rem; margin-bottom: 8px; } 
+    p { color: #FF9800; font-size: 1.1rem; font-style: italic; } 
+    .flight-info-block, .progress-block { margin: 18px 0; background: #f8f9fa; border-radius: 12px; padding: 18px 24px; box-shadow: 0 2px 8px #0001; text-align: left; min-width: 320px; } 
+    .flight-info-block b, .progress-block b { color: #1976d2; } 
+    .progress-block { background: #fffbe7; }
+    .poi-section { background: #f0f4ff; border-radius: 12px; padding: 16px 18px; margin-top: 18px; box-shadow: 0 2px 12px #0002; }
+    .poi-section ul { padding-left: 18px; }
+    .poi-section li { margin-bottom: 10px; }
+    .poi-section a { color: #1976d2; font-weight: 600; text-decoration: underline; transition: color 0.2s; }
+    .poi-section a:hover { color: #ff9800; }
+    .poi-desc { font-style: italic; color: #444; margin-left: 2px; font-size: 0.98em; }
+    .poi-badge { display: inline-block; background: #1976d2; color: #fff; border-radius: 8px; padding: 2px 10px; font-size: 0.85em; margin-left: 8px; }
+    .poi-popup-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.18); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    .poi-popup-waw { border:1px solid #ccc; border-radius:8px; width:300px; max-width:95vw; box-shadow:0 2px 16px rgba(0,0,0,0.18); font-family:sans-serif; background:#fff; animation: popin 0.22s cubic-bezier(.4,1.4,.6,1) both; }
+    .poi-popup-header { background:#f5f5f5; padding:8px 12px; border-top-left-radius:8px; border-top-right-radius:8px; display:flex; justify-content:space-between; align-items:center; }
+    .poi-popup-header strong { font-size:1.1em; color:#1976d2; }
+    .poi-popup-close { background:none; border:none; font-size:18px; cursor:pointer; color:#888; transition:color 0.2s; }
+    .poi-popup-close:hover { color:#d32f2f; }
+    .poi-popup-body { padding:12px; }
+    .poi-popup-body img { width:100%; height:auto; border-radius:4px; margin-bottom:8px; box-shadow:0 1px 4px #0001; }
+    .poi-popup-desc { margin:0 0 8px; font-size:14px; line-height:1.4; color:#222; }
+    .poi-popup-coords { margin:0; font-size:12px; color:#555; }
+    .poi-popup-footer { background:#fafafa; padding:8px 12px; border-bottom-left-radius:8px; border-bottom-right-radius:8px; text-align:right; }
+    .poi-popup-footer a { text-decoration:none; font-size:13px; color:#1976d2; font-weight:600; }
+    .poi-popup-footer a:hover { color: #ff9800; }
+    @keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .flight-path {
+      stroke-dasharray: 5, 10;
+      animation: dash 30s linear infinite;
+    }
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -1000;
+      }
+    }
+    .plane-icon-div {
+      position: relative;
+    }
+    .plane-shadow {
+      position: absolute;
+      width: 20px;
+      height: 4px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 50%;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: blur(2px);
+    }
+    .poi-marker {
+      position: relative;
+    }
+    .poi-pulse {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      background: rgba(25, 118, 210, 0.3);
+      border-radius: 50%;
+      animation: pulse 2s ease-out infinite;
+    }
+    @keyframes pulse {
+      0% {
+        transform: scale(0.5);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+    .custom-popup .leaflet-popup-content-wrapper {
+      background: rgba(255,255,255,0.95);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .poi-popup h3 {
+      margin: 0 0 8px 0;
+      color: #1976d2;
+      font-size: 1.1em;
+    }
+    .poi-popup p {
+      margin: 0 0 8px 0;
+      font-size: 0.9em;
+      color: #333;
+    }
+    .poi-popup a {
+      color: #1976d2;
+      text-decoration: none;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+    .poi-popup a:hover {
+      text-decoration: underline;
+    }
+    .poi-type-icon {
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .hublots-bottom-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 240px;
+      margin: 0 auto 24px auto;
+      padding: 32px 0 24px 0;
+      width: 100vw;
+      max-width: 100vw;
+      background: linear-gradient(180deg, #e3e9f6 60%, #bfc9db 100%);
+      border-top: 1.5px solid #dde3f2;
+      border-bottom: 1.5px solid #dde3f2;
+      box-shadow: 0 8px 32px #0001;
+      overflow-x: auto;
+    }
+    @media (max-width: 1200px) {
+      .hublots-bottom-row { gap: 160px; }
+    }
+    @media (max-width: 900px) {
+      .hublots-bottom-row { gap: 100px; padding: 18px 0 12px 0; }
+    }
+    @media (max-width: 600px) {
+      .hublots-bottom-row { gap: 60px; padding: 8px 0 6px 0; }
+    }
+    `
+  ],
+  imports: [
+    CommonModule,
+    IonicModule,
+    WindowMapTestComponent,
+    WindowHublotComponent /**, UserStatusBarComponent, TranslatePipe**/
+  ]
+})
+export class WindowPage {
+  flightData: any = null;
+  intervalId: any;
+  loading = true;
+  user: User | null = null;
+  departure: any = null;
+  arrival: any = null;
+  waypoints: any[] = [];
+  currentPOI: { left: any[]; right: any[] } = { left: [], right: [] };
+  public selectedPOI: any = null;
+  public showPOIModal: boolean = false;
+  public popoverEvent: MouseEvent | null = null;
+  public currentWaypoint: any = null;
+  flightTestData: FlightData | null = null;
+
+  constructor(
+    private firestore: Firestore,
+    private auth: Auth,
+    private flightDataService: FlightDataService
+  ) {}
+
+  ngOnInit() {
+    this.initDemoFlight();
+    // Génère les waypoints à partir de ALL_POIS pour tout le vol
+    const start = { lat: 46.2381, lon: 6.1080 };
+    const end = { lat: 37.9364, lon: 23.9445 };
+    this.waypoints = generateWaypointsWithPOIs(start, end, ALL_POIS, 10);
+    if (this.intervalId) clearInterval(this.intervalId);
+    this.intervalId = setInterval(() => {
+      this.updateDemoFlight();
+      this.updateFlightTestData();
+      this.updateCurrentPOI();
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) clearInterval(this.intervalId);
+  }
+
+  initDemoFlight() {
+    // Paramètres du vol
+    const durationMin = 165; // 2h45
+    const now = DateTime.now();
+    const percent = 0.25;
+    const elapsedMs = Math.round(durationMin * 60 * 1000 * percent);
+    this.departure = now.minus({ milliseconds: elapsedMs });
+    this.arrival = this.departure.plus({ minutes: durationMin });
+    this.updateDemoFlight();
+  }
+
+  updateDemoFlight() {
+    if (!this.departure || !this.arrival) return;
+    const now = DateTime.now();
+    // Infos aéroports
+    const gva = {
+      code: 'GVA',
+      city: 'Genève',
+      name: 'Aéroport de Genève',
+      tz: 'Europe/Zurich',
+      lat: 46.2381,
+      lon: 6.1080
+    };
+    const ath = {
+      code: 'ATH',
+      city: 'Athènes',
+      name: "Aéroport d'Athènes Elefthérios-Venizélos",
+      tz: 'Europe/Athens',
+      lat: 37.9364,
+      lon: 23.9445
+    };
+    // Profil de vol
+    const t_total_min = 148;
+    const t_climb = 20;
+    const t_descent = 30;
+    const KT_TO_KMH = 1.852;
+    const v_climb_kt = 280;
+    const v_descent_kt = 300;
+    const v_climb_kmh = v_climb_kt * KT_TO_KMH;
+    const v_descent_kmh = v_descent_kt * KT_TO_KMH;
+    const t_cruise = t_total_min - t_climb - t_descent;
+    // Haversine (grand-cercle)
+    const R = 6371;
+    const toRad = (deg: number) => deg * Math.PI / 180;
+    const toDeg = (rad: number) => rad * 180 / Math.PI;
+    const φ1 = toRad(gva.lat);
+    const φ2 = toRad(ath.lat);
+    const λ1 = toRad(gva.lon);
+    const λ2 = toRad(ath.lon);
+    const Δφ = toRad(ath.lat - gva.lat);
+    const Δλ = toRad(ath.lon - gva.lon);
+    const hav = (Δ: number) => Math.sin(Δ / 2) ** 2;
+    const a = hav(Δφ) + Math.cos(φ1) * Math.cos(φ2) * hav(Δλ);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const D_gc_km = R * c;
+    // Calibration croisière
+    const d_climb = v_climb_kmh * (t_climb / 60);
+    const d_descent = v_descent_kmh * (t_descent / 60);
+    const t_cruise_h = t_cruise / 60;
+    const v_cruise_kmh = (D_gc_km - d_climb - d_descent) / t_cruise_h;
+    const v_cruise_kt = v_cruise_kmh / KT_TO_KMH;
+    const d_cruise = v_cruise_kmh * t_cruise_h;
+    // Temps écoulé
+    const total = this.arrival.diff(this.departure);
+    const elapsed = now.diff(this.departure);
+    const t_elapsed_min = elapsed.as('minutes');
+    let phase = '';
+    let v_sol_kt = 0;
+    let v_sol_kmh = 0;
+    let d_elapsed_km = 0;
+    if (t_elapsed_min <= t_climb) {
+      phase = 'Montée';
+      v_sol_kt = v_climb_kt;
+      v_sol_kmh = v_climb_kmh;
+      d_elapsed_km = v_climb_kmh * (t_elapsed_km / 60);
+    } else if (t_elapsed_min <= t_climb + t_cruise) {
+      phase = 'Croisière';
+      v_sol_kt = v_cruise_kt;
+      v_sol_kmh = v_cruise_kmh;
+      const dt_cruise = t_elapsed_min - t_climb;
+      d_elapsed_km = d_climb + v_cruise_kmh * (dt_cruise / 60);
+    } else {
+      phase = 'Descente';
+      v_sol_kt = v_descent_kt;
+      v_sol_kmh = v_descent_kmh;
+      const dt_desc = t_elapsed_min - t_climb - t_cruise;
+      d_elapsed_km =
+        d_climb + d_cruise + v_descent_kmh * (dt_desc / 60);
+    }
+    const fraction_f = Math.max(0, Math.min(1, d_elapsed_km / D_gc_km));
+    // Interpolation du point courant (grand-cercle)
+    const δ = c;
+    const A = Math.sin((1 - fraction_f) * δ) / Math.sin(δ);
+    const B = Math.sin(fraction_f * δ) / Math.sin(δ);
+    const x =
+      A * Math.cos(φ1) * Math.cos(λ1) +
+      B * Math.cos(φ2) * Math.cos(λ2);
+    const y =
+      A * Math.cos(φ1) * Math.sin(λ1) +
+      B * Math.cos(φ2) * Math.sin(λ2);
+    const z = A * Math.sin(φ1) + B * Math.sin(φ2);
+    const φ_t = Math.atan2(z, Math.sqrt(x * x + y * y));
+    const λ_t = Math.atan2(y, x);
+    const lat_t_deg = toDeg(φ_t);
+    const lon_t_deg = toDeg(λ_t);
+    // Calculs horaires
+    const depTimeGeneva = this.departure.setZone(gva.tz);
+    const depTimeAthens = this.departure.setZone(ath.tz);
+    const arrTimeGeneva = this.arrival.setZone(gva.tz);
+    const arrTimeAthens = this.arrival.setZone(ath.tz);
+    const nowGeneva = now.setZone(gva.tz);
+    const nowAthens = now.setZone(ath.tz);
+    // Statut
+    const progress = Math.max(
+      0,
+      Math.min(1, elapsed.as('milliseconds') / total.as('milliseconds'))
+    );
+    let statusDesc = '';
+    if (progress < 0) statusDesc = 'En attente';
+    else if (progress >= 1) statusDesc = 'Arrivé';
+    else statusDesc = 'En vol';
+    const status = { type: 'ON_TIME', description: statusDesc };
+    // Altitude basée sur le profil réel
+    const progressPercent = Math.round(progress * 100);
+    const altitude = getRealisticAltitude(progressPercent);
+    const newFlightData = {
+      departureCity: gva.city,
+      departureAirport: gva.code,
+      departureTimeGeneva: depTimeGeneva.toFormat('HH:mm dd LLL yyyy'),
+      departureTimeAthens: depTimeAthens.toFormat('HH:mm dd LLL yyyy'),
+      departureTZGeneva: gva.tz,
+      departureTZAthens: ath.tz,
+      arrivalCity: ath.city,
+      arrivalAirport: ath.code,
+      arrivalTimeGeneva: arrTimeGeneva.toFormat('HH:mm dd LLL yyyy'),
+      arrivalTimeAthens: arrTimeAthens.toFormat('HH:mm dd LLL yyyy'),
+      arrivalTZGeneva: gva.tz,
+      arrivalTZAthens: ath.tz,
+      flightNumber: 'EZS1528',
+      airline: 'easyJet',
+      aircraft: 'Airbus A320',
+      nowGeneva: nowGeneva.toFormat('HH:mm:ss dd LLL yyyy'),
+      nowAthens: nowAthens.toFormat('HH:mm:ss dd LLL yyyy'),
+      progressPercent: Math.round(progress * 100),
+      elapsed:
+        progress < 0
+          ? '0 min'
+          : Duration.fromMillis(Math.max(0, elapsed.as('milliseconds'))).toFormat('h:mm'),
+      remaining:
+        progress >= 1
+          ? '0 min'
+          : Duration.fromMillis(
+              Math.max(0, total.as('milliseconds') - elapsed.as('milliseconds'))
+            ).toFormat('h:mm'),
+      duration: Duration.fromMillis(total.as('milliseconds')).toFormat('h:mm'),
+      status,
+      phase,
+      v_sol_kt: Math.round(v_sol_kt),
+      v_sol_kmh: Math.round(v_sol_kmh),
+      d_elapsed_km: Math.round(d_elapsed_km),
+      d_remaining_km: Math.round(D_gc_km - d_elapsed_km),
+      D_gc_km: Math.round(D_gc_km),
+      fraction_f: Math.round(fraction_f * 100),
+      lat_t_deg: Number(lat_t_deg.toFixed(4)),
+      lon_t_deg: Number(lon_t_deg.toFixed(4)),
+      altitude
+    };
+    console.log(
+      '[WindowPage] updateDemoFlight progressPercent:',
+      newFlightData.progressPercent,
+      'à',
+      new Date().toISOString()
+    );
+    this.flightData = { ...newFlightData, altitude };
+    this.updateCurrentPOI();
+    this.loading = false;
+  }
+
+  updateFlightTestData() {
+    if (!this.departure || !this.arrival) return;
+    const now = DateTime.now();
+    const gva = {
+      code: 'GVA',
+      city: 'Genève',
+      name: 'Aéroport de Genève',
+      tz: 'Europe/Zurich',
+      lat: 46.2381,
+      lon: 6.1080
+    };
+    const ath = {
+      code: 'ATH',
+      city: 'Athènes',
+      name: "Aéroport d'Athènes Elefthérios-Venizélos",
+      tz: 'Europe/Athens',
+      lat: 37.9364,
+      lon: 23.9445
+    };
+    const total = this.arrival.diff(this.departure);
+    const elapsed = now.diff(this.departure);
+    const progress = Math.max(
+      0,
+      Math.min(1, elapsed.as('milliseconds') / total.as('milliseconds'))
+    );
+    let statusDesc2 = '';
+    if (progress < 0) statusDesc2 = 'En attente';
+    else if (progress >= 1) statusDesc2 = 'Arrivé';
+    else statusDesc2 = 'En vol';
+    const status2 = { type: 'ON_TIME' as 'ON_TIME', description: statusDesc2 };
+    this.flightTestData = {
+      flightNumber: 'EZS1528',
+      airline: 'easyJet',
+      aircraft: { registration: 'HB-JZY', type: 'Airbus A320', icao24: '4b180c' },
+      route: {
+        departure: {
+          airport: gva.name,
+          city: gva.city,
+          country: 'Suisse',
+          scheduledTime: this.departure.toISO(),
+          actualTime: this.departure.toISO(),
+          terminal: 'T1',
+          gate: 'A12',
+          status: status2,
+          location: { latitude: gva.lat, longitude: gva.lon }
+        },
+        arrival: {
+          airport: ath.name,
+          city: ath.city,
+          country: 'Grèce',
+          scheduledTime: this.arrival.toISO(),
+          actualTime: this.arrival.toISO(),
+          terminal: 'M',
+          gate: 'B7',
+          status: status2,
+          location: { latitude: ath.lat, longitude: ath.lon }
+        },
+        currentPosition: {
+          latitude: parseFloat(this.flightData.lat_t_deg as any),
+          longitude: parseFloat(this.flightData.lon_t_deg as any),
+          altitude: 11000,
+          speed: 800,
+          heading: 110,
+          timestamp: now.toISO()
+        },
+        distance: { kilometers: this.flightData.D_gc_km, miles: Math.round(this.flightData.D_gc_km * 0.621371) },
+        duration: { scheduledMinutes: 148 },
+        waypoints: []
+      },
+      status: status2,
+      lastUpdated: now.toISO(),
+      codeshares: ['U21456', 'LX1234'],
+      waypoints: []
+    };
+  }
+
+  updateCurrentPOI() {
+    // Trouve la tranche de progression la plus proche
+    if (!this.flightData || !this.waypoints.length) return;
+    const pct = this.flightData.progressPercent;
+    let closest = this.waypoints[0];
+    let minDiff = 100;
+    for (const wp of this.waypoints) {
+      const diff = Math.abs(wp.pct - pct);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = wp;
+      }
+    }
+    this.currentPOI = { left: closest.poi_left, right: closest.poi_right };
+    this.currentWaypoint = closest;
+  }
+
+  async logout() {
+    // TODO: Adapter AuthService logout
+    // await this.authService.logout();
+    window.location.href = '/auth/email';
+  }
+
+  public openPOIPopover(poi: any, event: MouseEvent) {
+    this.selectedPOI = poi;
+    this.popoverEvent = event;
+    this.showPOIModal = true;
+  }
+
+  public closePOIPopover() {
+    this.showPOIModal = false;
+    this.selectedPOI = null;
+    this.popoverEvent = null;
+  }
+
+  // Retourne true si le POI est visible à ce moment du vol (dans la tranche courante)
+  isPOIVisible(poi: any, side: 'left' | 'right'): boolean {
+    if (!this.currentPOI) return false;
+    return this.currentPOI[side]?.some((p: any) => p.name === poi.name);
+  }
+
+  getMapZoomFromAltitude(altitude: number): number {
+    const minAlt = 0;
+    const maxAlt = 40000;
+    const minZoom = 6;
+    const maxZoom = 13;
+    const alt = Math.max(minAlt, Math.min(maxAlt, altitude));
+    const zoom = maxZoom - ((alt - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
+    return Math.round(zoom);
+  }
+
+  getVisiblePOIs(): any[] {
+    if (!this.currentPOI) return [];
+    return [...(this.currentPOI.left || []), ...(this.currentPOI.right || [])].filter(
+      (poi) =>
+        typeof poi.lat === 'number' &&
+        typeof poi.lon === 'number' &&
+        !isNaN(poi.lat) &&
+        !isNaN(poi.lon)
+    );
+  }
+
+  getPinIconForType(type: string): string {
+    return getPinIconForType(type);
+  }
+
+  getHublotLat(side: 'left' | 'right'): number {
+    if (!this.flightData) return 0;
+    const lat = parseFloat(this.flightData.lat_t_deg as any);
+    const lon = parseFloat(this.flightData.lon_t_deg as any);
+    const cap = this.getCurrentHeading();
+    const offsetKm = 10; // décalage latéral en km
+    const angle = (cap + (side === 'left' ? -90 : 90)) * (Math.PI / 180);
+    const dLat = (offsetKm / 6371) * Math.cos(angle) * (180 / Math.PI);
+    return lat + dLat;
+  }
+
+  getHublotLon(side: 'left' | 'right'): number {
+    if (!this.flightData) return 0;
+    const lat = parseFloat(this.flightData.lat_t_deg as any);
+    const lon = parseFloat(this.flightData.lon_t_deg as any);
+    const cap = this.getCurrentHeading();
+    const offsetKm = 10;
+    const angle = (cap + (side === 'left' ? -90 : 90)) * (Math.PI / 180);
+    const dLon = (offsetKm / 6371) * Math.sin(angle) * (180 / Math.PI) / Math.cos(lat * (Math.PI / 180));
+    return lon + dLon;
+  }
+
+  getCurrentHeading(): number {
+    // Si la vitesse sol est nulle ou cap non dispo, approxime la direction de la polyligne du vol
+    if (this.flightData && this.waypoints && this.waypoints.length > 1) {
+      const pct = this.flightData.progressPercent;
+      let idx = 0;
+      for (let i = 1; i < this.waypoints.length; i++) {
+        if (this.waypoints[i].pct > pct) {
+          idx = i - 1;
+          break;
+        }
+      }
+      const wp1 = this.waypoints[idx];
+      const wp2 = this.waypoints[Math.min(idx + 1, this.waypoints.length - 1)];
+      const lat1 = wp1.lat,
+        lon1 = wp1.lon;
+      const lat2 = wp2.lat,
+        lon2 = wp2.lon;
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const y = Math.sin(dLon) * Math.cos(lat2 * (Math.PI / 180));
+      const x =
+        Math.cos(lat1 * (Math.PI / 180)) * Math.sin(lat2 * (Math.PI / 180)) -
+        Math.sin(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.cos(dLon);
+      let brng = (Math.atan2(y, x) * 180) / Math.PI;
+      if (brng < 0) brng += 360;
+      return brng;
+    }
+    return 90; // cap par défaut (est)
+  }
+}
+```
