@@ -1,0 +1,97 @@
+```pseudocode
+// PSEUDOCODE POUR LE CALAGE DES VOYAGES DÉMO
+
+// 1. Définir la date courante
+currentDate ← now()  // date et heure actuelles
+
+// 2. Charger les 3 voyages démo
+demoPast     ← loadDemoTrip("past")     // ex. Marrakech
+demoOngoing  ← loadDemoTrip("ongoing")  // ex. Athènes
+demoFuture   ← loadDemoTrip("future")   // ex. Montréal
+
+// Fonction utilitaire pour convertir jours en millisecondes
+function daysToMillis(days):
+    return days * 24 * 60 * 60 * 1000
+
+// 3. Calage du voyage passé
+//    Période : [now – 37j, now – 30j]
+demoPast.newStart ← currentDate - daysToMillis(37)
+demoPast.newEnd   ← currentDate - daysToMillis(30)
+
+// Calcul de l’offset à appliquer à tous les plans
+offsetPast ← demoPast.newStart - demoPast.originalStart
+
+for each plan in demoPast.plans:
+    plan.start ← plan.originalStart + offsetPast
+    plan.end   ← plan.originalEnd   + offsetPast
+
+// 4. Calage du voyage à venir
+//    Période : [now + 60j, now + 67j]
+demoFuture.newStart ← currentDate + daysToMillis(60)
+demoFuture.newEnd   ← currentDate + daysToMillis(67)
+
+// Calcul de l’offset pour tous les plans
+offsetFuture ← demoFuture.newStart - demoFuture.originalStart
+
+for each plan in demoFuture.plans:
+    plan.start ← plan.originalStart + offsetFuture
+    plan.end   ← plan.originalEnd   + offsetFuture
+
+// 5. Calage du voyage en cours
+//    Faire en sorte que le premier vol soit à 1/3 de sa durée passé
+//    (c.-à-d. : départ = now – (duréeVol / 3))
+
+// 5.1. Identifier le premier vol
+firstFlight ← findEarliestFlight(demoOngoing.plans)
+
+// 5.2. Calculer la durée du vol
+flightDuration       ← firstFlight.originalEnd - firstFlight.originalStart
+
+// 5.3. Nouvel horaire de départ pour ce vol
+newFirstFlightStart  ← currentDate - (flightDuration / 3)
+
+// 5.4. Offset à appliquer à tout le voyage
+offsetOngoing ← newFirstFlightStart - firstFlight.originalStart
+
+// 5.5. Appliquer l’offset au voyage
+demoOngoing.newStart ← demoOngoing.originalStart + offsetOngoing
+demoOngoing.newEnd   ← demoOngoing.originalEnd   + offsetOngoing
+
+// 5.6. Appliquer l’offset à chaque plan (vols, hôtels, activités…)
+for each plan in demoOngoing.plans:
+    plan.start ← plan.originalStart + offsetOngoing
+    plan.end   ← plan.originalEnd   + offsetOngoing
+
+// 6. Préparer l’affichage
+// - Calculer les icônes et statuts (passé/actif/à venir) selon plan.start/end vs. currentDate
+// - Générer une timeline avec les nouvelles dates
+// - Afficher pour chaque plan :  
+//     • Heure de départ/arrivée recalculée  
+//     • Icône adaptée (avion, hôtel, activité...)  
+//     • Statut logique (terminé, en cours, à venir)
+
+displayTrip(demoPast)
+displayTrip(demoOngoing)
+displayTrip(demoFuture)
+```
+
+**Explications clés :**
+
+1. **Voyage passé**
+
+   * Début : 37 jours avant maintenant
+   * Fin   : 30 jours avant maintenant
+   * Tous les plans sont décalés de la même durée (`offsetPast`).
+
+2. **Voyage futur**
+
+   * Début : 60 jours après maintenant
+   * Fin   : 67 jours après maintenant
+   * Tous les plans décalés par `offsetFuture`.
+
+3. **Voyage en cours**
+
+   * On prend la durée du **premier vol**, et on positionne son départ à `now – (durée/3)`.
+   * L’`offsetOngoing` calculé est appliqué à *toutes* les dates du voyage pour maintenir la cohérence.
+
+Le résultat : l’interface présente toujours trois voyages fictifs — un passé, un en cours qui “vibre” comme si vous étiez au cœur de l’action, et un à venir — avec des dates, statuts et icônes totalement réalistes.

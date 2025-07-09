@@ -1,0 +1,478 @@
+ [vite] connecting...
+ [vite] connected.
+ 2025-07-09T10:05:40.586Z | INFO | LoggerService | anonymous | session_1752055540586_yz1522erf | 51MB |  | Service de logging initialisé | {"sessionId":"session_1752055540586_yz1522erf","environment":"development","logLevel":"INFO","config":{"maxFileSize":10485760,"maxFiles":10,"logLevel":1,"enableConsole":true,"enableFile":true,"enableRemote":false,"enableMetrics":true,"autoCleanup":true,"cleanupInterval":24,"enableRequestTracing":true,"enablePerformanceMonitoring":true},"version":"2.0.0"}
+ [LOG] 2025-07-09T10:05:40.586Z | INFO | LoggerService | anonymous | session_1752055540586_yz1522erf | 51MB |  | Service de logging initialisé | {"sessionId":"session_1752055540586_yz1522erf","environment":"development","logLevel":"INFO","config":{"maxFileSize":10485760,"maxFiles":10,"logLevel":1,"enableConsole":true,"enableFile":true,"enableRemote":false,"enableMetrics":true,"autoCleanup":true,"cleanupInterval":24,"enableRequestTracing":true,"enablePerformanceMonitoring":true},"version":"2.0.0"}
+ [UserStatusBar] user: null
+ Angular is running in development mode.
+ [UserStatusBar] user: _UserImpl
+ Calling Firebase APIs outside of an Injection context may destabilize your application leading to subtle change-detection and hydration bugs. Find more at https://github.com/angular/angularfire/blob/main/docs/zones.md
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js:2517
+ Firebase API called outside injection context: docData
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js:2520
+ Firebase API called outside injection context: docData
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js:2520
+ 2025-07-09T10:05:41.218Z | INFO | Auth | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 53MB |  | Utilisateur connecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","provider":"password","emailVerified":false}
+ [LOG] 2025-07-09T10:05:41.218Z | INFO | Auth | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 53MB |  | Utilisateur connecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","provider":"password","emailVerified":false}
+ [Ionicons Warning]: Could not load icon with name "bug". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. 
+getNamedUrl @ @ionic_angular_standalone.js:310
+ [Ionicons Warning]: Could not load icon with name "bug". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. 
+getNamedUrl @ @ionic_angular_standalone.js:310
+ [Ionicons Warning]: Could not load icon with name "bug". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. 
+getNamedUrl @ @ionic_angular_standalone.js:310
+ [Ionicons Warning]: Could not load icon with name "bug". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. 
+getNamedUrl @ @ionic_angular_standalone.js:310
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:41.290Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 56MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:41.290Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 56MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:41.301Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 56MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Marrakech Menara (RAK)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:41.301Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 56MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Marrakech Menara (RAK)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:41.831Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Marrakech Menara (RAK)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:41.831Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Marrakech Menara (RAK)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:41.841Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:41.841Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:42.240Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:42.240Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:42.245Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Montréal-Trudeau (YUL)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:42.245Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Montréal-Trudeau (YUL)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:42.640Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Québec YQB","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:42.640Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Québec YQB","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:42.644Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Gaspé YGP","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:42.644Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Gaspé YGP","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+:3040/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+ [LoggerService] Echec d'envoi au proxy: 
+(anonymous) @ chunk-V6V5QHHF.js:301
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:43.069Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Montréal-Trudeau (YUL)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:43.069Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Montréal-Trudeau (YUL)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:43.072Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:43.072Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+:3040/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+ [LoggerService] Echec d'envoi au proxy: 
+(anonymous) @ chunk-V6V5QHHF.js:301
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api.openai.com/v1/chat/completions:1  Failed to load resource: the server responded with a status of 401 ()
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:43.495Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Genève","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:43.495Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Genève","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:43.499Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Athènes","iata":"Aéroport International d'Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:43.499Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Athènes","iata":"Aéroport International d'Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/gpt-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-09T10:05:43.503Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur GPT timezone | {"city":"Genève","date":"2025-07-09T09:15:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-V6V5QHHF.js:282
+ [LOG] 2025-07-09T10:05:43.503Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur GPT timezone | {"city":"Genève","date":"2025-07-09T09:15:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+api/gpt-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-09T10:05:43.506Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur GPT timezone | {"city":"Athènes","date":"2025-07-09T11:45:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-09T10:05:43.506Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur GPT timezone | {"city":"Athènes","date":"2025-07-09T11:45:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-09T10:05:43.510Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Santorin (JTR)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-09T10:05:43.510Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Santorin (JTR)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-09T10:05:43.514Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-09T10:05:43.514Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 39MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+api.openai.com/v1/chat/completions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 ()
+api.openai.com/v1/chat/completions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 ()
+api/get-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-09T10:05:43.912Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Athènes","iata":"Aéroport International d'Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-09T10:05:43.912Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Athènes","iata":"Aéroport International d'Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-09T10:05:43.915Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Genève","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-09T10:05:43.915Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"Genève","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/gpt-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-09T10:05:43.919Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur GPT timezone | {"city":"Athènes","date":"2025-07-17T11:15:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-09T10:05:43.919Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur GPT timezone | {"city":"Athènes","date":"2025-07-17T11:15:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+api/gpt-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-09T10:05:43.923Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur GPT timezone | {"city":"Genève","date":"2025-07-17T15:00:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-09T10:05:43.923Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752055540586_yz1522erf | 40MB |  | Erreur GPT timezone | {"city":"Genève","date":"2025-07-17T15:00:41.272Z","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/gpt-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/gpt-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/gpt-timezone</pre>\n</body>\n</html>\n"}}
+icon.js:54 [Ionicons Warning]: Could not load icon with name "camera". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c518776672 name=​"camera" ng-reflect-name=​"camera" role=​"img" class=​"md">​…​</ion-icon>​slot
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "camera". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c518776672 name=​"camera" ng-reflect-name=​"camera" role=​"img" class=​"md">​…​</ion-icon>​slot
+getNamedUrl @ icon.js:54
+default-trip.jpg:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:230:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:230:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+core.mjs:10529 WARNING: sanitizing HTML stripped some content, see https://angular.dev/best-practices/security#preventing-cross-site-scripting-xss
+_sanitizeHtml @ core.mjs:10529
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:230:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:230:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434

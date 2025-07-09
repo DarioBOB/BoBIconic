@@ -1,0 +1,758 @@
+# Cahier des Charges Fonctionnel : Position de l’Avion (Modes Connecté, Déconnecté & Démo)
+
+## 1. Objectif et Contexte
+
+Cette section détaille spécifiquement la fonctionnalité de suivi de position de l’avion pour l’application BoB on Board, en distinguant trois modes d’utilisation :
+
+* **Mode Connecté (Réel)** : utilisation de la position GPS réelle (via puce GNSS du téléphone) et affichage de la carte en ligne.
+* **Mode Déconnecté (Hors-ligne)** : lorsque le GPS n’est pas disponible (permission refusée ou signal faible), mais que la connexion Wi‑Fi ou le cache local de tuiles est accessible. La trajectoire est alors simulée via un calcul de grand cercle.
+* **Mode Démo** : démonstration avec un vol préconfiguré (GVA→ATH) dont la trajectoire (200 points, altitude, vitesse) est entièrement embarquée dans l’application. Aucune API externe n’est utilisée pour l’itinéraire ; seules des API d’enrichissement facultatif (météo, callsign) peuvent être sollicitées.
+
+L’objectif est de garantir une expérience fluide quel que soit l’état réseau ou GPS, tout en proposant une visualisation claire (carte, polylines, marqueur avion) et des données textuelles associées.
+
+---
+
+## 2. Pré-requis Techniques
+
+1. **Permissions** :
+
+   * Accès **GPS** (Location) : demandé au démarrage si l’utilisateur veut activer le mode Réel.
+   * Vérification **Wi‑Fi** : détection de l’état Wi‑Fi avec le plugin (Network ou Capacitor).
+   * Lecture **Stockage Local** : accès aux fichiers embarqués (trajet démo, cache de tuiles).
+
+2. **Librairies & Services** :
+
+   * **Geolocation Plugin** (Ionic/Cordova ou Capacitor) : récupération de la position GPS.
+   * **Network Plugin** : détection de la connexion Wi‑Fi.
+   * **Leaflet** : affichage cartographique et tracé des polylines.
+   * **Three.js** : animation 3D pour la vue hublot (consommateur des segments calculés).
+   * **OpenSky API** ou équivalent : uniquement pour l’enrichissement (callsign, météo, compagnie) en Mode Connecté.
+   * **Stockage Local** : Ionic Storage (SQLite ou IndexedDB) pour conserver :
+
+     * Trajectoire démo : fichier JSON/TSV `trajectory_gva_ath.json` (200 points).
+     * Cache de tuiles cartes pour le mode hors‑ligne.
+
+3. **Services Métier** :
+
+   * `GeoStatusService` : détermine l’état du GPS, la connexion Wi‑Fi, et retourne le mode courant (`REAL`, `DISCONNECTED`, `DEMO`).
+   * `TrajectoryService` : calcule le grand cercle entre deux aéroports ou charges la trajectoire démo pré-to-stockée.
+   * `FlightDataService` : pour le Mode Connecté, récupère et enrichit les données (OpenSky), mais ne participe pas au calcul de l’itinéraire ; pour le Mode Démo, lit la trajectoire préchargée.
+   * `WindowService` : stocke les segments calculés ou reçus (200 points) et la progression utilisateur.
+
+---
+
+## 3. Détection du Mode et Workflow Global
+
+### 3.1. Méthode `GeoStatusService.getStatus()` :
+
+* **Étape 1** : vérifier la permission GPS (`isGpsEnabled()`).
+* **Étape 2** : vérifier l’état Wi‑Fi (`isWifiConnected()`).
+* **Logique de décision** :
+
+  1. Si un flag utilisateur « Mode Démo forcé » est actif → renvoyer `{ mode: 'DEMO' }`.
+  2. Sinon, si `(gpsEnabled == true)` :
+
+     * Si `(wifiConnected == true)` ou cache de tuiles disponible → `{ mode: 'REAL' }`.
+     * Sinon → `{ mode: 'DISCONNECTED' }` (calcul de grand cercle hors-ligne, mais affichage possible si cache existe).
+  3. Sinon (GPS désactivé ou refusé) :
+
+     * Si `(wifiConnected == true)` ou cache de tuiles existe → `{ mode: 'DISCONNECTED' }`.
+     * Sinon → `{ mode: 'DEMO' }`.
+
+### 3.2. Workflow par Mode :
+
+#### 3.2.1. Mode Connecté (REAL)
+
+1. **Récupération GPS** : s’abonner à `Geolocation.watchPosition()`.
+2. **Enrichissement Vol** : appeler `FlightDataService.getRealEnrichment()` (OpenSky) pour récupérer callsign, compagnie, type d’avion, et éventuellement météo.
+3. **Segments Réels** :
+
+   * À chaque mise à jour GPS (intervalle 1–2 s), ajouter le point `{ lat, lng, alt, spd, ts }` à `realSegments`.
+4. **Trajectoire** :
+
+   * **Partie déjà parcourue** : polyline bleu plein reliant tous les points GPS reçus depuis le départ.
+   * **Partie restante** : calculer, à partir de la position GPS actuelle, un **grand cercle** vers l’aéroport d’arrivée (coordonnées fixes). Utiliser `TrajectoryService.computeGreatCircle(currentPos, destination, N)`, par exemple pour `N = 50`. Tracer cette portion en polyline bleu clair pointillé.
+   * **Marqueur Avion** : icône orientée selon le cap calculé entre les deux derniers points GPS.
+5. **Mise à jour UI** :
+
+   * **Carte Leaflet** : `map.panTo(currentPos)`, mise à jour des deux polylines et du marqueur.
+   * **Bandeau Info** : « Mode Connecté – GPS activé – Wi‑Fi activé », puis `Vitesse : {currentSpeed} km/h`, `Altitude : {currentAltitude} m`, `Progression : {percent} %`.
+   * **Slider** : calcul de l’index pour la partie déjà parcourue : `idx = realSegments.length - 1`. Optionnel : slider de 0→100 % peut être lié à une estimation de la distance totale.
+6. **Transitions** :
+
+   * Si plus de 10 s sans mise à jour GPS : afficher « Recherche GPS… » et basculer en Mode Déconnecté.
+   * Si Wi‑Fi se coupe mais cache de tuiles disponible : on reste en Mode Connecté, mais on utilise le cache pour la carte.
+
+#### 3.2.2. Mode Déconnecté (DISCONNECTED)
+
+1. **Initialisation** : dès que `mode == 'DISCONNECTED'`, charger une trajectoire simulée de **grand cercle** entre l’origine et la destination (par défaut GVA→BRU). Utiliser `TrajectoryService.computeGreatCircle(start, end, 200)` pour obtenir 200 points `{ lat, lng, alt, spd, ts }`.
+2. **Segments Simulés** : stocker ces 200 points dans `segments`.
+3. **Affichage** :
+
+   * **Fond de carte** : si `wifiConnected == true`, charger tuiles en ligne ; sinon utiliser le cache.
+   * **Polylines** :
+
+     * **Déjà parcouru** : au démarrage, seul le premier point est affiché en bleu plein.
+     * **À venir** : tous les 200 points sont initialement en polyline bleu clair pointillé.
+   * **Marqueur Avion** : positionné sur `segments[0]` au départ.
+   * **Bandeau Info** : « Mode Déconnecté – Données simulées », `Progression : {percent} %`.
+4. **Slider**  :
+
+   * Min = 0 % ; Max = 100 %; à chaque changement, calculer :
+
+     ```ts
+     currentIdx = Math.floor((currentPercent / 100) * (segments.length - 1));
+     completedCoords = segments.slice(0, currentIdx + 1).map(p => [p.lat, p.lng]);
+     remainingCoords = segments.slice(currentIdx).map(p => [p.lat, p.lng]);
+     completedPath.setLatLngs(completedCoords);
+     remainingPath.setLatLngs(remainingCoords);
+     planeMarker.setLatLng([segments[currentIdx].lat, segments[currentIdx].lng]);
+     // Calcule et met à jour l’icône orientée entre segments[currentIdx] et segments[currentIdx+1]
+     ```
+5. **Transitions** :
+
+   * Si ultérieurement le GPS redevient disponible **et** Wi‑Fi actif : appeler `GeoStatusService.getStatus()`. Si les conditions de Mode Connecté sont réunies, basculer en Mode Connecté.
+   * En cas de déconnexion Wi‑Fi sans cache accessible, passer en Mode Démo.
+
+#### 3.2.3. Mode Démo (DEMO)
+
+1. **Activation** :
+
+   * L’utilisateur peut forcer le Mode Démo via un bouton « Activer Mode Démo ».
+   * Ou lorsque `getStatus()` renvoie `{ gpsEnabled: false, wifiConnected: false, mode: 'DEMO' }`.
+2. **Données Préchargées** :
+
+   * Trajectoire démo stockée localement dans `/assets/demo/trajectory_gva_ath.json` (200 points). Chaque point contient : `{ lat, lng, alt, spd, ts }`. Ce fichier est intégré dans l’application.
+   * Métadonnées vol démo : `{ callsign: 'DEMO123', airline: 'DemoAir', aircraft: 'B737-800', departure: 'GVA', arrival: 'ATH', departureTime: '08:00', arrivalTime: '11:30' }`.
+3. **Affichage** :
+
+   * **Fond de carte** : charger tuiles en ligne si Wi‑Fi actif ; sinon utiliser le cache local.
+   * **Polylines** :
+
+     * **Déjà parcouru** : points 0→currentIdx en bleu plein.
+     * **À venir** : points currentIdx→199 en bleu clair pointillé.
+   * **Marqueur Avion** : position initiale sur `segmentsDemo[0]`; orientation calculée entre `segmentsDemo[currentIdx]` et `segmentsDemo[currentIdx+1]`.
+   * **Bandeau Info** : « Mode Démo – Vol GVA → ATH », `Compagnie : DemoAir – Avion : B737-800`, `Progression : {percent} %`.
+4. **Slider & Animation** :
+
+   * Même logique que Mode Déconnecté pour faire varier `currentIdx` (0…199) à partir du slider 0→100 %.
+   * Option d’**animation automatique** : incrémenter `currentIdx` toutes les `T` secondes (par exemple, toutes les 500 ms), pour simuler un vol continu.
+5. **Transitions** :
+
+   * Si l’utilisateur active le GPS + Wi‑Fi et qu’il souhaite passer à Mode Connecté, appeler `getStatus()` ; si les conditions sont remplies, basculer en Mode Connecté.
+
+---
+
+## 4. Spécifications d’Implémentation
+
+### 4.1. Services Métier
+
+#### 4.1.1. GeoStatusService
+
+```ts
+class GeoStatusService {
+  private demoForced = false;
+
+  /** Force le mode démo, indépendamment du GPS/Wi‑Fi */
+  setDemoForced(flag: boolean) { this.demoForced = flag; }
+
+  /** Vérifie si le GPS est activé et accessible */
+  async isGpsEnabled(): Promise<boolean> {
+    // Utiliser le plugin Loucation pour vérifier la permission et état du GPS
+  }
+
+  /** Vérifie si une connexion Wi‑Fi est active */
+  async isWifiConnected(): Promise<boolean> {
+    // Utiliser Network plugin ou Capacitor Network pour vérifier l’état Wi‑Fi
+  }
+
+  /** Retourne le mode courant { mode: 'REAL' | 'DISCONNECTED' | 'DEMO' } */
+  async getStatus(): Promise<{ mode: 'REAL' | 'DISCONNECTED' | 'DEMO' }> {
+    if (this.demoForced) return { mode: 'DEMO' };
+    const gps = await this.isGpsEnabled();
+    const wifi = await this.isWifiConnected();
+    if (gps) {
+      if (wifi || this.hasCachedTiles()) return { mode: 'REAL' };
+      else return { mode: 'DISCONNECTED' };
+    }
+    if (wifi || this.hasCachedTiles()) return { mode: 'DISCONNECTED' };
+    return { mode: 'DEMO' };
+  }
+
+  /** Vérifie si des tuiles de la zone ont été mises en cache */
+  private hasCachedTiles(): boolean {
+    // Lire le stockage local pour savoir si des tuiles existent
+  }
+}
+```
+
+#### 4.1.2. TrajectoryService
+
+```ts
+class TrajectoryService {
+  /**
+   * Calcule un grand cercle entre deux points (start, end) et retourne `count` points.
+   * Chaque point intègre lat, lng, alt, spd et ts.
+   */
+  computeGreatCircle(
+    start: [number, number], // [lat, lng]
+    end: [number, number],   // [lat, lng]
+    count: number
+  ): Array<{ lat: number; lng: number; alt: number; spd: number; ts: number }> {
+    const points: any[] = [];
+    // 1) Calculer distance totale via formule Haversine
+    // 2) Pour i = 0..count-1, f = i / (count - 1)
+    // 3) Interpolation orthodromique (grande-cercle) pour lat, lng
+    // 4) Interpolation altitude & vitesse selon profil monté/croisière/descente
+    // 5) Calcul d'un timestamp fictif en débutant à heure de départ fictive
+    return points;
+  }
+}
+```
+
+#### 4.1.3. FlightDataService
+
+```ts
+class FlightDataService {
+  /**
+   * Récupère et enrichit les données du dernier vol GVA→ATH via OpenSky.
+   * Ne concerne que les métadonnées (callsign, compagnie, météo).
+   */
+  getRealEnrichment(): Observable<FlightInfo> {
+    // Appel API OpenSky : findLatestGvaToAthFlight(), puis getFlightTrackPoints().
+    // Ne pas utiliser track.path pour l’itinéraire. Les points GPS proviennent du téléphone.
+  }
+
+  /** Lit la trajectoire démo embarquée dans /assets/demo/trajectory_gva_ath.json */
+  async getDemoTrajectory(): Promise<{ flightInfo: FlightInfo; segments200: TrackPoint[] }> {
+    // Lire fichier JSON local, le parser, et retourner flightInfo + segments200
+  }
+
+  /** Utile pour le Mode Déconnecté si on veut charger un vol hors-ligne via API d’enrichissement */
+  getOfflineEnrichment(): Promise<FlightInfo> {
+    // Optionnel : lire une version cache des métadonnées du dernier vol
+  }
+}
+```
+
+#### 4.1.4. WindowService
+
+```ts
+class WindowService {
+  private segmentsSource = new BehaviorSubject<TrackPoint[]>([]);
+  segments$ = this.segmentsSource.asObservable();
+  private currentPercentSource = new BehaviorSubject<number>(0);
+  currentPercent$ = this.currentPercentSource.asObservable();
+
+  setSegments(points: TrackPoint[]) {
+    this.segmentsSource.next(points);
+  }
+
+  setCurrentPercent(p: number) {
+    this.currentPercentSource.next(p);
+  }
+}
+```
+
+---
+
+### 4.2. Pages & Composants
+
+#### 4.2.1. WindowMapPage (Carte)
+
+**TypeScript** :
+
+```ts
+export class WindowMapPage implements OnInit, OnDestroy {
+  @ViewChild('mapContainer') mapContainer: ElementRef;
+  map: L.Map;
+  completedPath: L.Polyline;
+  remainingPath: L.Polyline;
+  planeMarker: L.Marker;
+  modeCurrent: 'REAL' | 'DISCONNECTED' | 'DEMO';
+  segments: TrackPoint[] = [];
+  currentPercent = 0;
+
+  constructor(
+    private geoStatus: GeoStatusService,
+    private flightData: FlightDataService,
+    private trajectory: TrajectoryService,
+    private windowService: WindowService
+  ) {}
+
+  async ngOnInit() {
+    const status = await this.geoStatus.getStatus();
+    this.modeCurrent = status.mode;
+
+    // Initialisation selon mode
+    if (this.modeCurrent === 'REAL') {
+      // S'abonner à la position GPS
+      Geolocation.watchPosition({ enableHighAccuracy: true, timeout: 10000 }).subscribe(pos => {
+        if (!pos || !pos.coords) return;
+        const point: TrackPoint = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          alt: pos.coords.altitude || 0,
+          spd: pos.coords.speed ? pos.coords.speed * 3.6 : 0, // m/s → km/h
+          ts: pos.timestamp
+        };
+        this.segments.push(point);
+        this.windowService.setSegments(this.segments);
+        this.updateMapReal(point);
+      });
+      // Charger métadonnées réelles si besoin
+      this.flightData.getRealEnrichment().subscribe(info => {
+        // stocker flightInfo pour affichage dans le bandeau
+      });
+    }
+
+    if (this.modeCurrent === 'DISCONNECTED') {
+      const start: [number, number] = [46.2381, 6.1098]; // GVA
+      const end: [number, number] = [50.9010, 4.4844];  // BRU
+      this.segments = this.trajectory.computeGreatCircle(start, end, 200);
+      this.windowService.setSegments(this.segments);
+      this.initMapSimulated();
+    }
+
+    if (this.modeCurrent === 'DEMO') {
+      const demo = await this.flightData.getDemoTrajectory();
+      this.segments = demo.segments200;
+      this.windowService.setSegments(this.segments);
+      this.initMapSimulated();
+    }
+
+    // Écouter le slider
+    this.windowService.currentPercent$.subscribe(p => {
+      this.currentPercent = p;
+      if (this.modeCurrent !== 'REAL') {
+        this.updateMapSimulated(p);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.map.remove();
+  }
+
+  initMapSimulated() {
+    // Initialisation de la carte Leaflet
+    this.map = L.map(this.mapContainer.nativeElement).setView(
+      [this.segments[0].lat, this.segments[0].lng], 6
+    );
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
+
+    const allCoords = this.segments.map(p => [p.lat, p.lng] as [number, number]);
+    // Polylines initiales
+    this.completedPath = L.polyline([allCoords[0]], { color: '#1976D2', weight: 4 }).addTo(this.map);
+    this.remainingPath = L.polyline(allCoords, {
+      color: '#90CAF9', weight: 4, dashArray: '8,12'
+    }).addTo(this.map);
+    // Marqueur avion initial
+    this.planeMarker = L.marker(allCoords[0], { icon: this.getPlaneIcon(0) }).addTo(this.map);
+    // Ajuster la vue
+    this.map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+
+    setTimeout(() => this.map.invalidateSize(), 200);
+  }
+
+  updateMapSimulated(percent: number) {
+    const idx = Math.floor((percent / 100) * (this.segments.length - 1));
+    const allCoords = this.segments.map(p => [p.lat, p.lng] as [number, number]);
+    const completedCoords = allCoords.slice(0, idx + 1);
+    const remainingCoords = allCoords.slice(idx);
+
+    this.completedPath.setLatLngs(completedCoords);
+    this.remainingPath.setLatLngs(remainingCoords);
+    const bearing = this.calculateBearing(allCoords[idx], allCoords[Math.min(idx + 1, allCoords.length - 1)]);
+    this.planeMarker.setLatLng(allCoords[idx]);
+    this.planeMarker.setIcon(this.getPlaneIcon(bearing));
+  }
+
+  updateMapReal(point: TrackPoint) {
+    // Partie déjà parcourue en bleu plein
+    const alreadyCoords = this.segments.map(p => [p.lat, p.lng] as [number, number]);
+    if (this.completedPath) this.completedPath.remove();
+    this.completedPath = L.polyline(alreadyCoords, { color: '#1976D2', weight: 5 }).addTo(this.map);
+    // Partie restante : calculer grand cercle depuis point vers destination
+    const dest: [number, number] = [50.9010, 4.4844]; // Athènes (en mode réel, on pourrait récupérer dynamiquement)
+    const remaining = this.trajectory.computeGreatCircle([point.lat, point.lng], dest, 50);
+    const nextCoords = remaining.map(p => [p.lat, p.lng] as [number, number]);
+    if (this.remainingPath) this.remainingPath.remove();
+    this.remainingPath = L.polyline(nextCoords, {
+      color: '#90CAF9', weight: 5, dashArray: '8,12'
+    }).addTo(this.map);
+    // Mettre à jour marqueur avion
+    if (this.planeMarker) this.planeMarker.remove();
+    const prevIdx = this.segments.length - 2;
+    const bearing = this.calculateBearing(
+      [this.segments[prevIdx].lat, this.segments[prevIdx].lng],
+      [point.lat, point.lng]
+    );
+    this.planeMarker = L.marker([point.lat, point.lng], { icon: this.getPlaneIcon(bearing) }).addTo(this.map);
+    this.map.panTo([point.lat, point.lng]);
+  }
+
+  getPlaneIcon(bearing: number): L.Icon {
+    const pad = (n: number) => n.toString().padStart(3, '0');
+    const normalized = (Math.round(bearing / 15) * 15 + 360) % 360;
+    const iconUrl = `assets/plane_${pad(normalized)}deg.png`;
+    return L.icon({ iconUrl, iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20] });
+  }
+
+  calculateBearing(start: [number, number], end: [number, number]): number {
+    const [lat1, lon1] = start;
+    const [lat2, lon2] = end;
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+    let θ = Math.atan2(y, x) * 180 / Math.PI;
+    if (θ < 0) θ += 360;
+    return θ;
+  }
+}
+```
+
+**Template HTML** (: uniquement la structure pour la carte)
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Suivi de Position</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card class="info-overlay">
+    <ion-card-content>
+      <ng-container *ngIf="modeCurrent === 'REAL'; else offlineInfo">
+        GPS : Activé – Wi‑Fi : Activé<br>
+        Vitesse : {{ segments[segments.length - 1]?.spd | number:'1.0-0' }} km/h<br>
+        Altitude : {{ segments[segments.length - 1]?.alt | number:'1.0-0' }} m<br>
+        Progression : {{ currentPercent | number:'1.0-0' }} %
+      </ng-container>
+      <ng-template #offlineInfo>
+        <ng-container *ngIf="modeCurrent === 'DISCONNECTED'; else demoInfo">
+          Mode Déconnecté – Données simulées<br>
+          Progression : {{ currentPercent | number:'1.0-0' }} %
+        </ng-container>
+        <ng-template #demoInfo>
+          Mode Démo – Vol GVA → ATH<br>
+          Compagnie : DemoAir – Avion : B737-800<br>
+          Progression : {{ currentPercent | number:'1.0-0' }} %
+        </ng-template>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <div #mapContainer id="map" style="width:100%; height:100%;"></div>
+
+  <ion-item style="position: absolute; bottom: 0; width: 100%; background: rgba(255,255,255,0.9);">
+    <ion-range min="0" max="100" step="1" [(ngModel)]="currentPercent" (ionChange)="windowService.setCurrentPercent(currentPercent)"></ion-range>
+  </ion-item>
+</ion-content>
+```
+
+#### 4.2.2. WindowTextDataPage (Donnees Textuelles)
+
+```ts
+export class WindowTextDataPage implements OnInit {
+  modeCurrent: 'REAL' | 'DISCONNECTED' | 'DEMO';
+  flightInfo: FlightInfo;
+  segments: TrackPoint[] = [];
+  currentIdx = 0;
+  currentPercent = 0;
+
+  constructor(
+    private geoStatus: GeoStatusService,
+    private flightData: FlightDataService,
+    private trajectory: TrajectoryService,
+    private windowService: WindowService
+  ) {}
+
+  async ngOnInit() {
+    const status = await this.geoStatus.getStatus();
+    this.modeCurrent = status.mode;
+
+    if (this.modeCurrent === 'REAL') {
+      this.flightData.getRealEnrichment().subscribe(info => this.flightInfo = info);
+      this.windowService.segments$.subscribe(pts => this.segments = pts);
+    }
+    if (this.modeCurrent === 'DISCONNECTED') {
+      const start: [number, number] = [46.2381, 6.1098]; // GVA
+      const end: [number, number] = [50.9010, 4.4844];  // BRU
+      this.segments = this.trajectory.computeGreatCircle(start, end, 200);
+    }
+    if (this.modeCurrent === 'DEMO') {
+      const demo = await this.flightData.getDemoTrajectory();
+      this.flightInfo = demo.flightInfo;
+      this.segments = demo.segments200;
+    }
+
+    this.windowService.currentPercent$.subscribe(p => {
+      this.currentPercent = p;
+      this.currentIdx = Math.floor((p / 100) * (this.segments.length - 1));
+    });
+  }
+
+  getPhase(idx: number): string {
+    if (idx === 0) return 'Taxi départ';
+    else if (idx <= 15) return 'Montée';
+    else if (idx <= 180) return 'Croisière';
+    else if (idx < 199) return 'Descente';
+    else return 'Taxi arrivée';
+  }
+}
+```
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Infos du Vol</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card class="info-overlay">
+    <ion-card-content>
+      <ng-container *ngIf="modeCurrent === 'REAL'; else offlineInfo">
+        <h2>Vol : {{ flightInfo.callsign }}</h2>
+        <p>Compagnie : {{ flightInfo.airline }} – {{ flightInfo.aircraft }}</p>
+        <p>Départ : {{ flightInfo.departureAirport }} à {{ flightInfo.departureTime | date:'HH:mm' }}</p>
+        <p>Arrivée : {{ flightInfo.arrivalAirport }} à {{ flightInfo.arrivalTime | date:'HH:mm' }}</p>
+      </ng-container>
+      <ng-template #offlineInfo>
+        <ng-container *ngIf="modeCurrent === 'DISCONNECTED'; else demoInfo">
+          <h2>Vol simulé GVA → BRU</h2>
+          <p>Trajectoire grand cercle</p>
+        </ng-container>
+        <ng-template #demoInfo>
+          <h2>Vol démo GVA → ATH</h2>
+          <p>Compagnie : DemoAir – Avion : B737-800</p>
+          <p>Départ : 08 h 00   Arrivée : 11 h 30 (fictifs)</p>
+        </ng-template>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list>
+    <ion-item *ngFor="let segment of segments; let i = index" [class.highlight]="i === currentIdx">
+      <ion-label>
+        <h3>Segment {{ i + 1 }}</h3>
+        <p>Lat : {{ segment.lat.toFixed(4) }}, Lng : {{ segment.lng.toFixed(4) }}</p>
+        <p>Alt : {{ segment.alt }} m | Vitesse : {{ segment.spd }} km/h</p>
+        <p>Phase : {{ getPhase(i) }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-item style="position: absolute; bottom: 0; width: 100%; background: rgba(255,255,255,0.9);">
+    <ion-range min="0" max="100" step="1" [(ngModel)]="currentPercent" (ionChange)="windowService.setCurrentPercent(currentPercent)"></ion-range>
+  </ion-item>
+</ion-content>
+```
+
+#### 4.2.3. WindowHublotPage (Vue Hublot)
+
+```ts
+export class WindowHublotPage implements AfterViewInit, OnDestroy {
+  @ViewChild('hublotCanvas') canvas: ElementRef<HTMLCanvasElement>;
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
+  renderer: THREE.WebGLRenderer;
+  airplane: THREE.Mesh;
+  segments: TrackPoint[] = [];
+  currentIdx = 0;
+  modeCurrent: 'REAL' | 'DISCONNECTED' | 'DEMO';
+  subscription: Subscription;
+
+  constructor(
+    private geoStatus: GeoStatusService,
+    private flightData: FlightDataService,
+    private trajectory: TrajectoryService,
+    private windowService: WindowService
+  ) {}
+
+  async ngAfterViewInit() {
+    const status = await this.geoStatus.getStatus();
+    this.modeCurrent = status.mode;
+
+    if (this.modeCurrent === 'REAL') {
+      this.flightData.realSegments$.subscribe(pts => this.segments = pts);
+    }
+    if (this.modeCurrent === 'DISCONNECTED') {
+      const start: [number, number] = [46.2381, 6.1098]; // GVA
+      const end: [number, number] = [50.9010, 4.4844];  // BRU
+      this.segments = this.trajectory.computeGreatCircle(start, end, 200);
+    }
+    if (this.modeCurrent === 'DEMO') {
+      const demo = await this.flightData.getDemoTrajectory();
+      this.segments = demo.segments200;
+    }
+
+    this.windowService.currentPercent$.subscribe(p => {
+      this.currentIdx = Math.floor((p / 100) * (this.segments.length - 1));
+    });
+
+    this.initThree();
+    this.animate();
+  }
+
+  ngOnDestroy() {
+    this.renderer.dispose();
+    if (this.subscription) this.subscription.unsubscribe();
+  }
+
+  initThree() {
+    const width = this.canvas.nativeElement.clientWidth;
+    const height = this.canvas.nativeElement.clientHeight;
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas.nativeElement, antialias: true });
+    this.renderer.setSize(width, height);
+    this.initSkybox();
+    this.initAirplane();
+    this.camera.position.set(0, 0.05, -0.1);
+    this.camera.lookAt(0, 0, 0);
+  }
+
+  initSkybox() {
+    // Charger textures ou couleurs du ciel/sol
+  }
+
+  initAirplane() {
+    const geometry = new THREE.BoxGeometry(0.02, 0.01, 0.05);
+    const material = new THREE.MeshBasicMaterial({ color: 0x555555 });
+    this.airplane = new THREE.Mesh(geometry, material);
+    this.scene.add(this.airplane);
+  }
+
+  animate() {
+    requestAnimationFrame(() => this.animate());
+    if (this.segments.length > 1) {
+      const current = this.segments[this.currentIdx];
+      const next = this.segments[Math.min(this.currentIdx + 1, this.segments.length - 1)];
+      const bearing = this.calculateBearing(
+        [current.lat, current.lng], [next.lat, next.lng]
+      );
+      // Position de l’avion
+      this.airplane.position.set(current.lat, current.alt / 1000, current.lng);
+      this.airplane.rotation.y = THREE.MathUtils.degToRad(90 - bearing);
+      // Caméra légèrement devant pour simuler vue hublot
+      this.camera.position.set(current.lat, current.alt / 1000 + 0.05, current.lng - 0.01);
+      this.camera.lookAt(new THREE.Vector3(current.lat, current.alt / 1000, current.lng));
+    }
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  calculateBearing(start: [number, number], end: [number, number]): number {
+    const [lat1, lon1] = start;
+    const [lat2, lon2] = end;
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+    let θ = Math.atan2(y, x) * 180 / Math.PI;
+    if (θ < 0) θ += 360;
+    return θ;
+  }
+}
+```
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Vue Hublot</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card class="info-overlay" style="z-index: 10;">
+    <ion-card-content>
+      <ng-container *ngIf="modeCurrent === 'REAL'; else offlineInfo">
+        GPS : Activé – Wi‑Fi : Activé<br>
+        Altitude : {{ segments[currentIdx]?.alt }} m<br>
+        Vitesse : {{ segments[currentIdx]?.spd }} km/h<br>
+        Progression : {{ currentPercent }} %
+      </ng-container>
+      <ng-template #offlineInfo>
+        <ng-container *ngIf="modeCurrent === 'DISCONNECTED'; else demoInfo">
+          Mode Déconnecté – Simulé<br>
+          Progression : {{ currentPercent }} %
+        </ng-container>
+        <ng-template #demoInfo>
+          Mode Démo – GVA → ATH<br>
+          Progression : {{ currentPercent }} %
+        </ng-template>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <canvas #hublotCanvas style="width:100%; height:100%;"></canvas>
+
+  <ion-item style="position:absolute; bottom: 0; width: 100%; background: rgba(255,255,255,0.9);">
+    <ion-range min="0" max="100" step="1" [(ngModel)]="currentPercent" (ionChange)="windowService.setCurrentPercent(currentPercent)"></ion-range>
+  </ion-item>
+</ion-content>
+```
+
+---
+
+## 5. Exigences Non-Fonctionnelles et Tests
+
+1. **Performance** :
+
+   * Chargement et tracé fluide de 200 points sur Leaflet (< 16 ms/frame).
+   * Three.js hublot à ≥ 30 FPS sur smartphone milieu de gamme.
+   * Temps de bascule entre modes < 500 ms.
+
+2. **Gestion des Erreurs & Transitions** :
+
+   * Si l’utilisateur refuse la permission GPS, basculer immédiatement en Mode Déconnecté.
+   * Si le signal GPS se perd (> 10 s), afficher toast « Perte GPS – Passage en mode hors-ligne » puis basculer en Mode Déconnecté.
+   * Si, en Mode Déconnecté, ni Wi‑Fi ni cache disponibles, afficher « Mode Démo activé – carte non disponible » et basculer en Mode Démo.
+   * Tous les messages doivent apparaître sous forme de toasts ou de bandeaux temporaires.
+
+3. **UI / UX** :
+
+   * Polylines : bleu plein (déjà parcouru), bleu clair pointillé (à venir).
+   * Marqueur avion : icône orientée vers le cap, taille 40×40, ancre au centre.
+   * Bandeau Info : positionné en haut à droite, semi-transparent, texte lisible.
+   * Slider : toujours visible en bas de l’écran, fond blanc semi-transparent.
+   * En mode hublot, la caméra doit légèrement surplomber l’avion pour donner l’impression de vue extérieure.
+
+4. **Compatibilité & Accessibilité** :
+
+   * iOS 14+ et Android 8+.
+   * Accessibilité : utilisa­tion d’`aria-label` pour boutons, contraste conforme à WCAG AA.
+   * Adapté aux orientations paysage et portrait.
+
+5. **Tests** :
+
+   * **Unitaires** :
+
+     * `GeoStatusService.getStatus()` : cas combinatoires (GPS on/off, Wi‑Fi on/off, demoForced).
+     * `TrajectoryService.computeGreatCircle()` : renvoie toujours `count` points, distribution orthodromique correcte.
+     * `WindowMapPage.updateMapSimulated()` : vérifie que `completedPath` et `remainingPath` sont mis à jour.
+   * **E2E** :
+
+     * Simuler passage des modes (Force Demo → Déconnecté → Réel) et vérifier affichage correspondant.
+     * Vérifier interaction du slider sur Carte, Données et Hublot.
+     * Vérifier gestion des erreurs GPS (refus) et Wi‑Fi (coupures).
+
+---
+
+## 6. Glossaire
+
+* **REAL** : Mode Connecté, position GPS réelle + carte en ligne.
+* **DISCONNECTED** : Mode hors‑ligne, trajectoire simulée (grand cercle) + carte en cache ou en ligne.
+* **DEMO** : Mode démo fixe, vol GVA→ATH préchargé (100% embarqué).
+* **Grand Cercle** : Trajectoire orthodromique la plus courte entre deux points sur la sphère.
+* **Segment (TrackPoint)** : Point interpolé contenant `{ lat, lng, alt, spd, ts }`.
+* **Polyline** : Objet Leaflet reliant une série de points par des lignes continues ou pointillées.
+* **Marqueur Avion** : Icône orientée selon le cap de déplacement, positionnée sur Leaflet.
+* **Cache de tuiles** : Tuiles cartographiques enregistrées localement pour l’affichage hors‑ligne.
+
+**Fin du Cahier des Charges Fonctionnel dédié à la position de l’avion (Modes Connecté, Déconnecté & Démo).**

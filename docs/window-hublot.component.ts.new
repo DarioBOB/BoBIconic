@@ -1,0 +1,285 @@
+import {
+  Component,
+  Input,
+  AfterViewInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+@Component({
+  selector: 'app-window-hublot',
+  standalone: true,
+  template: `
+    <div class="hublot-frame">
+      <div #mapContainer class="hublot-map"></div>
+    </div>
+  `,
+  styles: [
+    `
+      .hublot-frame {
+        position: relative;
+        width: 54.4vw;
+        max-width: 476px;
+        aspect-ratio: 0.72/1;
+        height: auto;
+        min-width: 272px;
+        min-height: 374px;
+        border-radius: 48% / 60%;
+        overflow: hidden;
+        background: radial-gradient(
+          ellipse at 60% 40%,
+          #e3e9f6 0%,
+          #bfc9db 60%,
+          #222 100%
+        );
+        box-shadow: 0 0 40px 8px #0008, 0 2px 32px #0006, inset 0 0 40px #000a;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 6px solid #fff;
+        outline: 2px solid #b0b8c6;
+        outline-offset: -8px;
+        transition: box-shadow 0.3s;
+      }
+      .hublot-frame::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 48% / 60%;
+        border: 2.5px solid #fff8;
+        pointer-events: none;
+        box-shadow: 0 0 24px 2px #fff4 inset;
+      }
+      .hublot-map {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      @media (max-width: 900px) {
+        .hublot-frame {
+          width: 64.6vw;
+          max-width: 272px;
+          min-width: 170px;
+          min-height: 170px;
+        }
+      }
+      @media (max-width: 600px) {
+        .hublot-frame {
+          width: 71.4vw;
+          max-width: 204px;
+          min-width: 136px;
+          min-height: 136px;
+        }
+      }
+    `,
+  ],
+})
+export class WindowHublotComponent implements AfterViewInit, OnDestroy, OnChanges {
+  @Input() lat!: number;
+  @Input() lon!: number;
+  @Input() altitude: number = 11000;
+  @Input() side: 'left' | 'right' = 'left';
+  @ViewChild('mapContainer', { static: true })
+  mapContainer!: ElementRef<HTMLDivElement>;
+
+  private mapInstance!: L.Map;
+  private tileLayer!: L.TileLayer;
+  private centerMarker?: L.Marker;
+
+  ngAfterViewInit(): void {
+    this.initMap();
+    window.addEventListener('resize', this.handleResize);
+    setTimeout(() => this.handleResize(), 300);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      this.mapInstance &&
+      (changes['lat'] || changes['lon'] || changes['altitude'])
+    ) {
+      this.updateMapView();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.mapInstance) {
+      this.mapInstance.remove();
+    }
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  private initMap(): void {
+    const lat = this.lat || 0;
+    const lon = this.lon || 0;
+    const alt = this.altitude || 11000;
+    const zoom = this.getZoomFromAltitude(alt, lat);
+
+    // Calcul de l'angle de vue basé sur l'altitude
+    const viewAngle = this.getViewAngle(alt);
+
+    // Calcul de la position exacte de l'avion
+    const planePosition = this.calculatePlanePosition(lat, lon, alt);
+
+    this.mapInstance = L.map(this.mapContainer.nativeElement, {
+      center: [planePosition.lat, planePosition.lon],
+      zoom,
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      touchZoom: false,
+      maxBoundsViscosity: 1.0,
+    });
+
+    // Limitation de la vue avec un rectangle
+    const bounds = this.getMaxBounds(
+      planePosition.lat,
+      planePosition.lon,
+      viewAngle
+    );
+    this.mapInstance.setMaxBounds(bounds);
+
+    // Utilisation d'une couche satellite plus détaillée
+    this.tileLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: 'Tiles © Esri',
+        maxZoom: 19,
+        tileSize: 256,
+        zoomOffset: 0,
+      }
+    );
+    this.tileLayer.addTo(this.mapInstance);
+
+    // Ajout d'une couche de relief pour une meilleure perception de la profondeur
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
+      {
+        opacity: 0.3,
+        maxZoom: 19,
+      }
+    ).addTo(this.mapInstance);
+
+    this.centerMarker = L.marker([planePosition.lat, planePosition.lon], {
+      icon: L.divIcon({
+        html: '',
+        className: '',
+        iconSize: [1, 1],
+        iconAnchor: [0, 0],
+      }),
+    }).addTo(this.mapInstance);
+  }
+
+  private updateMapView(): void {
+    const lat = this.lat || 0;
+    const lon = this.lon || 0;
+    const alt = this.altitude || 11000;
+    const zoom = this.getZoomFromAltitude(alt, lat);
+    const viewAngle = this.getViewAngle(alt);
+
+    // Calcul de la position exacte de l'avion
+    const planePosition = this.calculatePlanePosition(lat, lon, alt);
+
+    // Mise à jour des limites de la vue
+    const bounds = this.getMaxBounds(planePosition.lat, planePosition.lon, viewAngle);
+    this.mapInstance.setMaxBounds(bounds);
+
+    this.mapInstance.setView([planePosition.lat, planePosition.lon], zoom);
+
+    if (this.centerMarker) {
+      this.centerMarker.setLatLng([planePosition.lat, planePosition.lon]);
+    }
+  }
+
+  private calculatePlanePosition(
+    lat: number,
+    lon: number,
+    altitude: number
+  ): { lat: number; lon: number } {
+    // Calcul de la position exacte de l'avion en tenant compte de l'altitude
+    const EARTH_RADIUS = 6378137; // Rayon de la Terre en mètres
+    const altitudeMeters = altitude * 0.3048; // Conversion des pieds en mètres
+
+    // Calcul de l'angle de vue en radians
+    const viewAngleRad = (this.getViewAngle(altitude) * Math.PI) / 180;
+
+    // Calcul de la distance de vue en mètres
+    const viewDistance = altitudeMeters * Math.tan(viewAngleRad);
+
+    // Calcul de l'angle de vue en degrés
+    const viewAngleDeg = (viewDistance / EARTH_RADIUS) * (180 / Math.PI);
+
+    // Cap du vol (GVA-ATH)
+    const flightHeading = 135;
+    // Pour le hublot gauche, on regarde à 45° à gauche du cap (90°)
+    // Pour le hublot droit, à 45° à droite du cap (180°)
+    const hublotHeading = this.side === 'left' ? flightHeading - 45 : flightHeading + 45;
+    const headingRad = (hublotHeading * Math.PI) / 180;
+
+    // Décalage selon la direction du hublot
+    const latOffset = viewAngleDeg * Math.cos(headingRad) * 0.5;
+    const lonOffset = viewAngleDeg * Math.sin(headingRad) * 0.5;
+
+    return {
+      lat: lat + latOffset,
+      lon: lon + lonOffset,
+    };
+  }
+
+  private getZoomFromAltitude(altitude: number, lat: number): number {
+    const EARTH_RADIUS = 6378137;
+    const latRad = (lat * Math.PI) / 180;
+    const denominator = 256 * altitude;
+    const numerator = Math.cos(latRad) * 2 * Math.PI * EARTH_RADIUS;
+    let zoom = Math.log2(numerator / denominator);
+
+    // Ajustement du zoom pour une meilleure vue passager
+    zoom = Math.max(8, Math.min(15, zoom));
+    return Math.round(zoom);
+  }
+
+  private getViewAngle(altitude: number): number {
+    // Angle de vue en degrés basé sur l'altitude
+    // Plus l'altitude est basse, plus l'angle est large
+    return Math.max(30, Math.min(60, 45 + (altitude - 11000) / 1000));
+  }
+
+  private getMaxBounds(
+    lat: number,
+    lon: number,
+    viewAngle: number
+  ): L.LatLngBounds {
+    // Calcul des limites de la vue basé sur l'angle et l'altitude
+    const radius = this.getViewRadius(lat, lon, viewAngle);
+    return L.latLngBounds(
+      [lat - radius, lon - radius],
+      [lat + radius, lon + radius]
+    );
+  }
+
+  private getViewRadius(lat: number, lon: number, viewAngle: number): number {
+    // Calcul du rayon de vue en degrés
+    const EARTH_RADIUS = 6378137;
+    const altitude = this.altitude || 11000;
+    const viewDistance = altitude * Math.tan((viewAngle * Math.PI) / 180);
+    return (viewDistance / EARTH_RADIUS) * (180 / Math.PI);
+  }
+
+  private handleResize = () => {
+    if (this.mapInstance) {
+      this.mapInstance.invalidateSize();
+    }
+  };
+}
