@@ -1,0 +1,350 @@
+ [vite] connecting...
+ [vite] connected.
+ 2025-07-19T08:15:23.776Z | INFO | LoggerService | anonymous | session_1752912923776_pcz7f6j4g | 70MB |  | Service de logging initialisé | {"sessionId":"session_1752912923776_pcz7f6j4g","environment":"development","logLevel":"INFO","config":{"maxFileSize":10485760,"maxFiles":10,"logLevel":1,"enableConsole":true,"enableFile":true,"enableRemote":false,"enableMetrics":true,"autoCleanup":true,"cleanupInterval":24,"enableRequestTracing":true,"enablePerformanceMonitoring":true},"version":"2.0.0"}
+ [LOG] 2025-07-19T08:15:23.776Z | INFO | LoggerService | anonymous | session_1752912923776_pcz7f6j4g | 70MB |  | Service de logging initialisé | {"sessionId":"session_1752912923776_pcz7f6j4g","environment":"development","logLevel":"INFO","config":{"maxFileSize":10485760,"maxFiles":10,"logLevel":1,"enableConsole":true,"enableFile":true,"enableRemote":false,"enableMetrics":true,"autoCleanup":true,"cleanupInterval":24,"enableRequestTracing":true,"enablePerformanceMonitoring":true},"version":"2.0.0"}
+ [UserStatusBar] user: null
+ Angular is running in development mode.
+:3040/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+ [LoggerService] Echec d'envoi au proxy: 
+(anonymous) @ chunk-EAOU6R3G.js:301
+ [UserStatusBar] user: _UserImpl
+ Calling Firebase APIs outside of an Injection context may destabilize your application leading to subtle change-detection and hydration bugs. Find more at https://github.com/angular/angularfire/blob/main/docs/zones.md
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js:2517
+ Firebase API called outside injection context: docData
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js:2520
+ Firebase API called outside injection context: docData
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js:2520
+ 2025-07-19T08:15:24.338Z | INFO | Auth | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 76MB |  | Utilisateur connecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","provider":"password","emailVerified":false}
+ [LOG] 2025-07-19T08:15:24.338Z | INFO | Auth | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 76MB |  | Utilisateur connecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","provider":"password","emailVerified":false}
+ [DEBUG] Voyages trouvés pour l'utilisateur démo: 3
+ [DEBUG] Voyage 1: Voyage démo Montréal - Status: upcoming
+ [DEBUG] Voyage 2: Voyage démo Marrakech - Status: past
+ [DEBUG] Voyage 3: Voyage démo Athènes - Status: ongoing
+ [DEMO] Application de la logique démo selon les exigences strictes
+ [DEMO] Traitement du voyage: Voyage démo Montréal
+ [DEMO] Durée totale du voyage: 13 jours
+ [DEMO] Voyage futur - Offset: +60 jours
+ [DEMO] Plan "Vol Genève → Montréal" recalé: 2025-09-10T08:40:00.000Z → 2025-11-09T08:40:00.000Z
+ [DEMO] Plan "Hôtel Tadoussac" recalé: 2025-09-21T17:00:00.000Z → 2025-11-20T17:00:00.000Z
+ [DEMO] Plan "Route Tadoussac → Montréal" recalé: 2025-09-23T14:00:00.000Z → 2025-11-22T14:00:00.000Z
+:3040/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+ [LoggerService] Echec d'envoi au proxy: 
+(anonymous) @ chunk-EAOU6R3G.js:301
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-19T08:15:24.406Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"165 Rue Bord de l'Eau, Tadoussac, QC G0T 2A0","iata":"","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-EAOU6R3G.js:282
+ [LOG] 2025-07-19T08:15:24.406Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"165 Rue Bord de l'Eau, Tadoussac, QC G0T 2A0","iata":"","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+ 2025-07-19T08:15:24.409Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.409Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+ [DEMO] Nouveau statut: upcoming (2025-11-09T08:40:00.000Z → 2025-11-22T20:30:00.000Z)
+ [DEBUG] Plan "Vol Genève → Montréal": 2025-11-09T08:40:00.000Z vs now: 2025-07-19T08:15:24.387Z
+ [DEBUG] Plan "Vol Genève → Montréal" → upcoming (future)
+ [DEBUG] Plan "Hôtel Tadoussac": 2025-11-20T17:00:00.000Z vs now: 2025-07-19T08:15:24.387Z
+ [DEBUG] Plan "Hôtel Tadoussac" → upcoming (future)
+ [DEBUG] Plan "Route Tadoussac → Montréal": 2025-11-22T14:00:00.000Z vs now: 2025-07-19T08:15:24.387Z
+ [DEBUG] Plan "Route Tadoussac → Montréal" → upcoming (future)
+ [DEMO] Traitement du voyage: Voyage démo Marrakech
+ [DEMO] Durée totale du voyage: 0 jours
+ [DEMO] Voyage passé - Offset: -30 jours
+ [DEMO] Plan "Visite historique de Marrakech" recalé: 2024-04-16T08:00:00.000Z → 2024-03-17T08:00:00.000Z
+ 2025-07-19T08:15:24.411Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.411Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+ [DEMO] Nouveau statut: past (2024-03-17T08:00:00.000Z → 2024-03-17T16:00:00.000Z)
+ [DEBUG] Plan "Visite historique de Marrakech": 2024-03-17T08:00:00.000Z vs now: 2025-07-19T08:15:24.387Z
+ [DEBUG] Plan "Visite historique de Marrakech" → past (completed)
+ [DEMO] Traitement du voyage: Voyage démo Athènes
+ [DEMO] Durée totale du voyage: 8 jours
+ [DEMO] Voyage en cours - Offset: 9031h
+ [DEMO] Heure actuelle: 2025-07-19T08:15:24.387Z
+ [DEMO] Premier plan après recalage: 2025-07-16T15:25:24.387Z
+ [DEMO] Plan "Location voiture Athènes" recalé: 2024-07-05T08:30:00.000Z → 2025-07-16T15:25:24.387Z
+ [DEMO] Plan "Hôtel Electra Palace Athens" recalé: 2024-07-05T11:00:00.000Z → 2025-07-16T17:55:24.387Z
+ [DEMO] Plan "Vol Genève → Athènes" recalé: 2024-07-05T12:35:00.000Z → 2025-07-16T19:30:24.387Z
+ [DEMO] Plan "Visite Acropole + musée" recalé: 2024-07-06T06:00:00.000Z → 2025-07-17T12:55:24.387Z
+ [DEMO] Plan "Route Athènes → Patras" recalé: 2024-07-07T06:00:00.000Z → 2025-07-18T12:55:24.387Z
+ [DEMO] Plan "Traversée Patras → Santorin" recalé: 2024-07-07T11:30:00.000Z → 2025-07-18T18:25:24.387Z
+ [DEMO] Plan "Croisière coucher de soleil" recalé: 2024-07-09T12:00:00.000Z → 2025-07-20T18:55:24.387Z
+ [DEMO] Plan "Vol Santorin → Athènes" recalé: 2024-07-11T09:30:00.000Z → 2025-07-22T16:25:24.387Z
+ [DEMO] Plan "Dîner To Thalassino" recalé: 2024-07-12T17:00:00.000Z → 2025-07-23T23:55:24.387Z
+ [DEMO] Plan "Vol Athènes → Genève" recalé: 2024-07-13T07:15:00.000Z → 2025-07-24T14:10:24.387Z
+ [DEMO] Heure corrigée pour "Dîner To Thalassino": 1h → 10h00
+ 2025-07-19T08:15:24.412Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.412Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+api/get-timezone:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ 2025-07-19T08:15:24.437Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"18-20 N. Nikodimou St, Plaka, Athènes 105 57","iata":"","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ chunk-EAOU6R3G.js:282
+ [LOG] 2025-07-19T08:15:24.437Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"18-20 N. Nikodimou St, Plaka, Athènes 105 57","iata":"","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+ 2025-07-19T08:15:24.440Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.440Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+ 2025-07-19T08:15:24.441Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.441Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+ 2025-07-19T08:15:24.442Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.442Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+ 2025-07-19T08:15:24.443Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.443Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+ 2025-07-19T08:15:24.446Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+logToConsole @ chunk-EAOU6R3G.js:278
+ [LOG] 2025-07-19T08:15:24.446Z | WARN | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 78MB |  | Aucune ville ou IATA fourni | {"city":"","iata":""}
+api/get-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-19T08:15:24.473Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 80MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Aéroport International d'Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-19T08:15:24.473Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 80MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Aéroport International d'Athènes (ATH)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+api/get-timezone:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+logger.service.ts:415 2025-07-19T08:15:24.483Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 80MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+logToConsole @ logger.service.ts:415
+logger.service.ts:436 [LOG] 2025-07-19T08:15:24.483Z | ERROR | Timezone | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1752912923776_pcz7f6j4g | 80MB |  | Erreur lors de la récupération du fuseau horaire | {"city":"","iata":"Genève Aéroport (GVA)","error":{"headers":{"normalizedNames":{},"lazyUpdate":null},"status":404,"statusText":"Not Found","url":"http://localhost:8100/api/get-timezone","ok":false,"name":"HttpErrorResponse","message":"Http failure response for http://localhost:8100/api/get-timezone: 404 Not Found","error":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/get-timezone</pre>\n</body>\n</html>\n"}}
+trips.page.ts:218 [DEMO] Nouveau statut: ongoing (2025-07-16T15:25:24.387Z → 2025-07-24T17:55:24.387Z)
+trips.page.ts:226 [DEBUG] Plan "Location voiture Athènes": 2025-07-16T15:25:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:236 [DEBUG] Plan "Location voiture Athènes" → ongoing (current)
+trips.page.ts:226 [DEBUG] Plan "Hôtel Electra Palace Athens": 2025-07-16T17:55:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:233 [DEBUG] Plan "Hôtel Electra Palace Athens" → past (completed)
+trips.page.ts:226 [DEBUG] Plan "Vol Genève → Athènes": 2025-07-16T19:30:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:233 [DEBUG] Plan "Vol Genève → Athènes" → past (completed)
+trips.page.ts:226 [DEBUG] Plan "Visite Acropole + musée": 2025-07-17T12:55:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:233 [DEBUG] Plan "Visite Acropole + musée" → past (completed)
+trips.page.ts:226 [DEBUG] Plan "Route Athènes → Patras": 2025-07-18T12:55:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:233 [DEBUG] Plan "Route Athènes → Patras" → past (completed)
+trips.page.ts:226 [DEBUG] Plan "Traversée Patras → Santorin": 2025-07-18T18:25:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:236 [DEBUG] Plan "Traversée Patras → Santorin" → ongoing (current)
+trips.page.ts:226 [DEBUG] Plan "Croisière coucher de soleil": 2025-07-20T18:55:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:230 [DEBUG] Plan "Croisière coucher de soleil" → upcoming (future)
+trips.page.ts:226 [DEBUG] Plan "Vol Santorin → Athènes": 2025-07-22T16:25:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:230 [DEBUG] Plan "Vol Santorin → Athènes" → upcoming (future)
+trips.page.ts:226 [DEBUG] Plan "Dîner To Thalassino": 2025-07-24T08:00:00.000Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:230 [DEBUG] Plan "Dîner To Thalassino" → upcoming (future)
+trips.page.ts:226 [DEBUG] Plan "Vol Athènes → Genève": 2025-07-24T14:10:24.387Z vs now: 2025-07-19T08:15:24.387Z
+trips.page.ts:230 [DEBUG] Plan "Vol Athènes → Genève" → upcoming (future)
+trips.page.ts:508 [CATEGORIZE] Voyages catégorisés:
+trips.page.ts:509 [CATEGORIZE] - En cours: 1
+trips.page.ts:510 [CATEGORIZE] - À venir: 1
+trips.page.ts:511 [CATEGORIZE] - Passés: 1
+trips.page.ts:512 [CATEGORIZE] - Total: 3
+icon.js:54 [Ionicons Warning]: Could not load icon with name "camera". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 name=​"camera" ng-reflect-name=​"camera" role=​"img" class=​"md">​…​</ion-icon>​slot
+getNamedUrl @ icon.js:54
+core.mjs:10529 WARNING: sanitizing HTML stripped some content, see https://angular.dev/best-practices/security#preventing-cross-site-scripting-xss
+_sanitizeHtml @ core.mjs:10529
+icon.js:54 [Ionicons Warning]: Could not load icon with name "camera". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 name=​"camera" ng-reflect-name=​"camera" role=​"img" class=​"md">​…​</ion-icon>​slot
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "car". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 class=​"timeline-icon md" ng-reflect-name=​"car" role=​"img" name=​"car">​…​</ion-icon>​flex
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "bed". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 class=​"timeline-icon md" ng-reflect-name=​"bed" role=​"img" name=​"bed">​…​</ion-icon>​flex
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "walk". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 class=​"timeline-icon md" ng-reflect-name=​"walk" role=​"img" name=​"walk">​…​</ion-icon>​flex
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "walk". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 class=​"timeline-icon md" ng-reflect-name=​"walk" role=​"img" name=​"walk">​…​</ion-icon>​flex
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "walk". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 class=​"timeline-icon md" ng-reflect-name=​"walk" role=​"img" name=​"walk">​…​</ion-icon>​flex
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "walk". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 class=​"timeline-icon md" ng-reflect-name=​"walk" role=​"img" name=​"walk">​…​</ion-icon>​flex
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "walk". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c403361710 class=​"timeline-icon md" ng-reflect-name=​"walk" role=​"img" name=​"walk">​…​</ion-icon>​flex
+getNamedUrl @ icon.js:54
+default-trip.jpg:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.warn (logger.service.ts:227:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:32:19)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:434 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:429:7)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _TimezoneService.<anonymous> (timezone.service.ts:67:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:434

@@ -1,0 +1,101 @@
+<ng-container *ngIf="isLoadingTrack; else trackerContent">
+  <div class="spinner-container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;">
+    <ion-spinner name="crescent" style="margin-bottom:16px;"></ion-spinner>
+    <div>Chargement du tracker de vol…</div>
+  </div>
+</ng-container>
+<ng-template #trackerContent>
+  <!-- Le contenu principal existant ici (searchbar, map, card, etc.) -->
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Suivi de Vol</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <div class="search-container">
+      <ion-searchbar
+        [(ngModel)]="flightNumber"
+        placeholder="Numéro de vol (ex: LX1234)"
+        (ionChange)="searchFlight()"
+        [debounce]="500"
+      ></ion-searchbar>
+    </div>
+    <div class="map-container">
+      <app-flight-map
+        *ngIf="flightNumber"
+        [flightNumber]="flightNumber"
+        (mapReady)="onMapReady($event)"
+      ></app-flight-map>
+    </div>
+    <ion-card *ngIf="flightData" class="flight-details">
+      <ion-card-header>
+        <ion-card-title>{{ flightData.flightNumber }}</ion-card-title>
+        <ion-card-subtitle>{{ flightData.airline }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="flight-route">
+          <div class="route-point departure">
+            <div class="airport">
+              <h3>{{ flightData.departure.code }}</h3>
+              <p>{{ flightData.departure.name }}</p>
+            </div>
+            <div class="time">
+              <p class="scheduled">{{ flightData.departure.scheduledTime }}</p>
+              <p class="delay" *ngIf="flightData.departure.averageDelay > 0">
+                +{{ flightData.departure.averageDelay }}min
+              </p>
+            </div>
+            <div class="details">
+              <p>Terminal {{ flightData.departure.terminal }}</p>
+              <p>Porte {{ flightData.departure.gate }}</p>
+              <p>Bagages: Tapis {{ flightData.departure.baggageClaim }}</p>
+            </div>
+          </div>
+          <div class="route-line">
+            <div class="duration">
+              {{ flightData.route.averageDuration }}min
+            </div>
+          </div>
+          <div class="route-point arrival">
+            <div class="airport">
+              <h3>{{ flightData.arrival.code }}</h3>
+              <p>{{ flightData.arrival.name }}</p>
+            </div>
+            <div class="time">
+              <p class="scheduled">{{ flightData.arrival.scheduledTime }}</p>
+              <p class="delay" *ngIf="flightData.arrival.averageDelay > 0">
+                +{{ flightData.arrival.averageDelay }}min
+              </p>
+            </div>
+            <div class="details">
+              <p>Terminal {{ flightData.arrival.terminal }}</p>
+              <p>Porte {{ flightData.arrival.gate }}</p>
+              <p>Bagages: Tapis {{ flightData.arrival.baggageClaim }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="flight-stats">
+          <h4>Statistiques</h4>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="label">Ponctualité</span>
+              <span class="value">{{ flightData.statistics.onTimePercentage }}%</span>
+            </div>
+            <div class="stat-item">
+              <span class="label">Retard moyen</span>
+              <span class="value">{{ flightData.statistics.averageDelay }}min</span>
+            </div>
+          </div>
+          <div class="common-delays" *ngIf="flightData.statistics.mostCommonDelays.length > 0">
+            <h5>Retards les plus fréquents</h5>
+            <ul>
+              <li *ngFor="let delay of flightData.statistics.mostCommonDelays">
+                {{ delay.reason }} ({{ delay.frequency }}%)
+              </li>
+            </ul>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ion-content>
+</ng-template> 

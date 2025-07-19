@@ -1,0 +1,581 @@
+{
+  "users": [
+    {
+      "id": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "email": "guestuser@demo.com",
+      "displayName": "Utilisateur Invité",
+      "firstName": {
+        "en": "Guest",
+        "fr": "Utilisateur"
+      },
+      "lastName": {
+        "en": "User",
+        "fr": "Invité"
+      },
+      "preferredLang": "fr",
+      "language": "fr",
+      "isDemo": true,
+      "role": "demo",
+      "_id": "fUBBVpboDeaUjD6w2nz0xKni9mG3"
+    }
+  ],
+  "trips": [
+    {
+      "id": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Mumbai\\, India\\, March 2025",
+        "fr": "Mumbai\\, Inde\\, mars 2025"
+      },
+      "summary": {
+        "en": "Mumbai\\, India\\, March 2025 from Mar 22 to Apr 05, 2025",
+        "fr": "Mumbai\\ du 22 March 2025 au 05 April 2025"
+      },
+      "startDate": {
+        "_seconds": 1742601600,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743811200,
+        "_nanoseconds": 0
+      },
+      "origin": {
+        "city": "Mumbai\\",
+        "country": "India"
+      },
+      "destination": {
+        "city": "Mumbai\\",
+        "country": "India"
+      },
+      "type": "vacation",
+      "currency": "USD",
+      "totalBudget": 0,
+      "_id": "447e622e-ca69-9000-0001-000015564949"
+    }
+  ],
+  "plans": [
+    {
+      "id": "item-88c7c194-6e5c-9000-0003-00011db7a621",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "LX2805 GVA to ZRH",
+        "fr": "LX2805 GVA to ZRH"
+      },
+      "description": {
+        "en": "LX2805 GVA to ZRH",
+        "fr": "LX2805 GVA to ZRH"
+      },
+      "type": "flight",
+      "startDate": {
+        "_seconds": 1742625600,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742628600,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "flight": {
+          "flight_number": "LX2805",
+          "airline": "SWISS International Air Lines",
+          "departure": {
+            "airport": "GVA"
+          },
+          "arrival": {
+            "airport": "ZRH"
+          }
+        }
+      },
+      "_id": "item-88c7c194-6e5c-9000-0003-00011db7a621"
+    },
+    {
+      "id": "item-25a7559f-636b-9000-0003-00011db7a625",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "LX154 ZRH to BOM",
+        "fr": "LX154 ZRH to BOM"
+      },
+      "description": {
+        "en": "LX154 ZRH to BOM",
+        "fr": "LX154 ZRH to BOM"
+      },
+      "type": "flight",
+      "startDate": {
+        "_seconds": 1742633100,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742662800,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "flight": {
+          "flight_number": "LX154",
+          "airline": "SWISS International Air Lines",
+          "departure": {
+            "airport": "ZRH"
+          },
+          "arrival": {
+            "airport": "BOM"
+          }
+        }
+      },
+      "_id": "item-25a7559f-636b-9000-0003-00011db7a625"
+    },
+    {
+      "id": "item-79360e6c-4b53-9000-0003-00011db8b68d",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Visite de la ville de Mumbai avec les grottes d'Elephanta",
+        "fr": "Visite de la ville de Mumbai avec les grottes d'Elephanta"
+      },
+      "type": "activity",
+      "startDate": {
+        "_seconds": 1742702400,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742706000,
+        "_nanoseconds": 0
+      },
+      "details": {}
+    },
+    {
+      "id": "item-bdc839a0-655e-9000-0003-00011db7a911",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "AI2442 BOM to DEL",
+        "fr": "AI2442 BOM to DEL"
+      },
+      "description": {
+        "en": "AI2442 BOM to DEL",
+        "fr": "AI2442 BOM to DEL"
+      },
+      "type": "flight",
+      "startDate": {
+        "_seconds": 1742809200,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742817300,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "flight": {
+          "flight_number": "AI2442",
+          "airline": "Air India",
+          "departure": {
+            "airport": "BOM"
+          },
+          "arrival": {
+            "airport": "DEL"
+          }
+        }
+      },
+      "_id": "item-bdc839a0-655e-9000-0003-00011db7a911"
+    },
+    {
+      "id": "item-80785aae-2827-9000-0003-00011db8e0b5",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Delhi : Old and New Delhi Private Full or Half-Day Tour (visite privée d'une journée ou d'une...",
+        "fr": "Delhi : Old and New Delhi Private Full or Half-Day Tour (visite privée d'une journée ou d'une..."
+      },
+      "type": "activity",
+      "startDate": {
+        "_seconds": 1742877000,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742880600,
+        "_nanoseconds": 0
+      },
+      "details": {}
+    },
+    {
+      "id": "item-a24da9eb-6f05-9000-0003-0001230a9191",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "AI642 UDR to BOM",
+        "fr": "AI642 UDR to BOM"
+      },
+      "description": {
+        "en": "AI642 UDR to BOM",
+        "fr": "AI642 UDR to BOM"
+      },
+      "type": "flight",
+      "startDate": {
+        "_seconds": 1743666600,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743672600,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "flight": {
+          "flight_number": "AI642",
+          "airline": "Air India",
+          "departure": {
+            "airport": "UDR"
+          },
+          "arrival": {
+            "airport": "BOM"
+          }
+        }
+      },
+      "_id": "item-a24da9eb-6f05-9000-0003-0001230a9191"
+    },
+    {
+      "id": "item-4bbe9e01-fa02-9000-0003-00011db7a8c9",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "BA198 BOM to LHR",
+        "fr": "BA198 BOM to LHR"
+      },
+      "description": {
+        "en": "BA198 BOM to LHR",
+        "fr": "BA198 BOM to LHR"
+      },
+      "type": "flight",
+      "startDate": {
+        "_seconds": 1743752100,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743787200,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "flight": {
+          "flight_number": "BA198",
+          "airline": "British Airways",
+          "departure": {
+            "airport": "BOM"
+          },
+          "arrival": {
+            "airport": "LHR"
+          }
+        }
+      },
+      "_id": "item-4bbe9e01-fa02-9000-0003-00011db7a8c9"
+    },
+    {
+      "id": "item-8c71fedf-b78f-9000-0003-00011db7a8cd",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "BA738 LHR to GVA",
+        "fr": "BA738 LHR to GVA"
+      },
+      "description": {
+        "en": "BA738 LHR to GVA",
+        "fr": "BA738 LHR to GVA"
+      },
+      "type": "flight",
+      "startDate": {
+        "_seconds": 1743792900,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743799200,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "flight": {
+          "flight_number": "BA738",
+          "airline": "British Airways",
+          "departure": {
+            "airport": "LHR"
+          },
+          "arrival": {
+            "airport": "GVA"
+          }
+        }
+      },
+      "_id": "item-8c71fedf-b78f-9000-0003-00011db7a8cd"
+    },
+    {
+      "id": "item-a1e4d00d-68d0-9000-0003-00011db7a5f5",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "The Taj Mahal Tower\\, Mumbai",
+        "fr": "The Taj Mahal Tower\\, Mumbai"
+      },
+      "type": "hotel",
+      "startDate": {
+        "_seconds": 1742666400,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742787000,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "hotel": {
+          "name": "The Taj Mahal Tower\\, Mumbai",
+          "address": "Apollo Bunder\\, Colaba\\, 400001 Mumbai\\, Inde"
+        }
+      },
+      "_id": "item-a1e4d00d-68d0-9000-0003-00011db7a5f5"
+    },
+    {
+      "id": "item-a9217027-44a4-9000-0003-00012163a5e5",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Golden Grand delhi",
+        "fr": "Golden Grand delhi"
+      },
+      "type": "hotel",
+      "startDate": {
+        "_seconds": 1742821200,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742961600,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "hotel": {
+          "name": "Golden Grand delhi",
+          "address": "W-1/10\\,Main Patel Road\\,New Delhi-110008"
+        }
+      },
+      "_id": "item-a9217027-44a4-9000-0003-00012163a5e5"
+    },
+    {
+      "id": "item-878b8774-d395-9000-0003-00012163b259",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Hotel Atulya Taj Agra",
+        "fr": "Hotel Atulya Taj Agra"
+      },
+      "type": "hotel",
+      "startDate": {
+        "_seconds": 1742979600,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743132600,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "hotel": {
+          "name": "Hotel Atulya Taj Agra",
+          "address": "Taj East Gate Rd\\, Near Shilpgram\\, Tajganj\\, Agra\\, Uttar Pradesh 282001-India"
+        }
+      },
+      "_id": "item-878b8774-d395-9000-0003-00012163b259"
+    },
+    {
+      "id": "item-c4f88859-1698-9000-0003-00012163b8a1",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Nirbana Palace Jaipur",
+        "fr": "Nirbana Palace Jaipur"
+      },
+      "type": "hotel",
+      "startDate": {
+        "_seconds": 1743161400,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743309000,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "hotel": {
+          "name": "Nirbana Palace Jaipur",
+          "address": "Main D-Villa Building\\, Khasa Kothi Circle\\, M.I. Road\\, Jaipur - 302001"
+        }
+      },
+      "_id": "item-c4f88859-1698-9000-0003-00012163b8a1"
+    },
+    {
+      "id": "item-3198d785-084f-9000-0003-00012163c0fd",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Ratan Vilas Jodhpur",
+        "fr": "Ratan Vilas Jodhpur"
+      },
+      "type": "hotel",
+      "startDate": {
+        "_seconds": 1743336000,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743481800,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "hotel": {
+          "name": "Ratan Vilas Jodhpur",
+          "address": "Loco Shed Road\\, Near Bhaskar Circle\\, Ratanada\\, Jodhpur – 342001 (Rajasthan) India"
+        }
+      },
+      "_id": "item-3198d785-084f-9000-0003-00012163c0fd"
+    },
+    {
+      "id": "item-e10115b7-b456-9000-0003-00012163e245",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Sterling Jaisinghgarh Udaipur",
+        "fr": "Sterling Jaisinghgarh Udaipur"
+      },
+      "type": "hotel",
+      "startDate": {
+        "_seconds": 1743505200,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743658200,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "hotel": {
+          "name": "Sterling Jaisinghgarh Udaipur",
+          "address": "3\\, Trident Rd\\, Haridas Ji Ki Magri\\, Shavri Colony\\, Udaipur\\, Rajasthan 313001"
+        }
+      },
+      "_id": "item-e10115b7-b456-9000-0003-00012163e245"
+    },
+    {
+      "id": "item-bc741d6e-0db8-9000-0003-00011db86519",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "The Leela Mumbai",
+        "fr": "The Leela Mumbai"
+      },
+      "type": "hotel",
+      "startDate": {
+        "_seconds": 1743669000,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743748200,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "hotel": {
+          "name": "The Leela Mumbai",
+          "address": "Sahar Road\\, 400059 Mumbai\\, Inde"
+        }
+      },
+      "_id": "item-bc741d6e-0db8-9000-0003-00011db86519"
+    },
+    {
+      "id": "item-0b4ffa7f-8406-9000-0003-00011db9a649",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Pick Up Rental Car: Chauffeur Savaari",
+        "fr": "Pick Up Rental Car: Chauffeur Savaari"
+      },
+      "type": "car_rental",
+      "startDate": {
+        "_seconds": 1742965200,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1742977800,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "car_rental": {
+          "company": "Chauffeur Savaari",
+          "location": "D - 26/28\\, Connaught Place \\,110001 New Delhi\\, Inde"
+        }
+      },
+      "_id": "item-0b4ffa7f-8406-9000-0003-00011db9a649"
+    },
+    {
+      "id": "item-bff3b2ad-9b1e-9000-0003-00011db9f855",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Pick Up Rental Car: Driver Savaari",
+        "fr": "Pick Up Rental Car: Driver Savaari"
+      },
+      "type": "car_rental",
+      "startDate": {
+        "_seconds": 1743138000,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743156000,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "car_rental": {
+          "company": "Driver Savaari",
+          "location": ""
+        }
+      },
+      "_id": "item-bff3b2ad-9b1e-9000-0003-00011db9f855"
+    },
+    {
+      "id": "item-f76a550a-bb5b-9000-0003-00011dba10cd",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Pick Up Rental Car: Driver Savaari",
+        "fr": "Pick Up Rental Car: Driver Savaari"
+      },
+      "type": "car_rental",
+      "startDate": {
+        "_seconds": 1743310800,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743334200,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "car_rental": {
+          "company": "Driver Savaari",
+          "location": ""
+        }
+      },
+      "_id": "item-f76a550a-bb5b-9000-0003-00011dba10cd"
+    },
+    {
+      "id": "item-eee5e11c-2d27-9000-0003-00011dba3029",
+      "tripId": "447e622e-ca69-9000-0001-000015564949",
+      "userId": "fUBBVpboDeaUjD6w2nz0xKni9mG3",
+      "title": {
+        "en": "Pick Up Rental Car: Driver Savaari",
+        "fr": "Pick Up Rental Car: Driver Savaari"
+      },
+      "type": "car_rental",
+      "startDate": {
+        "_seconds": 1743483600,
+        "_nanoseconds": 0
+      },
+      "endDate": {
+        "_seconds": 1743503400,
+        "_nanoseconds": 0
+      },
+      "details": {
+        "car_rental": {
+          "company": "Driver Savaari",
+          "location": ""
+        }
+      },
+      "_id": "item-eee5e11c-2d27-9000-0003-00011dba3029"
+    }
+  ]
+}

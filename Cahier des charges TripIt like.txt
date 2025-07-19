@@ -1,0 +1,301 @@
+# Spécification visuelle et fonctionnelle – Interface TripIt
+
+Ce document décrit en détail chaque capture d’écran fournie, pour guider le développement d’une interface utilisateur similaire (voire améliorée) dans votre application Ionic. Vous y trouverez le positionnement des éléments, comportements attendus et suggestions d’optimisation “wow”.
+
+---
+
+## 1. Vue d’ensemble – Liste des voyages (Web)
+
+**Image**: `TripIt 000.jpg`
+
+### Structure générale
+
+* **Header global**
+
+  * Logo TripIt en haut à gauche (couleurs, forme).
+  * Menu de navigation principal :
+
+    * Karousel d’onglets : « Voyages », « Assistance », icône de chat.
+    * Bouton de profil utilisateur (avatar + menu déroulant PRO / paramètre de langue).
+* **Section Voyages**
+
+  * Sous-onglets horizontaux :
+
+    * « Vos voyages à venir » (sélectionné), « Voyages à venir d’autres personnes », « Voyages passés », « Éléments non classés ».
+  * Bouton « Ajouter un voyage » en haut à gauche de la zone de contenu.
+* **Liste de cartes Voyage**
+
+  * Chaque carte :
+
+    * **Titre** : « Brussels, Belgium, June 2025 » (pays, mois, année).
+    * **Lieu** : répétition (« Brussels, Belgium »).
+    * **Dates & détails** : « juin 5 – 10, 2025 (6 jours, dans 24 jours) ».
+    * **Statut** : label vert « Tout est OK ».
+    * **Actions** : icône lien de partage + avatar (initiales), « Gérer le partage », « Modifier les informations du voyage », « Plus d’options ».
+    * **Image à droite** : photo paysage (grande place de Bruxelles).
+
+### Comportements & suggestions « waw »
+
+* Animations fluides au survol des cartes (légère élévation, ombre portée).
+* Effet parallax ou micro-interactions sur l’image (zoom lors du hover).
+* Sticky header lors du scroll.
+
+---
+
+## 2. Vue détail d’un voyage – Timeline Web
+
+**Image**: `TripIt 000a.jpg`, `000b.jpg`, `000c.jpg`, `000d.jpg`
+
+### Barre supérieure
+
+* Bouton retour « Retour aux voyages ».
+* Titre du voyage, statut « Tout est OK ».
+* Photo de couverture à droite.
+
+### Timeline verticale
+
+* **Groupes datés** (ex. « jeu., juin 5 », « sam., juin 7 », « mar., juin 10 »), bandes grises séparatrices.
+* **Événement / Plan** :
+
+  * **Icône** (svg) à gauche (avion, voiture, piéton, hôtel…).
+  * **Heure de début** en gros (ex. « 2:10 PM »), fuseau UTC affiché.
+  * **Contenu** :
+
+    * **Titre** : code aéroport « GVA – BRU » ou nom de l’activité « Vol Avion (Cadeau) ».
+    * **Badge statut** : « Planifié » en vert.
+    * **Détails** : numéro de vol, confirmation, heure d’arrivée, adresse.
+    * **Bouton Actions** : menu « … Actions ».
+* **CTA flottant** « Ajouter un plan » en bas à droite de la vue.
+
+### Comportements & suggestions« waw »
+
+* Timeline interactive : défilement infini avec inertia.
+* Hover sur icône : affiche tooltip avec résumé.
+* Clic global sur un plan : drawer latérale s’ouvre avec édition inline.
+* Customizable pins sur la timeline (priorités, code couleur selon type).
+
+---
+
+## 3. Versions Mobile – iOS (Native) vs Web responsive
+
+**Images**: `TripIt 001.jpg`, `002.jpg`, `003.jpg`, `004.jpg`
+
+### Doublons d’UI native
+
+* Exemple light/dark mode (002.jpg) – mêmes composants, inversions de couleurs.
+* Timeline compacte : icônes, titres et horaires réagencés verticalement.
+* Liste déroulante des plans, possibilité de swipe pour éditer/supprimer.
+
+### Différences Web vs Mobile
+
+* Sur Web, la timeline s’étire horizontalement (plus d’espace), mobile utilise un scroll vertical fort.
+* Le Web affiche bandeau de dates plus apparent ; mobile l’intègre dans chaque section.
+
+### Suggestions mobiles « waw »
+
+* Ajout de gestes tactiles (pinch zoom sur la timeline).
+* Mode jour/nuit automatique selon heure locale.
+* Notifications push dynamiques pré-plan (rappels, check‑in).
+
+---
+
+## 4. Écran de création de plan (Web)
+
+**Images**: `TripIt 005.jpg`, dernière capture (types de plans)
+
+### Layout
+
+* **Titre** en haut : « Ajouter une réservation Brussels, Belgium, June 2025, juin 5 – 10, 2025 ».
+* **Section des types populaires** : gros boutons ronds (Activité, Vol, Hébergement).
+* **Section Plus de types** : liste de boutons plus petits (Location de voiture, Concert, Remarque, Stationnement, Croisière, Train, Restaurant, Théâtre, Itinéraires, Carte, Réunion, Visite, Transport…).
+
+### Comportements & suggestions « waw »
+
+* Barre de recherche intelligente (reconnaissance de texte libre, NLP) pour suggérer le type et pré-remplir champ.
+* Aperçu en temps réel de la timeline incrémentale lorsque l’on sélectionne un type, pour voir où se positionnera le nouveau plan.
+* Drag & drop d’un type vers la timeline.
+
+---
+
+**Résumé**
+Ce document sert de spec pour reproduire et enrichir l’UX/UI de TripIt dans une application Ionic. En s’inspirant des éléments ci-dessus et en ajoutant micro‑interactions, previews dynamiques et personnalisation, vous obtiendrez une interface « encore plus waw ».
+
+Pour chaque composant, fournissez :
+
+* Maquette Figma / CSS variables (taille, couleurs, espacement).
+* Composant Angular/Ionic réactif (API-driven).
+* Tests unitaires et d’intégration (UX flows).
+
+# Spécification – Formulaire “Ajouter un vol” TripIt (suite)
+
+Ce document complète la spec précédente en détaillant l’UI du formulaire d’ajout de vol tel que vu dans les captures `TripIt 006` à `TripIt 010`.
+
+---
+
+## 5. Formulaire principal “Ajouter un vol”
+
+**Image**: `TripIt 006.jpg`
+
+### Structure générale
+
+* **Header**
+
+  * Bouton retour `<- Retour` (lien vers la timeline du voyage).
+  * Titre de page : **Ajouter un vol**.
+  * **CTA primaire** : bouton bleu **Enregistrer** placé en haut à droite, toujours visible (sticky) en scroll.
+
+* **Champ Confirmation**
+
+  * Label **Confirmation** (obligatoire dans la plupart des cas).
+  * Input text large, placeholder `Saisir la confirmation`.
+
+* **Section Vol 1** (permet potentiellement multisegments)
+
+  * **Date de départ**
+
+    * Input date-picker (`dd/mm/yyyy`), icône calendrier à gauche.
+  * **Compagnie aérienne** `*`
+
+    * Input text obligatoire, placeholder `Saisir la compagnie aérienne`.
+
+\-- Extrait bas --
+
+* **Numéro de vol & Sièges**
+
+  * Deux inputs text côte-à-côte (responsive), placeholders `Saisir le numéro de vol`, `Saisir les sièges`.
+
+---
+
+## 6. Sections repliables / avancées
+
+**Images**: `TripIt 007.jpg`, `TripIt 008.jpg`, `TripIt 009.jpg`
+
+### a) Modifier manuellement le vol
+
+* **Toggle / accordéon** avec label **Modifier manuellement le vol** et chevron.
+* Contenu **déplié** :
+
+  * **Départ**
+
+    * **Aéroport** : 1 input text (auto-complete idéal).
+    * **Heure de dép.** : input time-picker (`hh:mm am/pm`) + option **Fuseau horaire** (select `Fuseau horaire automatique` par défaut).
+    * **Terminal** & **Porte** : deux inputs text.
+
+  * **Arrivée**
+
+    * Champ équivalent (Aéroport, Date, Heure, Fuseau, Terminal, Porte).
+
+### b) Informations sur le service et l’avion
+
+**Images**: `TripIt 010.jpg`
+
+* **Toggle** label **Informations sur le service et l’avion**.
+* Champs (inputs text) organisés en grille responsive :
+
+  * Avion (modèle).
+  * Catégorie de tarif (Economy, Business…).
+  * Repas, Divertissements (text).
+  * Escales, Distance, **% à l’heure** (text / numeric).
+
+---
+
+## 7. Controls finaux
+
+* **Ajouter un vol** (CTA secondaire, lien + icône `+`).
+* **Annuler** (lien), **Enregistrer** (bouton principal).
+
+---
+
+## 8. Suggestions “waw” & optimisations
+
+1. **Détection autom. de confirmation** : scanner un email/Ticket PDF et pré-remplir.
+2. **Auto-suggestion aéroports** : via API Google Places + IATA, avec flags.
+3. **Fuseau automatique** : inference via géocoding de l’aéroport.
+4. **Validation inline** : vérifier en temps réel la validité du numéro de vol et disponibilité des sièges.
+5. **Dark mode / theme switcher** (form input redesign compatibles).
+
+# Spécification – Fonctionnalités TripIt Pro et pistes d’intégration
+
+Cette section complète le canevas UI précédent en détaillant les **services avancés** offerts par TripIt Pro (Web et mobile), d’après la doc officielle et démos YouTube. Elle servira de blueprint pour votre AI de développement (cursor) afin de reproduire et étendre ces services.
+
+---
+
+## 1. Alertes & notifications en temps réel
+
+**Source**: Site officiel TripIt Pro ([tripit.com](https://www.tripit.com/web/pro/pricing?utm_source=chatgpt.com))
+
+1. **Alertes de vol** – Retards, annulations et porte de départ modifiée.
+2. **Rappel d’enregistrement (Check‑in)** – Notification push pré‑vol.
+3. **Conseil « Go Now »** – Indique le meilleur moment pour partir vers l’aéroport en fonction du trafic et du guide temps réel.
+4. **Rappel terminal/porte** – Rappels locaux lors du trajet dans l’aéroport.
+
+**Intégration** : Utiliser Firestore triggers + FCM (Firebase Cloud Messaging) pour pousser des notifications basées sur les champs `flight.status`, `event.checkInTime`, `event.departureGate`, et géolocation (via Capacitor Geolocation).
+
+---
+
+## 2. Suivi de prix et remboursements
+
+**Source**: Site officiel TripIt Pro ([tripit.com](https://www.tripit.com/web/pro/pricing?utm_source=chatgpt.com))
+
+* **Monitoring de tarifs** : scan automatique des mêmes vols aux dates données pour déceler une baisse de prix.
+* **Alerte remboursement** : propose un remboursement si le tarif diminue après achat.
+
+**Intégration** : Intégrer un microservice backend (cron job) qui interroge une API de recherche de vols (Skyscanner, Kiwi, etc.), compare `cachedPrice` vs `currentPrice`, et déclenche un plan `priceAlert` en base de données + notification.
+
+---
+
+## 3. Optimisation de l’itinéraire et conseils de siège
+
+**Source**: Site officiel TripIt Pro ([tripit.com](https://www.tripit.com/web/pro/pricing?utm_source=chatgpt.com))
+
+* **Suggestion de meilleur siège** en fonction du type d’appareil, classe de tarif, préférences utilisateur.
+* **Alternatives de vol** : itinéraires plus rapides ou moins chers détectés dès qu’ils deviennent disponibles.
+
+**Intégration** : Coupler avec un API de seating (ExpertFlyer) et de comparaison de vols. Afficher des CTA “Change to this flight” dans le détail du plan avec modals.
+
+---
+
+## 4. Guidance aéroportuaire & cartes interactives
+
+**Sources**: TripIt Pro Travel Guidance blog ([tripit.com](https://www.tripit.com/web/blog/news-culture/tripit-pro-travel-guidance?utm_source=chatgpt.com)) ; YouTube reviews (turn0search1)
+
+1. **Interactive airport maps** – Indique stands, portiques, services (Wi‑Fi, lounges, boutiques).
+2. **Guidance pas-à-pas** – Itinéraire interne du terminal jusqu’à la porte de correspondance ou au baggage claim.
+3. **Infos sécurité & visas** – Rappels des documents requis, restrictions COVID, formalités de visa.
+
+**Intégration** : Utiliser Mapbox + geojson des terminaux d’aéroport, couplé aux données `trip.events` pour tracer la route. Intégrer un microservice d’API “Know Before You Go” pour les exigences pays.
+
+---
+
+## 5. Gestion des programmes de fidélité
+
+**Source**: Site officiel TripIt Pro ([tripit.com](https://www.tripit.com/web/pro/pricing?utm_source=chatgpt.com))
+
+* **Suivi des points** : consolidation automatique des statuts et points aériens, hôtels, voitures selon les programmes liés.
+
+**Intégration** : Authentification OAuth vers partenaires (Flying Blue, Marriott Bonvoy), stockage chiffré des credentials, et retrieval périodique des balances.
+
+---
+
+## 6. Partage & collaboration avancée
+
+**Source**: YouTube reviews (turn0search6)
+
+* **Partage en équipe** : visualisation en temps réel des itinéraires de co‑voyageurs.
+* **Notes & chat intégré** : commentaires, photos, documents joints par plan ou voyage.
+
+**Intégration** : Étendre le modèle Firestore `trip.sharedWith` et `plan.comments`. Utiliser Firebase Realtime DB ou Firestore pour le chat en direct.
+
+---
+
+## 7. Propositions « Waw » pour votre app
+
+1. **Assistant IA contextuel** : chat intégrée pour poser des questions à l’IA (“Quel est le meilleur moment pour partir ?”).
+2. **Résumé vocal** : TTS pour lire l’itinéraire à l’embarquement.
+3. **Mode multi-langues auto** : contenu, notifications et guides traduits dynamiquement (DeepL API).
+4. **Configuration voyage hybride** : ajout direct de billets de train, bus, croisière avec services spécifiques.
+
+---
+
+
+
