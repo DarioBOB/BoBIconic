@@ -1,0 +1,419 @@
+###USER DEMO
+{"id":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"email":"guestuser@demo.com",
+"displayName":"Utilisateur Invité",
+"firstName":{"en":"Guest","fr":"Utilisateur"},
+"lastName":{"en":"User","fr":"Invité"},
+"preferredLang":"fr",
+"preferences":{},
+"loyaltyPrograms":[],
+"notificationSettings":{},
+"updatedAt":null,
+"language":"fr",
+"isDemo":true,
+"role":"demo",
+"createdAt":{"_seconds":1751371339,"_nanoseconds":270000000},
+"lastLogin":{"_seconds":1751371339,"_nanoseconds":270000000},
+"_id":"fUBBVpboDeaUjD6w2nz0xKni9mG3"},
+
+
+
+###TRIP ATHENS ONGOING
+{"id":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Voyage démo Athènes","en":"Demo trip Athens"},
+"summary":"Voyage Genève ? Athènes du 5 au 13 juillet 2024 - Culture + Santorin",
+"startDate":{"_seconds":1720156500,"_nanoseconds":0},
+?? Départ (startDate)
+* Timestamp brut : 1720156500
+* ?? Date et heure UTC : 2024-07-05 07:15:00 UTC
+* ?? C'est le départ du vol Genève ? Athènes, donc :
+o Ville : Genève
+o Pays : Suisse
+o Heure locale : 09:15 (CEST) ????
+"endDate":{"_seconds":1720868400,"_nanoseconds":0},
+?? Arrivée (endDate)
+* Timestamp brut : 1720868400
+* ?? Date et heure UTC : 2024-07-13 09:00:00 UTC
+* ?? C'est l'arrivée du vol retour Athènes ? Genève, donc :
+o Ville : Genève
+o Pays : Suisse
+o Heure locale : 11:00 (CEST) ????
+"origin":{"code":"GVA",
+"city":"Genève",
+"country":"Suisse"},
+"destination":{"code":"ATH","city":"Athènes","country":"Grèce"},
+"type":"vacation",
+"currency":"EUR",
+"totalBudget":1800,
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301755,"_nanoseconds":688000000},
+"updatedAt":{"_seconds":1751301755,"_nanoseconds":688000000},
+"status":"ongoing",
+"_id":"ZRH6s0nTMyyPfTDWbHoR"},
+
+
+
+### PLANS ATHENS ONGOING
+#01
+{"id":"KWC5GXJZhAIRJdfvZly9",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Vol Genève ? Athènes","en":"Flight Geneva ? Athens"},
+"description":{"fr":"Vol A3 847 - Aegean Airlines",
+"en":"Flight A3 847 - Aegean Airlines"},
+"type":"flight",
+"startDate":{"_seconds":1720156500,"_nanoseconds":0},
+?? Départ
+* Timestamp : 1720156500
+* ?? UTC : 2024-07-05 05:15:00
+* ?? Heure locale (Genève – CEST) : 07:15
+* ?? Aéroport de départ : Genève Aéroport (GVA), Suisse ????
+"endDate":{"_seconds":1720165500,"_nanoseconds":0},
+?? Arrivée
+* Timestamp : 1720165500
+* ?? UTC : 2024-07-05 07:45:00
+* ?? Heure locale (Athènes – EEST) : 10:45
+* ?? Aéroport d’arrivée : Aéroport International d’Athènes (ATH), Grèce ????
+"details":{"flight":{"flight_number":"A3 847",
+"airline":"Aegean Airlines",
+"departure":{"airport":"Genève Aéroport (GVA)"},
+"arrival":{"airport":"Aéroport International d'Athènes (ATH)"},
+"confirmation":"A3GVAATH567"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"_id":"KWC5GXJZhAIRJdfvZly9"},
+
+#02
+{"id":"KuhGUkckRqxUVn4xVT6T",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Location voiture Athènes","en":"Car rental Athens"},
+"description":{"fr":"Europcar - Peugeot 2008 automatique",
+"en":"Europcar - Peugeot 2008 automatic"},
+"type":"car_rental",
+"startDate":{"_seconds":1720168200,"_nanoseconds":0},
+?? Début de la location
+* Timestamp : 1720168200
+* ?? UTC : 2024-07-05 08:30:00
+* ?? Heure locale (Grèce – EEST) : 11:30
+* ?? Lieu : Aéroport d’Athènes – Terminal 1 – Arrivées
+"endDate":{"_seconds":1720854000,"_nanoseconds":0},
+?? Fin de la location
+* Timestamp : 1720854000
+* ?? UTC : 2024-07-13 05:00:00
+* ?? Heure locale (Grèce – EEST) : 08:00
+"details":{"car_rental":{"company":"Europcar",
+"location":"ATH Arrivées Terminal 1",
+"address":"Eleftherios Venizelos Airport,
+ Spata 190 04,
+ Grèce",
+"model":"Peugeot 2008 automatique",
+"reference":"EUROP-ATH2024"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"_id":"KuhGUkckRqxUVn4xVT6T"},
+#03
+{"id":"MbXNtL7TIUmx01nxsHjb",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Hôtel Electra Palace Athens","en":"Hotel Electra Palace Athens"},
+"description":{"fr":"5-7 juillet - Plaka","en":"July 5-7 - Plaka"},
+"type":"hotel",
+"startDate":{"_seconds":1720177200,"_nanoseconds":0},
+?? Check-in
+* Timestamp : 1720177200
+* ? UTC : 2024-07-05 11:00:00
+* ?? Heure locale (EEST – Grèce) : 14:00
+* ?? Date : Vendredi 5 juillet 2024
+"endDate":{"_seconds":1720332000,"_nanoseconds":0},
+?? Check-out
+* Timestamp : 1720332000
+* ? UTC : 2024-07-07 11:00:00
+* ?? Heure locale : 14:00
+* ?? Date : Dimanche 7 juillet 2024
+"details":{"hotel":{"name":"Electra Palace Athens",
+"address":"18-20 N Nikodimou St,
+ Plaka,
+ Athènes 105 57",
+"phone":"+30 210 3370000"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"_id":"MbXNtL7TIUmx01nxsHjb"},
+#04
+{"id":"CVqlXMFdLe9HdMqKS9DN",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Visite Acropole + musée","en":"Acropolis + museum visit"},
+"description":{"fr":"Guide local officiel - Entrée incluse","en":"Official local guide - Entry included"},
+"type":"activity",
+"startDate":{"_seconds":1720245600,"_nanoseconds":0},
+?? Début
+* Timestamp brut : 1720245600
+* ? UTC : 2024-07-06 08:00:00
+* ?? Heure locale (Grèce – EEST) : 11:00
+"endDate":{"_seconds":1720260000,"_nanoseconds":0},
+?? Fin
+* Timestamp brut : 1720260000
+* ? UTC : 2024-07-06 12:00:00
+* ?? Heure locale (Grèce – EEST) : 15:00
+"details":{"activity":{"meeting_point":"Station Acropolis Metro",
+"guide":"Guide local officiel",
+"reference":"ACRO-ACT105"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"_id":"CVqlXMFdLe9HdMqKS9DN"},
+#05
+{"id":"xWAZLKPAH8PhcCybY9EH",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Route Athènes ? Patras","en":"Route Athens ? Patras"},
+"description":{"fr":"Via Corinth - Pause canal de Corinthe","en":"Via Corinth - Corinth Canal stop"},
+"type":"activity",
+"startDate":{"_seconds":1720332000,"_nanoseconds":0},
+?? Départ
+* Timestamp : 1720332000
+* ? UTC : 2024-07-07 08:00:00
+* ?? Heure locale (Grèce – EEST) : 11:00
+* ?? Ville de départ : Athènes ????
+"endDate":{"_seconds":1720342800,"_nanoseconds":0},
+?? Arrivée
+* Timestamp : 1720342800
+* ? UTC : 2024-07-07 11:00:00
+* ?? Heure locale : 14:00
+* ?? Ville d’arrivée : Patras ????
+"details":{"transport":{"route":"Athènes ? Patras via Corinth",
+"duration":"2h30",
+"stops":["Canal de Corinthe (10h30)"]}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"_id":"xWAZLKPAH8PhcCybY9EH"},
+{"id":"z1aInVnhL5oYUBePRCck",
+#06
+{"id":"0bmkgBoNgQ4Tgz0U6Fqr",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Traversée Patras ? Santorin",
+"en":"Ferry Patras ? Santorini"},
+"description":{"fr":"Blue Star Ferries - Cabine avec hublot",
+"en":"Blue Star Ferries - Cabin with porthole"},
+"type":"activity",
+"startDate":{"_seconds":1720351800,"_nanoseconds":0},
+?? Départ
+* Timestamp : 1720351800
+* ? Date/heure UTC : 2024-07-07 07:30:00
+* ?? Heure locale (Grèce, EEST) : 10:30
+* ?? Départ estimé du ferry : 07 juillet 2024 à 10h30 (EEST)
+"endDate":{"_seconds":1720409400,"_nanoseconds":0},
+?? Arrivée
+* Timestamp : 1720409400
+* ? Date/heure UTC : 2024-07-07 23:30:00
+* ?? Heure locale (Grèce, EEST) : 02:30 (le 8 juillet)
+"details":{"ferry":{"company":"Blue Star Ferries",
+"ship":"Blue Star Delos",
+"cabin":"Cabine avec hublot - 2 pers.",
+"reference":"BSF2024-710"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":196000000},
+"_id":"0bmkgBoNgQ4Tgz0U6Fqr"},
+
+#07
+{"id":"a2cdEWX2sXfujmcUtCwK",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Hôtel Aressana Santorin","en":"Hotel Aressana Santorini"},
+"description":{"fr":"8-11 juillet - Fira","en":"July 8-11 - Fira"},
+"type":"hotel",
+"startDate":{"_seconds":1720414800,"_nanoseconds":0},
+?? Check-in
+* Timestamp : 1720414800
+* ? UTC : 2024-07-08 08:00:00
+* ?? Heure locale (EEST – Grèce) : 11:00
+* ?? Date : Lundi 8 juillet 2024
+"endDate":{"_seconds":1720684800,"_nanoseconds":0},
+?? Check-out
+* Timestamp : 1720684800
+* ? UTC : 2024-07-11 08:00:00
+* ?? Heure locale : 11:00
+* ?? Date : Jeudi 11 juillet 2024
+"details":{"hotel":{"name":"Hotel Aressana Spa & Suites",
+"address":"Fira Town,
+ Santorini 847 00,
+ Grèce",
+"phone":"+30 2286 025366",
+"check_in":"Early check-in confirmé"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"_id":"a2cdEWX2sXfujmcUtCwK"},
+#08
+{"id":"iuEtphGHrUGZtcwouhiE",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Croisière coucher de soleil","en":"Sunset cruise"},
+"description":{"fr":"Catamaran + volcan - Repas inclus","en":"Catamaran + volcano - Meals included"},
+"type":"activity",
+"startDate":{"_seconds":1720526400,"_nanoseconds":0},
+?? Début de l’activité
+* Timestamp : 1720526400
+* ? UTC : 2024-07-09 10:00:00
+* ?? Heure locale (EEST – Grèce) : 13:00
+* ?? Date : Mardi 9 juillet 2024
+"endDate":{"_seconds":1720544400,"_nanoseconds":0},
+?? Fin de l’activité
+* Timestamp : 1720544400
+* ? UTC : 2024-07-09 15:00:00
+* ?? Heure locale : 18:00
+"details":{"activity":{"departure":"Port de Vlychada",
+"boat":"Catamaran",
+"included":"Repas & boissons",
+"reference":"CATASUNSET2024"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"_id":"iuEtphGHrUGZtcwouhiE"},
+
+#09
+{"id":"994yfxAiLaz17TLHS1RC",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Vol Santorin ? Athènes","en":"Flight Santorini ? Athens"},
+"description":{"fr":"Vol OA 363 - Olympic Air","en":"Flight OA 363 - Olympic Air"},
+"type":"flight",
+"startDate":{"_seconds":1720690200,"_nanoseconds":0},
+?? Départ
+* Timestamp : 1720690200
+* ? UTC : 2024-07-11 08:30:00
+* ?? Heure locale (Grèce, EEST) : 11:30
+* ?? Départ : Santorin (JTR), Grèce ????
+"endDate":{"_seconds":1720693200,"_nanoseconds":0},
+?? Arrivée
+* Timestamp : 1720693200
+* ? UTC : 2024-07-11 09:20:00
+* ?? Heure locale (Grèce, EEST) : 12:20
+* ?? Arrivée : Athènes (ATH), Grèce ????
+"details":{"flight":{"flight_number":"OA 363",
+"airline":"Olympic Air",
+"departure":{"airport":"Santorin (JTR)"},
+"arrival":{"airport":"Athènes (ATH)"},
+"reference":"OLY-SJUL-2024"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"_id":"994yfxAiLaz17TLHS1RC"},
+
+#10
+{"id":"ZgBUKcRlMo4I1QifXHfT",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Hôtel Coco-Mat Athens","en":"Hotel Coco-Mat Athens"},
+"description":{"fr":"11-13 juillet - Kolonaki","en":"July 11-13 - Kolonaki"},
+"type":"hotel",
+"startDate":{"_seconds":1720695600,"_nanoseconds":0},
+?? Check-in
+* Timestamp : 1720695600
+* ? UTC : 2024-07-11 10:00:00
+* ?? Heure locale (EEST – Grèce) : 13:00
+* ?? Date : Jeudi 11 juillet 2024
+"endDate":{"_seconds":1720854000,"_nanoseconds":0},
+?? Check-out
+* Timestamp : 1720854000
+* ? UTC : 2024-07-13 05:00:00
+* ?? Heure locale : 08:00
+* ?? Date : Samedi 13 juillet 2024
+"details":{"hotel":{"name":"Coco-Mat Hotel Athens",
+"address":"36 Patriarchou Ioakim,
+ Kolonaki,
+ Athènes 106 75"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"_id":"ZgBUKcRlMo4I1QifXHfT"},
+
+#11
+{"id":"mwo9SKWquXWkOfUA1VV9",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Dîner To Thalassino","en":"Dinner To Thalassino"},
+"description":{"fr":"Spécialités poisson grillé + ouzo","en":"Grilled fish specialties + ouzo"},
+"type":"activity",
+"startDate":{"_seconds":1720803600,"_nanoseconds":0},
+?? Début du dîner
+* Timestamp : 1720803600
+* ? UTC : 2024-07-12 17:00:00
+* ?? Heure locale (EEST – Grèce) : 20:00
+* ?? Date : Vendredi 12 juillet 2024
+"endDate":{"_seconds":1720810800,"_nanoseconds":0},
+?? Fin estimée
+* Timestamp : 1720810800
+* ? UTC : 2024-07-12 19:00:00
+* ?? Heure locale : 22:00
+"details":{"restaurant":{"name":"To Thalassino",
+"address":"Akti Koumoundourou 54,
+ Le Pirée 185 33",
+"specialties":["Poisson grillé",
+"Ouzo"]}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"_id":"mwo9SKWquXWkOfUA1VV9"},
+#12
+
+{"id":"wBr0OP9Ku7BScQAICOJx",
+"tripId":"ZRH6s0nTMyyPfTDWbHoR",
+"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3",
+"title":{"fr":"Vol Athènes ? Genève","en":"Flight Athens ? Geneva"},
+"description":{"fr":"Vol A3 846 - Aegean Airlines","en":"Flight A3 846 - Aegean Airlines"},
+"type":"flight",
+"startDate":{"_seconds":1720854900,"_nanoseconds":0},
+?? Départ
+* Timestamp : 1720854900
+* ? UTC : 2024-07-13 05:15:00
+* ?? Heure locale (Grèce – EEST) : 08:15
+* ?? Aéroport de départ : Aéroport International d’Athènes (ATH)
+"endDate":{"_seconds":1720868400,"_nanoseconds":0},
+?? Arrivée
+* Timestamp : 1720868400
+* ? UTC : 2024-07-13 09:00:00
+* ?? Heure locale (Suisse – CEST) : 11:00
+* ?? Aéroport d’arrivée : Genève Aéroport (GVA)
+"details":{"flight":{"flight_number":"A3 846",
+"airline":"Aegean Airlines",
+"departure":{"airport":"Aéroport International d'Athènes (ATH)"},
+"arrival":{"airport":"Genève Aéroport (GVA)"},
+"confirmation":"A3ATHGVA852"}},
+"createdByDemo":true,
+"createdAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"updatedAt":{"_seconds":1751301756,
+"_nanoseconds":197000000},
+"_id":"wBr0OP9Ku7BScQAICOJx"},
+

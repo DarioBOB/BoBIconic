@@ -1,0 +1,570 @@
+Documentation détaillée de l’application BoredOnBoard (BOB)
+________________________________________
+1. Contexte & objectifs
+BoredOnBoard (BOB) est une application mobile conçue pour divertir et informer les passagers d’avion pendant leur vol. Développée avec Ionic/Angular, elle propose :
+•	Une visualisation de la progression du vol (position, altitude, vitesse) ;
+•	Des informations météorologiques à l’arrivée ou en vol (METAR, AWVX) ;
+•	Un système de gestion de voyages (création de trips, plans, points d’intérêt) stocké dans Firestore ;
+•	Des services annexes (chat, documentation, petits jeux, notifications) ;
+•	Un espace administrateur pour superviser utilisateurs et voyages.
+L’objectif est de fournir un compagnon de vol complet, combinant données temps réel et fonctionnalités sociales/dev.
+________________________________________
+2. Architecture technique
+•	Framework : Ionic 6 + Angular 16 en standalone components.
+•	Firebase : Authentification (Email/Password) et Firestore (Stockage users, trips, plans, etc.).
+•	Localisation : ngx-translate (assets/i18n/fr.json, en.json) et TranslationService.
+•	Backend flight data : Proxy FR24 (fr24ApiBaseUrl), AVWX, récupération via HTTP ;
+•	Stockage local : Ionic Storage (hors vol).
+•	Divers : .env pour clés (Zoho, OpenAI, AviationStack, OpenSky), ESLint, Prettier, Git.
+________________________________________
+3. Bootstrap & configuration
+•	environment.ts : définit environment.firebase (clés API, authDomain, projectId…), defaultLang, fr24ApiBaseUrl, defaultMapCenter, etc.
+•	main.ts : bootstrapApplication(AppComponent) avec :
+o	provideRouter(routes, { preloadingStrategy: PreloadAllModules }) ;
+o	provideIonicAngular() ;
+o	provideFirebaseApp(initializeApp(environment.firebase)), provideAuth(getAuth()), provideFirestore(getFirestore()) ;
+o	Import de HttpClientModule, TranslateModule.forRoot(...), IonicStorageModule.forRoot().
+________________________________________
+4. Authentification & profil utilisateur
+•	Pages :
+o	EmailAuthPage : connexion / enregistrement par email
+o	RegisterPage & RegisterProfilePage : création de compte et saisie des infos de profil
+o	ProfilePage : consultation & modification du profil (Fire¬store)
+•	Services/Guards :
+o	AuthGuard / RedirectIfAuthenticatedGuard pour contrôler l’accès aux routes ;
+o	adminOnlyGuard pour l’espace admin ;
+o	UserService : wrapper sur Auth.currentUser + lecture du doc Firestore users/{uid}.
+________________________________________
+5. Navigation & UI globale
+•	app.routes.ts : routes principales avec prefixes /auth/email, /landing-tiles, /window, /home, /trips, /admin, etc.
+•	AppComponent (standalone) :
+o	Menu latéral (SideMenuComponent), barre de statut utilisateur (UserStatusBarComponent)
+o	Gestion du changement de langue & titre de page
+o	Redirection initiale vers /landing-tiles ou /auth/email selon état auth
+________________________________________
+6. Page de démarrage : Landing Tiles
+•	LandingTilesPage :
+o	Affichage d’un tableau de tuiles (Tile { key, icon, route, color }), traduit et coloré
+o	Récupération du profil Firestore pour langue préférée
+o	Clic sur tuile → router.navigate([route], { state: { wip: true } })
+o	Menu toggle & responsive layout Ionic/SCSS
+________________________________________
+7. Fonctionnalités principales
+7.1 Through-My-Window (WindowPage)
+•	WindowService : cœur métier de la « fenêtre de vol » :
+o	Récupération des données FR24 (historique & live) via proxy backend ;
+o	Fallback sur AVWX/METAR (historic + realtime) en cas d’échec ;
+o	Décodage METAR (pression, vent, visibilité) et formatage temps/vitesse/durée ;
+o	Points d’intérêt (POI) autour de l’avion via POIService ;
+o	Publication d’Observable pour UI réactive (ngFor, binding)…
+•	WindowPage :
+o	Formulaire callsign + date facultative ;
+o	Affichage des infos vol (FlightInfo), progression, carte/fullscreen map ;
+o	Affichage de la météo d’arrivée, code météo emoji & description ;
+o	Utilisation de composants partagés : MiniMapComponent, FlightMapComponent, POITableComponent.
+7.2 Flight Search & Test
+•	FlightSearchComponent : recherche par numéro de vol, suggestions, historique minimal
+•	FlightTestPage : page de test / démo de la stack FR24 & map (dev)
+7.3 Trips & Plans
+•	TripsPage : liste des voyages créés (Fire¬store trips), CRUD basique
+•	Planification : depuis chaque trip, rattachement de plans (venues, dates)
+•	AdminService : lecture de tous les users + trips + plans pour espace admin
+7.4 Autres pages
+•	bobbers.page, chat.page, documents.page, support.page, games.page, notifications.page, preferences.page : modules complémentaires pour engagement utilisateurs
+________________________________________
+8. Services & composants partagés
+•	Services :
+o	WindowService, TrajectoryService (calcul trajectoire), PoiService, GeoStatusService, TranslationService
+•	Composants :
+o	MiniMapComponent (aperçu carte), FlightMapComponent (trajet + plan)
+o	PoiTableComponent (liste POI), UserStatusBarComponent, SideMenuComponent
+•	SharedModule : regroupe imports communs (CommonModule, IonicModule…)
+________________________________________
+9. Intégration Firebase / Firestore
+•	Collection users : doc par uid (email, preferredLang, profile…)
+•	Collection trips : champ userId, nom du voyage, dates
+•	Collection plans : rattachés à tripId, description, lieu, horaire
+•	Auth Email/Password via AngularFire Auth, stockage des sessions util.
+________________________________________
+10. Localisation & i18n
+•	Fichiers assets/i18n/fr.json, en.json pour toutes les clés
+•	TranslateModule.forRoot() + HttpLoaderFactory
+•	TranslationService pour abstraction des méthodes de traduction
+________________________________________
+11. Déploiement & environnement
+•	Scripts npm/Ionic : ionic serve, ionic build, ng build --configuration production
+•	Fichier .env : clés FR24 Proxy, Zoho SMTP, OpenAI, AviationStack, OpenSky, Ads B Exchange
+•	CI/CD envisagé : déploiement sur Firebase Hosting ou Appflow
+________________________________________
+12. Prochaines évolutions & roadmap
+•	🌐 Notifications Push (Flight status, remises à jour météo)
+•	📶 Mode Offline (caching parcours & météo) ;
+•	🗺️ Plan de vol interactif (waypoints & altitudes) ;
+•	📊 Statistiques & partages (partage de vols, leaderboard)
+•	🤖 Chatbot IA intégré via OpenAI (conseils de voyage)
+________________________________________
+13. Exemples de code et patterns
+________________________________________
+13.1 Gestion des rôles utilisateur (Sécurité)
+```typescript
+// Interface pour typer les rôles utilisateur
+interface UserRole {
+  isAdmin: boolean;
+  isDemo: boolean;
+}
+
+// Méthode de chargement du rôle depuis Firestore
+private async loadUserRole() {
+  try {
+    this.userRole = { isAdmin: false, isDemo: false };
+    
+    if (!this.userId) {
+      console.warn('[Trips] Pas d\'utilisateur connecté');
+      return;
+    }
+
+    // Vérifier si c'est un utilisateur de démo
+    const isDemoUser = this.userId === 'fUBBVpboDeaUjD6w2nz0xKni9mG3' || 
+                      this.userId === 'guest-demo' ||
+                      this.auth.currentUser?.email?.endsWith('@demo.com');
+
+    if (isDemoUser) {
+      this.userRole.isDemo = true;
+      return;
+    }
+
+    // Charger le document utilisateur pour vérifier le rôle admin
+    const userDoc = await getDoc(doc(this.firestore, 'users', this.userId));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      this.userRole.isAdmin = data['role'] === 'admin';
+    }
+  } catch (err) {
+    console.error('[Trips] Erreur chargement rôle utilisateur:', err);
+  }
+}
+
+// Méthode de vérification d'accès
+private async checkAccess(tripUserId: string): Promise<boolean> {
+  if (!this.userId) return false;
+  
+  // Les admins ont accès à tous les voyages
+  if (this.userRole.isAdmin) return true;
+  
+  // Les utilisateurs en mode démo ont accès aux voyages de démo
+  if (this.userRole.isDemo) {
+    return tripUserId === 'fUBBVpboDeaUjD6w2nz0xKni9mG3' || tripUserId === 'guest-demo';
+  }
+  
+  // Les utilisateurs standards ont accès à leurs propres voyages
+  return tripUserId === this.userId;
+}
+```
+
+13.2 Gestion du cache local (Robustesse offline)
+```typescript
+// Méthodes utilitaires pour le cache
+private async saveToCache(key: string, data: any) {
+  try {
+    await this.storage.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+  } catch (err) {
+    console.error('[Trips] Erreur sauvegarde cache:', err);
+  }
+}
+
+private async getFromCache<T>(key: string, maxAgeMs = 3600000): Promise<T | null> {
+  try {
+    const cached = await this.storage.get(key);
+    if (!cached) return null;
+    
+    const age = Date.now() - cached.timestamp;
+    if (age > maxAgeMs) {
+      await this.storage.remove(key);
+      return null;
+    }
+    
+    return cached.data;
+  } catch (err) {
+    console.error('[Trips] Erreur lecture cache:', err);
+    return null;
+  }
+}
+
+// Gestion des clés de cache avec séparation par utilisateur
+private getCacheKey(prefix: string, id?: string): string {
+  const userId = this.userId || 'anonymous';
+  return `${prefix}_${userId}${id ? `_${id}` : ''}`;
+}
+
+// Chargement avec fallback cache
+async loadTrips() {
+  this.isLoading = true;
+  this.error = null;
+
+  try {
+    // 1. Charger depuis le cache d'abord
+    const cacheKey = this.getCacheKey('trips');
+    const cachedTrips = await this.getFromCache<Trip[]>(cacheKey);
+    
+    if (cachedTrips) {
+      this.processTrips(cachedTrips);
+      console.log('[Trips] Données chargées depuis le cache');
+    }
+
+    // 2. Charger depuis Firestore en parallèle
+    const tripsQuery = query(
+      collection(this.firestore, 'trips'),
+      where('userId', '==', this.userId)
+    );
+    
+    const querySnapshot = await getDocs(tripsQuery);
+    const trips: Trip[] = [];
+    
+    for (const doc of querySnapshot.docs) {
+      const data = doc.data();
+      if (await this.validateTripData(data) && await this.checkAccess(data.userId)) {
+        trips.push({
+          id: doc.id,
+          title: data.title,
+          startDate: (data.startDate as Timestamp).toDate(),
+          endDate: (data.endDate as Timestamp).toDate(),
+          status: this.getTripStatus((data.startDate as Timestamp).toDate(), (data.endDate as Timestamp).toDate()),
+          showDetails: false,
+          loadingPlans: false
+        });
+      }
+    }
+
+    // 3. Mettre à jour l'affichage et le cache
+    this.processTrips(trips);
+    await this.saveToCache(cacheKey, trips);
+    
+  } catch (err) {
+    console.error('[Trips] Erreur chargement voyages:', err);
+    this.error = 'TRIPS.ERROR_LOADING';
+    await this.showErrorToast('TRIPS.ERROR_LOADING');
+  } finally {
+    this.isLoading = false;
+  }
+}
+```
+
+13.3 Validation des données (Sécurité et robustesse)
+```typescript
+// Validation des données de voyage
+private async validateTripData(data: any): Promise<boolean> {
+  if (!data['title'] || !data['startDate'] || !data['endDate']) {
+    await this.showErrorToast('TRIPS.ERROR_INVALID_DATA');
+    return false;
+  }
+
+  // Vérification des dates
+  const startDate = (data['startDate'] as Timestamp).toDate();
+  const endDate = (data['endDate'] as Timestamp).toDate();
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate < startDate) {
+    await this.showErrorToast('TRIPS.ERROR_INVALID_DATE');
+    return false;
+  }
+
+  return true;
+}
+
+// Validation des données de plan
+private async validatePlanData(data: any): Promise<boolean> {
+  if (!data['title'] || !data['type'] || !data['startDate'] || !data['endDate']) {
+    await this.showErrorToast('TRIPS.ERROR_INVALID_PLAN');
+    return false;
+  }
+
+  // Vérification du type
+  const validTypes = ['flight', 'hotel', 'car', 'activity', 'other'];
+  if (!validTypes.includes(data['type'])) {
+    await this.showErrorToast('TRIPS.ERROR_INVALID_PLAN_TYPE');
+    return false;
+  }
+
+  return true;
+}
+```
+
+13.4 Gestion des erreurs et notifications (UX)
+```typescript
+// Méthode utilitaire pour afficher les erreurs
+private async showErrorToast(key: string, params?: any) {
+  const message = this.translate.instant(key, params);
+  const toast = await this.toastCtrl.create({
+    message,
+    duration: 3000,
+    position: 'bottom',
+    color: 'danger'
+  });
+  await toast.present();
+}
+
+// Gestion des erreurs avec contexte
+try {
+  // Code susceptible d'échouer
+} catch (err) {
+  console.error('[Trips] Erreur avec contexte:', {
+    userId: this.userId,
+    action: 'loadTrips',
+    error: err
+  });
+  this.error = 'TRIPS.ERROR_LOADING';
+  await this.showErrorToast('TRIPS.ERROR_LOADING');
+}
+```
+
+13.5 Internationalisation et traductions
+```typescript
+// Service de traduction
+@Injectable({ providedIn: 'root' })
+export class TranslationService {
+  constructor(private translate: TranslateService) {}
+
+  setLanguage(lang: 'fr' | 'en') {
+    this.translate.use(lang);
+    localStorage.setItem('lang', lang);
+  }
+
+  getCurrentLang(): 'fr' | 'en' {
+    return this.translate.currentLang as 'fr' | 'en' || 'fr';
+  }
+}
+
+// Utilisation dans les composants
+export class TripsPage {
+  constructor(private translate: TranslateService) {}
+
+  getTitle(title: any): string {
+    if (typeof title === 'string') return title;
+    if (typeof title === 'object' && title[this.getCurrentLang()]) {
+      return title[this.getCurrentLang()];
+    }
+    return 'Titre inconnu';
+  }
+
+  getCurrentLang(): 'fr' | 'en' {
+    return this.translate.currentLang as 'fr' | 'en' || 'fr';
+  }
+}
+```
+
+13.6 Configuration d'environnement dynamique
+```typescript
+// environment.ts
+export const environment = {
+  production: false,
+  firebase: {
+    apiKey: "AIzaSyBQ876_Ci6AWLBV5-nmkqLDKnCI3929v0E",
+    authDomain: "bob-app-9cbfe.firebaseapp.com",
+    projectId: "bob-app-9cbfe",
+    storageBucket: "bob-app-9cbfe.appspot.com",
+    messagingSenderId: "163592997424",
+    appId: "1:163592997424:web:ece12127e2e3f07a66bbf5",
+    measurementId: "G-EMZ3P925JF"
+  },
+  fr24ApiBaseUrl: 'http://localhost:5001', // Configurable pour desktop/mobile
+  defaultLang: 'fr',
+  defaultMapCenter: { lat: 46.8182, lng: 8.2275 } // Suisse
+};
+
+// Utilisation dans WindowService
+async searchFlight(callsign: string) {
+  const url = `${environment.fr24ApiBaseUrl}/api/flightradar/history/${callsign}`;
+  // ... reste du code
+}
+```
+
+13.7 Règles de sécurité Firestore
+```javascript
+// firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Fonction pour vérifier si l'utilisateur est admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Fonction pour vérifier si l'utilisateur est en mode démo
+    function isDemo() {
+      return request.auth.uid == 'fUBBVpboDeaUjD6w2nz0xKni9mG3' || 
+             request.auth.uid == 'guest-demo' ||
+             request.auth.token.email.matches('.*@demo[.]com');
+    }
+
+    // Règles pour la collection trips
+    match /trips/{tripId} {
+      allow read: if isAdmin() || 
+                 resource.data.userId == request.auth.uid ||
+                 (isDemo() && resource.data.userId in ['fUBBVpboDeaUjD6w2nz0xKni9mG3', 'guest-demo']);
+      allow write: if isAdmin() ||
+                  (request.auth.uid == request.resource.data.userId && !isDemo());
+    }
+
+    // Règles pour la collection plans
+    match /plans/{planId} {
+      allow read: if isAdmin() ||
+                 exists(/databases/$(database)/documents/trips/$(resource.data.tripId)) &&
+                 (
+                   get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.userId == request.auth.uid ||
+                   (isDemo() && get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.userId in ['fUBBVpboDeaUjD6w2nz0xKni9mG3', 'guest-demo'])
+                 );
+      allow write: if isAdmin() ||
+                  (
+                    exists(/databases/$(database)/documents/trips/$(request.resource.data.tripId)) &&
+                    get(/databases/$(database)/documents/trips/$(request.resource.data.tripId)).data.userId == request.auth.uid &&
+                    !isDemo()
+                  );
+    }
+  }
+}
+```
+
+________________________________________
+14. Guide de tests et stratégie de test
+________________________________________
+14.1 Tests manuels recommandés
+```bash
+# Tests de connectivité
+- Mode connecté (Firestore OK)
+- Mode offline (cache uniquement)
+- Mode démo
+- Utilisateur admin
+- Utilisateur standard sans voyage
+
+# Tests de sécurité
+- Vérifier que l'utilisateur standard ne voit que ses voyages
+- Vérifier que l'admin voit tous les voyages
+- Vérifier que le mode démo affiche les données de démo
+- Tester les accès non autorisés
+
+# Tests de robustesse
+- Simuler des erreurs réseau
+- Tester le fallback cache
+- Vérifier les messages d'erreur
+- Tester l'expiration du cache
+
+# Tests d'internationalisation
+- Changer de langue et vérifier tous les textes
+- Tester les formats de date selon la langue
+- Vérifier les messages d'erreur traduits
+```
+
+14.2 Checklist de validation UAT
+- [ ] Accès et affichage des voyages
+- [ ] Sécurité et rôles utilisateur
+- [ ] Authentification et administration
+- [ ] Robustesse et gestion des erreurs
+- [ ] Expérience utilisateur (UX)
+- [ ] Internationalisation
+- [ ] Fenêtre de vol (Window)
+- [ ] Scénarios offline/online
+- [ ] Documentation et suivi
+
+________________________________________
+15. Procédures de maintenance et mises à jour
+________________________________________
+15.1 Mise à jour des dépendances
+```bash
+# Vérifier les mises à jour disponibles
+npm outdated
+
+# Mettre à jour Angular/Ionic
+ng update @angular/core @angular/cli
+ng update @ionic/angular
+
+# Mettre à jour les autres dépendances
+npm update
+
+# Vérifier la compatibilité après mise à jour
+npm run test
+npm run build
+```
+
+15.2 Déploiement et configuration
+```bash
+# Build de production
+npm run build
+
+# Test local du build
+ionic serve --prod
+
+# Déploiement Firebase
+firebase deploy
+
+# Configuration des variables d'environnement
+# Vérifier environment.ts et environment.prod.ts
+```
+
+15.3 Monitoring et logs
+```typescript
+// Ajout de logs structurés
+console.log('[Trips] Action effectuée:', {
+  action: 'loadTrips',
+  userId: this.userId,
+  timestamp: new Date().toISOString(),
+  result: 'success'
+});
+
+// Gestion des erreurs avec contexte
+console.error('[Trips] Erreur:', {
+  action: 'loadTrips',
+  userId: this.userId,
+  error: err.message,
+  stack: err.stack
+});
+```
+
+________________________________________
+16. Guide de contribution et workflow Git
+________________________________________
+16.1 Workflow de développement
+```bash
+# 1. Créer une branche pour la fonctionnalité
+git checkout -b feature/nom-de-la-fonctionnalite
+
+# 2. Développer et tester
+# - Suivre les conventions de code
+# - Ajouter des tests si nécessaire
+# - Documenter les changements
+
+# 3. Commiter avec un message descriptif
+git add .
+git commit -m "feat: ajouter gestion du cache local pour les voyages
+
+- Implémentation du cache avec Ionic Storage
+- Fallback automatique en cas d'erreur réseau
+- Tests de robustesse ajoutés"
+
+# 4. Pousser et créer une pull request
+git push origin feature/nom-de-la-fonctionnalite
+```
+
+16.2 Conventions de code
+- **Noms de fichiers** : kebab-case (ex: `trips.page.ts`)
+- **Noms de classes** : PascalCase (ex: `TripsPage`)
+- **Noms de méthodes** : camelCase (ex: `loadTrips`)
+- **Constantes** : UPPER_SNAKE_CASE (ex: `MAX_CACHE_AGE`)
+- **Interfaces** : PascalCase avec préfixe I optionnel (ex: `UserRole`)
+
+16.3 Messages de commit
+- **feat** : nouvelle fonctionnalité
+- **fix** : correction de bug
+- **docs** : documentation
+- **style** : formatage, point-virgules manquants, etc.
+- **refactor** : refactorisation du code
+- **test** : ajout ou modification de tests
+- **chore** : mise à jour de build, dépendances, etc.
+
+16.4 Checklist avant commit
+- [ ] Code fonctionne et passe les tests
+- [ ] Documentation mise à jour si nécessaire
+- [ ] Fichiers de suivi mis à jour (CHANGES.md, DONE_TRIPS.md)
+- [ ] Messages d'erreur traduits
+- [ ] Gestion des cas d'erreur
+- [ ] Respect des conventions de code

@@ -1,0 +1,25 @@
+{
+  "name": "BOBICONICNEW",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular",
+  "framework": "@angular",
+  "serve": {
+    "browser": "chrome",
+    "browserOption": "--disable-web-security",
+    "host": "localhost",
+    "port": 8100,
+    "liveReload": true,
+    "open": false,
+    "ssl": false,
+    "proxyUrl": null,
+    "devServer": {
+      "host": "localhost",
+      "port": 8100,
+      "open": false,
+      "liveReload": true,
+      "ssl": false
+    }
+  }
+}

@@ -1,0 +1,803 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      {{ 'WINDOW.TITLE' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Section voyage en cours -->
+  <div *ngIf="hasOngoingTrip && ongoingTripInfo" class="ongoing-trip-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="airplane-outline" color="primary"></ion-icon>
+          {{ 'WINDOW.ONGOING_TRIP.TITLE' | translate }}
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="ongoing-trip-info">
+          <h3>{{ ongoingTripInfo.title }}</h3>
+          <p class="trip-dates">
+            {{ ongoingTripInfo.startDate | date:'shortDate' }} - {{ ongoingTripInfo.endDate | date:'shortDate' }}
+          </p>
+          <p class="trip-status">
+            <ion-badge color="success">{{ 'WINDOW.ONGOING_TRIP.STATUS' | translate }}</ion-badge>
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Onglets pour les différentes vues -->
+  <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange($event)" *ngIf="flightInfo">
+    <ion-segment-button value="info">
+      <ion-label>Informations</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="map">
+      <ion-label>Carte</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="hublot">
+      <ion-label>Hublot</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pois">
+      <ion-label>🗺️ POIs</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- DEBUG: Affichage du vol en cours -->
+  <div *ngIf="callsign" class="debug-flight-info" style="background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 8px; border: 2px solid #2196f3;">
+    <h4 style="color: #1976d2; margin: 0 0 5px 0;">🔍 DEBUG - Vol en cours détecté :</h4>
+    <p style="margin: 5px 0; font-weight: bold; color: #d32f2f;">Numéro de vol: {{ callsign }}</p>
+    <p style="margin: 5px 0;">Compagnie: {{ flightInfo?.airline || 'Non définie' }}</p>
+    <p style="margin: 5px 0;">Départ: {{ flightInfo?.departure || 'Non défini' }}</p>
+    <p style="margin: 5px 0;">Arrivée: {{ flightInfo?.arrival || 'Non définie' }}</p>
+  </div>
+
+  <!-- SLIDER DE TEST - TOUJOURS VISIBLE -->
+  <div class="test-slider-container" style="background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 8px; border: 2px solid #ffc107;">
+    <h4 style="color: #856404; margin: 0 0 10px 0;">🧪 TEST - Slider de progression (toujours visible)</h4>
+    <ion-item>
+      <ion-label>Progression du vol (TEST)</ion-label>
+      <ion-range
+        [(ngModel)]="currentPercent"
+        (ionChange)="onProgressChange($event)"
+        min="0"
+        max="100"
+        step="1"
+        class="progress-slider">
+        <ion-label slot="start">0%</ion-label>
+        <ion-label slot="end">100%</ion-label>
+      </ion-range>
+    </ion-item>
+    <div style="margin-top: 10px;">
+      <strong>Valeur actuelle : {{ currentPercent }}%</strong>
+      <span style="margin-left: 15px;">
+        <span *ngIf="currentPercent < 25" style="color: #4CAF50;">🛫 Départ</span>
+        <span *ngIf="currentPercent >= 25 && currentPercent < 75" style="color: #2196F3;">✈️ En vol</span>
+        <span *ngIf="currentPercent >= 75" style="color: #FF9800;">🛬 Approche</span>
+      </span>
+    </div>
+    <div style="margin-top: 10px;">
+      <ion-button size="small" (click)="forceInitializeMap()" color="primary">
+        🔄 Forcer l'initialisation de la carte
+      </ion-button>
+      <ion-button size="small" (click)="debugMapStatus()" color="secondary" style="margin-left: 10px;">
+        🔍 Debug carte
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Section de recherche -->
+  <div class="search-container">
+    <!-- Barre de recherche - affichée si pas de voyage en cours OU en mode démo -->
+    <div *ngIf="!hasOngoingTrip || (isDemoUser && showManualSearch)" class="window-header-bar">
+      <ion-input
+        class="window-callsign-input"
+        [(ngModel)]="callsign"
+        [placeholder]="'WINDOW.SEARCH.PLACEHOLDER' | translate"
+        (keyup.enter)="searchFlight()"
+        maxlength="10"
+      ></ion-input>
+      <span *ngIf="callsign.length > 8" class="window-callsign-span">{{ callsign }}</span>
+      <span class="window-date" *ngIf="flightInfo && flightInfo.flightDate">• {{ flightInfo.flightDate | date:dateFormat:undefined:locale }}</span>
+      <ion-button class="window-search-btn" (click)="searchFlight()" [disabled]="loading">
+        {{ 'WINDOW.SEARCH.BUTTON' | translate }}
+      </ion-button>
+    </div>
+
+    <!-- Message pour mode démo avec voyage en cours -->
+    <div *ngIf="hasOngoingTrip && isDemoUser && !showManualSearch" class="demo-info-container">
+      <ion-card>
+        <ion-card-content>
+          <div class="demo-info-content">
+            <ion-icon name="information-circle-outline" class="demo-icon"></ion-icon>
+            <div class="demo-text">
+              <p>{{ 'WINDOW.DEMO.ONGOING_TRIP_INFO' | translate }}</p>
+            </div>
+            <ion-button fill="clear" (click)="showManualSearch = true" class="demo-button">
+              {{ 'WINDOW.DEMO.SEARCH_OTHER' | translate }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Section de restauration des données précédentes -->
+    <div *ngIf="hasPreviousData() && !flightInfo && !loading && (!hasOngoingTrip || isDemoUser)" class="restore-data-container">
+      <ion-card>
+        <ion-card-content>
+          <div class="restore-data-content">
+            <ion-icon name="refresh-outline" class="restore-icon"></ion-icon>
+            <div class="restore-text">
+              <p>{{ 'WINDOW.RESTORE.PREVIOUS_DATA' | translate }}</p>
+              <p class="restore-callsign">{{ getSavedCallsign() }}</p>
+            </div>
+            <ion-button fill="clear" (click)="restorePreviousData()" class="restore-button">
+              {{ 'WINDOW.RESTORE.BUTTON' | translate }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error | translate }}
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ 'WINDOW.SEARCH.LOADING' | translate }}</p>
+    </div>
+
+    <!-- Onglet Informations -->
+    <div *ngIf="flightInfo && selectedTab === 'info'" class="flight-info">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Informations du vol</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item *ngIf="flightInfo.photoUrl">
+              <img [src]="flightInfo.photoUrl" alt="Photo avion" style="max-width:100%; margin:auto; display:block;">
+            </ion-item>
+            <ion-item>
+              <ion-label>Numéro de vol</ion-label>
+              <ion-note slot="end">{{ flightInfo.flightNumber || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.callsign">
+              <ion-label>Callsign</ion-label>
+              <ion-note slot="end">{{ flightInfo.callsign }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Compagnie</ion-label>
+              <ion-note slot="end">{{ flightInfo.airline || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Type avion</ion-label>
+              <ion-note slot="end">{{ flightInfo.aircraft || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.registration">
+              <ion-label>Immatriculation</ion-label>
+              <ion-note slot="end">{{ flightInfo.registration }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Départ</ion-label>
+              <ion-note slot="end">
+                {{ flightInfo.departure || 'Non renseigné' }}
+                <span *ngIf="flightInfo.originIata"> ({{ flightInfo.originIata }})</span>
+                <span *ngIf="flightInfo.originCity"> - {{ flightInfo.originCity }}</span>
+                <span *ngIf="flightInfo.originCountry">, {{ flightInfo.originCountry }}</span>
+              </ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.originTimezone">
+              <ion-label>Fuseau départ</ion-label>
+              <ion-note slot="end">{{ flightInfo.originTimezone }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Arrivée</ion-label>
+              <ion-note slot="end">
+                {{ flightInfo.arrival || 'Non renseigné' }}
+                <span *ngIf="flightInfo.destinationIata"> ({{ flightInfo.destinationIata }})</span>
+                <span *ngIf="flightInfo.destinationCity"> - {{ flightInfo.destinationCity }}</span>
+                <span *ngIf="flightInfo.destinationCountry">, {{ flightInfo.destinationCountry }}</span>
+              </ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.destinationTimezone">
+              <ion-label>Fuseau arrivée</ion-label>
+              <ion-note slot="end">{{ flightInfo.destinationTimezone }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.departureTerminal">
+              <ion-label>Terminal départ</ion-label>
+              <ion-note slot="end">{{ flightInfo.departureTerminal }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.departureGate">
+              <ion-label>Porte départ</ion-label>
+              <ion-note slot="end">{{ flightInfo.departureGate }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.arrivalTerminal">
+              <ion-label>Terminal arrivée</ion-label>
+              <ion-note slot="end">{{ flightInfo.arrivalTerminal }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.arrivalGate">
+              <ion-label>Porte arrivée</ion-label>
+              <ion-note slot="end">{{ flightInfo.arrivalGate }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.scheduledDeparture">
+              <ion-label>Heure prévue départ (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.scheduledDeparture }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.realDeparture">
+              <ion-label>Heure réelle départ (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.realDeparture }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.scheduledArrival">
+              <ion-label>Heure prévue arrivée (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.scheduledArrival }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.realArrival">
+              <ion-label>Heure réelle arrivée (local)</ion-label>
+              <ion-note slot="end">{{ flightInfo.realArrival }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.duration">
+              <ion-label>Durée</ion-label>
+              <ion-note slot="end">{{ flightInfo.duration }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Statut</ion-label>
+              <ion-note slot="end">{{ flightInfo.statusText || flightInfo.status || 'Non renseigné' }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.delay">
+              <ion-label>Retard</ion-label>
+              <ion-note slot="end">{{ flightInfo.delay }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.distance">
+              <ion-label>Distance</ion-label>
+              <ion-note slot="end">{{ flightInfo.distance }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.altitude">
+              <ion-label>Altitude</ion-label>
+              <ion-note slot="end">{{ flightInfo.altitude }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.speed">
+              <ion-label>Vitesse</ion-label>
+              <ion-note slot="end">{{ flightInfo.speed }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.seat">
+              <ion-label>Siège</ion-label>
+              <ion-note slot="end">{{ flightInfo.seat }}</ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo.baggage">
+              <ion-label>Bagages</ion-label>
+              <ion-note slot="end">{{ flightInfo.baggage }}</ion-note>
+            </ion-item>
+            
+            <!-- Slider de progression du vol -->
+            <ion-item>
+              <ion-label>Progression du vol</ion-label>
+              <ion-range
+                [(ngModel)]="currentPercent"
+                (ionChange)="onProgressChange($event)"
+                min="0"
+                max="100"
+                step="1"
+                class="progress-slider">
+                <ion-label slot="start">0%</ion-label>
+                <ion-label slot="end">100%</ion-label>
+              </ion-range>
+            </ion-item>
+            <ion-item>
+              <ion-label>Statut du vol</ion-label>
+              <ion-note slot="end">
+                <span *ngIf="currentPercent < 25" style="color: #4CAF50;">Départ</span>
+                <span *ngIf="currentPercent >= 25 && currentPercent < 75" style="color: #2196F3;">En vol</span>
+                <span *ngIf="currentPercent >= 75" style="color: #FF9800;">Approche</span>
+              </ion-note>
+            </ion-item>
+            <ion-item *ngIf="flightInfo">
+              <ion-label>Météo à l'arrivée</ion-label>
+              <ion-note slot="end" style="width:100%;">
+                <ng-container *ngIf="flightInfo.arrivalWeather && (flightInfo.arrivalWeather.temperature !== undefined || flightInfo.arrivalWeather.weather)">
+                  <div class="weather-main">
+                    <span class="weather-icon" [innerHTML]="getWeatherEmoji(flightInfo.arrivalWeather.weather)"></span>
+                    <span class="weather-temp">{{ flightInfo.arrivalWeather.temperature !== undefined ? flightInfo.arrivalWeather.temperature + '°C' : '?' }}</span>
+                  </div>
+                  <div class="weather-desc">{{ getWeatherDesc(flightInfo.arrivalWeather.weather) }}</div>
+                  <div class="weather-details">
+                    <span *ngIf="flightInfo.arrivalWeather.wind">💨 {{ formatWind(flightInfo.arrivalWeather.wind) }}</span>
+                    <span *ngIf="flightInfo.arrivalWeather.pressure">🔽 {{ flightInfo.arrivalWeather.pressure }} hPa</span>
+                    <span *ngIf="flightInfo.arrivalWeather.dewpoint">💧 {{ flightInfo.arrivalWeather.dewpoint }}°C</span>
+                    <span *ngIf="flightInfo.arrivalWeather.time">🕒 {{ flightInfo.arrivalWeather.time | date:'short' }}</span>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="!flightInfo.arrivalWeather || (flightInfo.arrivalWeather && flightInfo.arrivalWeather.temperature === undefined && !flightInfo.arrivalWeather.weather)">
+                  <span style="color: #888;">Aucune donnée météo disponible</span>
+                </ng-container>
+              </ion-note>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Onglet Carte -->
+    <div *ngIf="flightInfo && selectedTab === 'map'" class="map-container">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="map-outline" color="primary"></ion-icon>
+            Carte du vol
+          </ion-card-title>
+          <ion-card-subtitle>
+            {{ flightInfo.departure }} → {{ flightInfo.arrival }}
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <!-- Conteneur de la carte -->
+          <div class="map-wrapper">
+            <div id="flight-map" class="flight-map"></div>
+            
+            <!-- Contrôles de la carte -->
+            <div class="map-controls">
+              <!-- Slider de progression -->
+              <div class="progress-slider-container">
+                <ion-label>Progression du vol</ion-label>
+                <ion-range
+                  [(ngModel)]="currentPercent"
+                  (ionChange)="onProgressChange($event)"
+                  min="0"
+                  max="100"
+                  step="1"
+                  class="progress-slider">
+                  <ion-label slot="start">0%</ion-label>
+                  <ion-label slot="end">100%</ion-label>
+                </ion-range>
+                <div class="progress-info">
+                  <span class="progress-percent">{{ currentPercent | number:'1.0-0' }}%</span>
+                  <span class="progress-status">
+                    <span *ngIf="currentPercent < 25">Départ</span>
+                    <span *ngIf="currentPercent >= 25 && currentPercent < 75">En vol</span>
+                    <span *ngIf="currentPercent >= 75">Approche</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Informations de vol en temps réel -->
+              <div class="flight-status-info">
+                <div class="status-item">
+                  <ion-icon name="time-outline"></ion-icon>
+                  <span>Durée: {{ flightInfo.duration || 'N/A' }}</span>
+                </div>
+                <div class="status-item" *ngIf="flightInfo.distance">
+                  <ion-icon name="resize-outline"></ion-icon>
+                  <span>Distance: {{ flightInfo.distance }}</span>
+                </div>
+                <div class="status-item" *ngIf="flightInfo.altitude">
+                  <ion-icon name="trending-up-outline"></ion-icon>
+                  <span>Altitude: {{ flightInfo.altitude }}</span>
+                </div>
+                <div class="status-item" *ngIf="flightInfo.speed">
+                  <ion-icon name="speedometer-outline"></ion-icon>
+                  <span>Vitesse: {{ flightInfo.speed }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Onglet Hublot -->
+    <div *ngIf="flightInfo && selectedTab === 'hublot'" class="hublot-container">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="eye-outline" color="primary"></ion-icon>
+            Vue depuis les hublots
+          </ion-card-title>
+          <ion-card-subtitle>
+            Altitude: {{ getCurrentAltitude() | number:'1.0-0' }} ft | Progression: {{ currentPercent }}%
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="hublots-container">
+            <!-- Slider de progression à côté des hublots -->
+            <div class="progression-controls">
+              <ion-label>Progression du vol</ion-label>
+              <ion-range 
+                [(ngModel)]="currentPercent" 
+                (ionChange)="onProgressChange($event)"
+                min="0" 
+                max="100" 
+                step="1"
+                color="primary"
+                class="custom-range">
+                <ion-label slot="start">0%</ion-label>
+                <ion-label slot="end">100%</ion-label>
+              </ion-range>
+              <div class="progression-info">
+                <span>{{ currentPercent }}%</span>
+                <span>{{ getCurrentTime() }}</span>
+              </div>
+            </div>
+            
+            <div class="hublots-row">
+              <div class="hublot-item">
+                <h4>👈 Hublot gauche</h4>
+                <app-window-hublot
+                  [lat]="getHublotLat('left')"
+                  [lon]="getHublotLon('left')"
+                  [altitude]="getCurrentAltitude()"
+                  [side]="'left'">
+                </app-window-hublot>
+              </div>
+              <div class="hublot-item">
+                <h4>👉 Hublot droit</h4>
+                <app-window-hublot
+                  [lat]="getHublotLat('right')"
+                  [lon]="getHublotLon('right')"
+                  [altitude]="getCurrentAltitude()"
+                  [side]="'right'">
+                </app-window-hublot>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Contenu de l'onglet POIs -->
+    <div *ngIf="selectedTab === 'pois'">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Points d'Intérêt Visibles</ion-card-title>
+          <ion-card-subtitle>
+            {{ currentPOIs.length }} POI(s) visible(s) - Progression: {{ currentPercent }}%
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="pois-container">
+            <!-- POIs à gauche -->
+            <div class="pois-side">
+              <h3>👈 À gauche ({{ visiblePOIsLeft.length }})</h3>
+              <div class="pois-list" *ngIf="visiblePOIsLeft.length > 0; else noPoisLeft">
+                <ion-item *ngFor="let poiVisibility of visiblePOIsLeft" class="poi-item">
+                  <ion-thumbnail slot="start">
+                    <div class="poi-icon" [style.background-color]="getPOIColor(poiVisibility.poi.type)">
+                      {{ getPOIIcon(poiVisibility.poi.type) }}
+                    </div>
+                  </ion-thumbnail>
+                  <ion-label>
+                    <h3 [style.color]="poiVisibility.isVisible ? getPOIColor(poiVisibility.poi.type) : '#666'">
+                      {{ poiVisibility.poi.name }}
+                      <span *ngIf="poiVisibility.isVisible" class="visible-badge">👁️ Visible</span>
+                    </h3>
+                    <p>{{ poiVisibility.poi.description }}</p>
+                    <div class="poi-details">
+                      <span class="detail-item">
+                        📏 {{ formatDistance(poiVisibility.distance) }}
+                      </span>
+                      <span class="detail-item">
+                        📐 {{ formatElevation(poiVisibility.elevationAngle) }}
+                      </span>
+                      <span class="detail-item">
+                        🏔️ {{ poiVisibility.poi.altitude || 0 }}m
+                      </span>
+                    </div>
+                  </ion-label>
+                  <ion-button slot="end" fill="clear" (click)="openPOIWiki(poiVisibility.poi)">
+                    📖
+                  </ion-button>
+                </ion-item>
+              </div>
+              <ng-template #noPoisLeft>
+                <div class="no-pois">
+                  <p>Aucun POI visible à gauche</p>
+                </div>
+              </ng-template>
+            </div>
+
+            <!-- POIs à droite -->
+            <div class="pois-side">
+              <h3>👉 À droite ({{ visiblePOIsRight.length }})</h3>
+              <div class="pois-list" *ngIf="visiblePOIsRight.length > 0; else noPoisRight">
+                <ion-item *ngFor="let poiVisibility of visiblePOIsRight" class="poi-item">
+                  <ion-thumbnail slot="start">
+                    <div class="poi-icon" [style.background-color]="getPOIColor(poiVisibility.poi.type)">
+                      {{ getPOIIcon(poiVisibility.poi.type) }}
+                    </div>
+                  </ion-thumbnail>
+                  <ion-label>
+                    <h3 [style.color]="poiVisibility.isVisible ? getPOIColor(poiVisibility.poi.type) : '#666'">
+                      {{ poiVisibility.poi.name }}
+                      <span *ngIf="poiVisibility.isVisible" class="visible-badge">👁️ Visible</span>
+                    </h3>
+                    <p>{{ poiVisibility.poi.description }}</p>
+                    <div class="poi-details">
+                      <span class="detail-item">
+                        📏 {{ formatDistance(poiVisibility.distance) }}
+                      </span>
+                      <span class="detail-item">
+                        📐 {{ formatElevation(poiVisibility.elevationAngle) }}
+                      </span>
+                      <span class="detail-item">
+                        🏔️ {{ poiVisibility.poi.altitude || 0 }}m
+                      </span>
+                    </div>
+                  </ion-label>
+                  <ion-button slot="end" fill="clear" (click)="openPOIWiki(poiVisibility.poi)">
+                    📖
+                  </ion-button>
+                </ion-item>
+              </div>
+              <ng-template #noPoisRight>
+                <div class="no-pois">
+                  <p>Aucun POI visible à droite</p>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
+
+<script>
+  // Détecte la langue utilisateur pour Angular (si besoin)
+  window.locale = navigator.language || navigator.userLanguage || 'fr';
+</script>
+
+<style>
+.window-header-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #1a237e;
+  background: #f5f7fa;
+  border-radius: 1em;
+  margin: 1em auto 1em auto;
+  padding: 0.5em 1.5em;
+  max-width: 900px;
+  box-shadow: 0 2px 8px #0001;
+  letter-spacing: 0.03em;
+}
+.window-callsign-input {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-transform: uppercase;
+  width: 110px;
+  min-width: 80px;
+  max-width: 140px;
+  margin-right: 1em;
+}
+.window-date {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: #1976d2;
+  margin-left: 0.7em;
+  margin-right: 0.7em;
+  white-space: nowrap;
+}
+.window-search-btn {
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-left: 1em;
+}
+@media (max-width: 600px) {
+  .window-header-bar {
+    flex-direction: column;
+    font-size: 1.1em;
+    padding: 0.5em 0.5em;
+  }
+  .window-callsign-input, .window-date, .window-search-btn {
+    margin: 0.2em 0;
+  }
+}
+.weather-card {
+  background: linear-gradient(120deg, #e3f2fd 60%, #bbdefb 100%);
+  border-radius: 1em;
+  padding: 1em 1.5em;
+  box-shadow: 0 2px 8px #0002;
+  margin: 0.5em 0;
+  text-align: center;
+}
+.weather-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2em;
+  font-weight: bold;
+  margin-bottom: 0.2em;
+}
+.weather-icon {
+  font-size: 2.2em;
+  margin-right: 0.3em;
+}
+.weather-temp {
+  font-size: 2.2em;
+  font-weight: bold;
+}
+.weather-desc {
+  font-size: 1.1em;
+  color: #1976d2;
+  margin-bottom: 0.3em;
+}
+.weather-details {
+  font-size: 1em;
+  color: #333;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2em;
+  justify-content: center;
+  margin-bottom: 0.2em;
+}
+.weather-raw {
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 0.5em;
+}
+
+/* Styles pour l'onglet Carte */
+.map-container {
+  margin-top: 16px;
+}
+
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.flight-map {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  color: #1976d2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Styles pour les marqueurs Leaflet */
+.plane-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.airport-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Amélioration des popups Leaflet */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+  font-family: inherit;
+}
+
+.leaflet-popup-tip {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.map-controls {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.progress-slider-container {
+  margin-bottom: 20px;
+}
+
+.progress-slider-container ion-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.progress-slider {
+  --bar-background: #e9ecef;
+  --bar-background-active: #007bff;
+  --knob-background: #007bff;
+  --pin-background: #007bff;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.progress-percent {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.progress-status {
+  font-size: 0.9em;
+  color: #6c757d;
+  padding: 4px 8px;
+  background: #e9ecef;
+  border-radius: 12px;
+}
+
+.flight-status-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  font-size: 0.9em;
+}
+
+.status-item ion-icon {
+  color: #007bff;
+  font-size: 1.1em;
+}
+
+/* Styles pour l'onglet Hublot */
+.hublot-container {
+  margin-top: 16px;
+}
+
+.hublot-view {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .map-wrapper {
+    height: 300px;
+  }
+  
+  .flight-status-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .progress-info {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}
+</style> 
