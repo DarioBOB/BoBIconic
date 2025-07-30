@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/games"></ion-back-button>
+    </ion-buttons>
+    <ion-title>4096</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="restart()">
+        🔄
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="game-container">
+  <!-- Scores -->
+  <div class="scores-container">
+    <div class="score-card">
+      <h3>Score</h3>
+      <p>{{ score }}</p>
+    </div>
+    <div class="score-card">
+      <h3>Meilleur</h3>
+      <p>{{ bestScore }}</p>
+    </div>
+  </div>
+
+  <!-- Grille de jeu -->
+  <div class="board-container">
+    <div class="board">
+      <div *ngFor="let tile of getFlattenedBoard(); let i = index" 
+           class="tile"
+           [class.tile-empty]="tile === 0"
+           [class.tile-2]="tile === 2"
+           [class.tile-4]="tile === 4"
+           [class.tile-8]="tile === 8"
+           [class.tile-16]="tile === 16"
+           [class.tile-32]="tile === 32"
+           [class.tile-64]="tile === 64"
+           [class.tile-128]="tile === 128"
+           [class.tile-256]="tile === 256"
+           [class.tile-512]="tile === 512"
+           [class.tile-1024]="tile === 1024"
+           [class.tile-2048]="tile === 2048"
+           [class.tile-4096]="tile === 4096">
+        {{ tile > 0 ? tile : '' }}
+      </div>
+    </div>
+  </div>
+  
+
+
+
+</ion-content>
+
+<!-- Modal de victoire -->
+<ion-modal [isOpen]="won" [backdropDismiss]="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>🎉 Félicitations !</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="modal-content">
+      <div class="victory-message">
+        <h2>Vous avez atteint 4096 !</h2>
+        <p>Score final : {{ score }}</p>
+        <div class="modal-buttons">
+          <ion-button fill="outline" (click)="continueGame()">
+            Continuer
+          </ion-button>
+          <ion-button (click)="restart()">
+            Nouvelle partie
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal de fin de partie -->
+<ion-modal [isOpen]="gameOver" [backdropDismiss]="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Game Over</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="modal-content">
+      <div class="gameover-message">
+        <h2>Partie terminée</h2>
+        <p>Score final : {{ score }}</p>
+        <p>Meilleur score : {{ bestScore }}</p>
+        <div class="modal-buttons">
+          <ion-button (click)="restart()">
+            Nouvelle partie
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal> 

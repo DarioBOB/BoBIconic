@@ -1,0 +1,21 @@
+{
+  "TRIPS": {
+    "NO_TRIPS_FOUND": "No trips found for this user.",
+    "UNTITLED": "Untitled trip",
+    "TITLE": "My Trips",
+    "SUBTITLE": "All your trips, past, present, and future.",
+    "ONGOING": "Ongoing",
+    "UPCOMING": "Upcoming",
+    "PAST": "Past",
+    "ERROR_TITLE": "Error loading trips",
+    "NO_ONGOING": "No ongoing trips",
+    "NO_UPCOMING": "No upcoming trips",
+    "NO_PAST": "No past trips",
+    "NO_ONGOING_DESC": "You have no ongoing trips. Start a new one!",
+    "NO_UPCOMING_DESC": "No upcoming trips are planned. Add one!",
+    "NO_PAST_DESC": "No past trips recorded.",
+    "STATUS_ONGOING": "Ongoing",
+    "STATUS_UPCOMING": "Upcoming",
+    "STATUS_PAST": "Completed"
+  }
+} 

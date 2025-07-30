@@ -1,0 +1,155 @@
+<ion-header>
+  <app-user-status-bar title="Support & Tickets"></app-user-status-bar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="support-container">
+  <!-- En-tête avec statistiques -->
+  <div class="support-header">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-content">
+          <h3>Total Tickets</h3>
+          <p>{{ statistics.total }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-content">
+          <h3>Ouverts</h3>
+          <p>{{ statistics.open }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-content">
+          <h3>En Cours</h3>
+          <p>{{ statistics.inProgress }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <h3>Résolus</h3>
+          <p>{{ statistics.resolved }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de recherche et filtres -->
+  <div class="search-section">
+    <ion-searchbar 
+      [(ngModel)]="searchTerm" 
+      placeholder="Rechercher un ticket..."
+      (ionInput)="filterTickets()"
+      class="search-bar">
+    </ion-searchbar>
+    
+    <div class="filter-chips">
+      <ion-chip 
+        *ngFor="let status of statusOptions" 
+        [class.active]="selectedStatus === status.value"
+        (click)="selectStatus(status.value)"
+        [style.--ion-color-primary]="getStatusColor(status.value)">
+        <ion-icon [name]="status.icon"></ion-icon>
+        <ion-label>{{ status.label }}</ion-label>
+      </ion-chip>
+    </div>
+  </div>
+
+  <!-- Boutons d'action -->
+  <div class="action-buttons">
+    <ion-button expand="block" (click)="createNewTicket()" class="create-btn">
+      <ion-icon name="add" slot="start"></ion-icon>
+      Créer un Ticket
+    </ion-button>
+    <ion-button expand="block" fill="outline" (click)="viewMyTickets()" class="my-tickets-btn">
+      <ion-icon name="list" slot="start"></ion-icon>
+      Mes Tickets
+    </ion-button>
+  </div>
+
+  <!-- Liste des tickets -->
+  <div class="tickets-list" *ngIf="filteredTickets.length > 0">
+    <div 
+      *ngFor="let ticket of filteredTickets; trackBy: trackByTicket" 
+      class="ticket-card"
+      [class.urgent]="ticket.priority === 'urgent'"
+      (click)="viewTicket(ticket)">
+      
+      <div class="ticket-header">
+        <div class="ticket-title">
+          <h3>{{ ticket.title }}</h3>
+          <div class="ticket-meta">
+            <span class="ticket-id">#{{ ticket.id }}</span>
+            <span class="ticket-date">{{ supportService.formatDate(ticket.createdAt) }}</span>
+          </div>
+        </div>
+        <div class="ticket-badges">
+          <ion-badge [color]="supportService.getCategoryColor(ticket.category)" class="category-badge">
+            {{ supportService.getCategoryLabel(ticket.category) }}
+          </ion-badge>
+          <ion-badge [color]="supportService.getPriorityColor(ticket.priority)" class="priority-badge">
+            {{ supportService.getPriorityLabel(ticket.priority) }}
+          </ion-badge>
+          <ion-badge [color]="supportService.getStatusColor(ticket.status)" class="status-badge">
+            {{ supportService.getStatusLabel(ticket.status) }}
+          </ion-badge>
+        </div>
+      </div>
+      
+      <div class="ticket-content">
+        <p class="ticket-description">{{ getShortDescription(ticket.description) }}</p>
+        
+        <div class="ticket-info">
+          <div class="user-info">
+            <ion-icon name="person" color="medium"></ion-icon>
+            <span>{{ ticket.userName }}</span>
+          </div>
+          
+          <div class="attachments-info" *ngIf="ticket.attachments.length > 0">
+            <ion-icon name="attach" color="primary"></ion-icon>
+            <span>{{ ticket.attachments.length }} pièce(s) jointe(s)</span>
+          </div>
+          
+          <div class="tags-info" *ngIf="ticket.tags.length > 0">
+            <ion-chip *ngFor="let tag of ticket.tags.slice(0, 3)" size="small">
+              <ion-label>{{ tag }}</ion-label>
+            </ion-chip>
+            <span *ngIf="ticket.tags.length > 3" class="more-tags">+{{ ticket.tags.length - 3 }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="ticket-footer" *ngIf="ticket.assignedTo">
+        <div class="assigned-info">
+          <ion-icon name="person-circle" color="secondary"></ion-icon>
+          <span>Assigné à {{ ticket.assignedToName }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div class="empty-state" *ngIf="filteredTickets.length === 0 && !isLoading">
+    <div class="empty-icon">📝</div>
+    <h2>Aucun ticket trouvé</h2>
+    <p *ngIf="searchTerm || selectedStatus">
+      Aucun ticket ne correspond à vos critères de recherche.
+    </p>
+    <p *ngIf="!searchTerm && !selectedStatus">
+      Aucun ticket n'a encore été créé. Commencez par créer votre premier ticket !
+    </p>
+    <ion-button (click)="createNewTicket()" fill="outline">
+      <ion-icon name="add" slot="start"></ion-icon>
+      Créer un Ticket
+    </ion-button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement des tickets...</p>
+  </div>
+</ion-content> 

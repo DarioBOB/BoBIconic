@@ -1,0 +1,166 @@
+{
+  "LANDING": {
+    "TILES": {
+      "TRIPS": "Voyages",
+      "WINDOW": "Ma Fenêtre",
+      "WINDOW2": "Ma Fenêtre 3D",
+      "CHAT": "Chat",
+      "BOBBERS": "Bobbers",
+    "GAMES": "Jeux",
+      "GAMES": "Jeux",
+      "NOTIFICATIONS": "Notifications",
+      "DOCUMENTS": "Documents",
+      "SUPPORT": "Support",
+      "PREFERENCES": "Préférences",
+      "IN_PROGRESS": "En cours"
+    }
+  },
+  "WINDOW": {
+    "TITLE": "Mon Voyage par ma Fenêtre",
+    "TEXT_DATA": "Données",
+    "MAP": "Carte",
+    "HUBLOT": "Hublot",
+    "SEARCH": {
+      "PLACEHOLDER": "Entrez un numéro de vol (ex: LX1820)",
+      "BUTTON": "Rechercher",
+      "LOADING": "Recherche en cours...",
+      "ERROR": "Erreur lors de la recherche",
+      "NO_RESULTS": "Aucun vol trouvé",
+      "ERRORS": {
+        "EMPTY_CALLSIGN": "Veuillez saisir un numéro de vol",
+        "API_ERROR": "Erreur lors de la recherche"
+      }
+    },
+    "FLIGHT_INFO": {
+      "TITLE": "Informations du vol",
+      "FLIGHT_NUMBER": "Numéro de vol",
+      "AIRLINE": "Compagnie aérienne",
+      "AIRCRAFT": "Type d'avion",
+      "DEPARTURE": "Départ",
+      "ARRIVAL": "Arrivée",
+      "SCHEDULED_TIME": "Horaire prévu",
+      "ACTUAL_TIME": "Horaire réel",
+      "STATUS": "Statut",
+      "ALTITUDE": "Altitude",
+      "SPEED": "Vitesse",
+      "WEATHER": "Météo",
+      "TIME_REMAINING": "Temps restant"
+    },
+    "STATUS": {
+      "SCHEDULED": "Prévu",
+      "ACTIVE": "En vol",
+      "LANDED": "Atterri",
+      "CANCELLED": "Annulé",
+      "DIVERTED": "Dérouté",
+      "UNKNOWN": "Inconnu"
+    },
+    "POIS": {
+      "GENEVA": {
+        "TITLE": "Genève",
+        "DESCRIPTION": "Point de départ"
+      },
+      "MILAN": {
+        "TITLE": "Milan",
+        "DESCRIPTION": "Première étape"
+      },
+      "ROME": {
+        "TITLE": "Rome",
+        "DESCRIPTION": "Deuxième étape"
+      },
+      "ATHENS": {
+        "TITLE": "Athènes",
+        "DESCRIPTION": "Point d'arrivée"
+      }
+    },
+    "PROGRESS": {
+      "CURRENT_POSITION": "Position actuelle",
+      "APPROACHING_MILAN": "Approche de Milan",
+      "APPROACHING_ROME": "Approche de Rome",
+      "APPROACHING_ATHENS": "Approche d'Athènes",
+      "FINAL_APPROACH": "Approche finale d'Athènes"
+    },
+    "NO_FLIGHT_FOUND": "Aucun vol trouvé sur les 8 derniers jours.",
+    "NO_FLIGHT_AIRLINE": "Non trouvé",
+    "ERROR_FR24": "Erreur lors de la récupération des données du serveur FR24.",
+    "ERROR_PHOTO": "Erreur lors de la récupération de la photo de l'avion.",
+    "ERROR_METAR": "Erreur lors de la récupération de la météo d'arrivée.",
+    "ERROR_UNKNOWN": "Erreur inconnue. Veuillez réessayer plus tard.",
+    "RESTORE": {
+      "PREVIOUS_DATA": "Données précédentes disponibles",
+      "BUTTON": "Restaurer"
+    },
+    "ONGOING_TRIP": {
+      "TITLE": "Voyage en cours",
+      "STATUS": "En cours"
+    },
+    "DEMO": {
+      "ONGOING_TRIP_INFO": "Votre voyage en cours est affiché. Vous pouvez également rechercher d'autres vols.",
+      "SEARCH_OTHER": "Rechercher un autre vol"
+    }
+  },
+  "TRIPS": {
+    "TITLE": "Mes Voyages",
+    "SUBTITLE": "Retrouvez tous vos voyages organisés",
+    "ONGOING": "En cours",
+    "UPCOMING": "À venir",
+    "PAST": "Passés",
+    "STATUS_ONGOING": "En cours",
+    "STATUS_UPCOMING": "À venir",
+    "STATUS_PAST": "Passé",
+    "NO_ONGOING": "Aucun voyage en cours",
+    "NO_ONGOING_DESC": "Vous n'avez pas de voyage en cours pour le moment",
+    "NO_UPCOMING": "Aucun voyage à venir",
+    "NO_UPCOMING_DESC": "Vous n'avez pas de voyage prévu pour le moment",
+    "NO_PAST": "Aucun voyage passé",
+    "NO_PAST_DESC": "Vous n'avez pas encore de voyage dans l'historique",
+    "LOADING_PLANS": "Chargement des étapes...",
+    "NO_PLANS": "Aucune étape planifiée",
+    "ERROR_TITLE": "Une erreur est survenue",
+    "ERROR_AUTH": "Vous devez être connecté pour voir vos voyages.",
+    "ERROR_ACCESS": "Vous n'avez pas accès à ce voyage.",
+    "ERROR_LOADING": "Erreur lors du chargement des voyages.",
+    "ERROR_LOADING_PLANS": "Erreur lors du chargement des plans.",
+    "ERROR_INVALID_DATA": "Données invalides pour ce voyage.",
+    "ERROR_INVALID_PLAN": "Données invalides pour ce plan.",
+    "ERROR_INVALID_PLAN_TYPE": "Type de plan non valide : '{{type}}'.",
+    "ERROR_UNKNOWN": "Erreur inconnue. Veuillez réessayer plus tard."
+  },
+  "COMMON": {
+    "LOADING": "Chargement...",
+    "SHOW": "Afficher",
+    "HIDE": "Masquer",
+    "LOGOUT": "Déconnexion"
+  },
+  "AUTH": {
+    "LOGIN_TITLE": "Connexion à BoB",
+    "PREFERRED_LANG": "Langue préférée",
+    "EMAIL": "Adresse e-mail",
+    "PASSWORD": "Mot de passe",
+    "LOGIN": "Se connecter",
+    "FORGOT_PASSWORD": "Mot de passe oublié ?",
+    "REGISTER": "Créer un compte",
+    "RESET_EMAIL_SENT": "E-mail de réinitialisation envoyé !",
+    "DEMO_ACTIVATED": "Mode démo activé avec succès !",
+    "ERRORS": {
+      "EMPTY_FIELDS": "Veuillez remplir tous les champs.",
+      "INVALID_EMAIL": "Adresse e-mail invalide.",
+      "USER_DISABLED": "Utilisateur désactivé.",
+      "USER_NOT_FOUND_BOB": "Utilisateur non trouvé.",
+      "INVALID_CREDENTIALS": "Identifiants invalides.",
+      "API_KEY_NOT_VALID": "Clé API non valide.",
+      "UNKNOWN": "Erreur inconnue.",
+      "EMAIL_REQUIRED": "Veuillez saisir votre e-mail.",
+      "DEMO_ACTIVATION_FAILED": "Échec de l'activation du mode démo."
+    }
+  },
+  "HOME": {
+    "TEST_APP": "Mode démo / Tester l'application",
+    "BASELINE": "Ne laissez plus l'ennui embarquer, application développée par Sunshine Adventures"
+  },
+  "PROFILE": {
+    "LANGUAGE": "Langue",
+    "NOTIFICATIONS": "Notifications",
+    "EMAIL_NOTIFICATIONS": "Notifications par e-mail",
+    "SAVE": "Enregistrer"
+  }
+} 

@@ -1,0 +1,534 @@
+ [vite] connecting...
+ [vite] connected.
+ 2025-07-24T16:25:59.364Z | INFO | LoggerService | anonymous | session_1753374359364_x01zrtb5j | 82MB |  | Service de logging initialisé | {"sessionId":"session_1753374359364_x01zrtb5j","environment":"development","logLevel":"INFO","config":{"maxFileSize":10485760,"maxFiles":10,"logLevel":1,"enableConsole":true,"enableFile":true,"enableRemote":true,"enableMetrics":true,"autoCleanup":true,"cleanupInterval":24,"enableRequestTracing":true,"enablePerformanceMonitoring":true},"version":"2.0.0"}
+ [LOG] 2025-07-24T16:25:59.364Z | INFO | LoggerService | anonymous | session_1753374359364_x01zrtb5j | 82MB |  | Service de logging initialisé | {"sessionId":"session_1753374359364_x01zrtb5j","environment":"development","logLevel":"INFO","config":{"maxFileSize":10485760,"maxFiles":10,"logLevel":1,"enableConsole":true,"enableFile":true,"enableRemote":true,"enableMetrics":true,"autoCleanup":true,"cleanupInterval":24,"enableRequestTracing":true,"enablePerformanceMonitoring":true},"version":"2.0.0"}
+ [UserStatusBar] user: null
+ Angular is running in development mode.
+ [UserStatusBar] user: _UserImpl
+ Calling Firebase APIs outside of an Injection context may destabilize your application leading to subtle change-detection and hydration bugs. Find more at https://github.com/angular/angularfire/blob/main/docs/zones.md
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js?v=a1637aa6:2517
+ Firebase API called outside injection context: docData
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js?v=a1637aa6:2520
+ Firebase API called outside injection context: docData
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js?v=a1637aa6:2520
+ 2025-07-24T16:25:59.799Z | INFO | Auth | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | Utilisateur connecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","provider":"password","emailVerified":false}
+ [LOG] 2025-07-24T16:25:59.799Z | INFO | Auth | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | Utilisateur connecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","provider":"password","emailVerified":false}
+ [OngoingFlightService] Service initialisé
+ [Window] Initialisation de la page window...
+ [Window] Changement détecté dans le vol en cours: null
+ [Window] Aucun vol en cours - effacement des données
+ [Window] Navigation state: Object
+ [Window] OngoingFlight from navigation: Object
+ [Window] Vol en cours reçu via navigation: Object
+ [Window] Configuration du vol depuis le voyage en cours: Object
+ [Window] Vol configuré avec succès: Object
+ [Window] Callsign sauvegardé: LX5678
+ === DEBUG VOL EN COURS ===
+ Numéro de vol: LX5678
+ Compagnie: Swiss International Air Lines
+ Départ: GVA
+ Arrivée: ATH
+ ========================
+ [Window] 🔥 AFFICHAGE AUTOMATIQUE DU VOL EN COURS 🔥
+ [Window] Numéro de vol: LX5678
+ [Window] Compagnie: Swiss International Air Lines
+ [Window] Départ: GVA → ATH
+ [Window] Heure départ: 2025-07-24T14:19:58.000Z
+ [Window] Heure arrivée: 2025-07-24T16:49:58.000Z
+ === VOL EN COURS - VARIABLES GLOBALES ===
+ Numéro de vol: LX5678
+ Compagnie: Swiss International Air Lines
+ Départ: GVA
+ Arrivée: ATH
+ Heure départ: 2025-07-24T14:19:58.000Z
+ Heure arrivée: 2025-07-24T16:49:58.000Z
+ =========================================
+ [Window] ✅ Informations du vol affichées automatiquement !
+ [Window] Rafraîchissement de page détecté - vidage des données
+ 2025-07-24T16:25:59.832Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | Mode démo détecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","isDemoUser":true}
+ [LOG] 2025-07-24T16:25:59.832Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | Mode démo détecté | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","email":"guestuser@demo.com","isDemoUser":true}
+ 2025-07-24T16:25:59.834Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | Vérification des voyages en cours | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","currentDateTime":"2025-07-24T16:25:59.833Z","timeZone":"Europe/Paris"}
+ [LOG] 2025-07-24T16:25:59.834Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | Vérification des voyages en cours | {"userId":"fUBBVpboDeaUjD6w2nz0xKni9mG3","currentDateTime":"2025-07-24T16:25:59.833Z","timeZone":"Europe/Paris"}
+ 📊 [DEMO SERVICE] Chargement des voyages de démo par ID...
+ Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js?v=a1637aa6:2520
+ Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js?v=a1637aa6:2520
+ Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ chunk-G7RMVK3M.js?v=a1637aa6:2520
+ [Window] 🔍 VÉRIFICATION DES VARIABLES GLOBALES 🔍
+ [Window] ✅ Variables globales trouvées:
+ [Window] - Numéro de vol: LX5678
+ [Window] - Compagnie: Swiss International Air Lines
+ [Window] - Départ: GVA
+ [Window] - Arrivée: ATH
+ [Window] - Heure départ: 2025-07-24T14:19:58.000Z
+ [Window] - Heure arrivée: 2025-07-24T16:49:58.000Z
+ 2025-07-24T16:25:59.836Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | POIs visibles mis à jour | {"total":0,"left":0,"right":0}
+ [LOG] 2025-07-24T16:25:59.836Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 84MB |  | POIs visibles mis à jour | {"total":0,"left":0,"right":0}
+ [Ionicons Warning]: Could not load icon with name "map-outline". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. 
+getNamedUrl @ @ionic_angular_stand…e.js?v=a1637aa6:310
+ WindowHublotComponent [left]: ngOnChanges Object
+ WindowHublotComponent [right]: ngOnChanges Object
+ NG0303: Can't bind to 'ngIf' since it isn't a known property of 'div' (used in the '_WindowHublotComponent' component template).
+If the 'ngIf' is an Angular control flow directive, please make sure that either the 'NgIf' directive or the 'CommonModule' is included in the '@Component.imports' of this component.
+reportUnknownPropertyError @ chunk-NI5J3JS7.js?v=a1637aa6:8456
+ NG0303: Can't bind to 'ngIf' since it isn't a known property of 'div' (used in the '_WindowHublotComponent' component template).
+If the 'ngIf' is an Angular control flow directive, please make sure that either the 'NgIf' directive or the 'CommonModule' is included in the '@Component.imports' of this component.
+reportUnknownPropertyError @ chunk-NI5J3JS7.js?v=a1637aa6:8456
+ WindowHublotComponent [left]: ngAfterViewInit Object
+ WindowHublotComponent [right]: ngAfterViewInit Object
+ [Ionicons Warning]: Could not load icon with name "map-outline". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. 
+getNamedUrl @ @ionic_angular_stand…e.js?v=a1637aa6:310
+ [Window] Vérification finale - callsign: LX5678
+ [Window] Vérification finale - sessionStorage: null
+ [Window] Vérification finale - hasPreviousData: true
+ WindowHublotComponent [left]: initMap Object
+ WindowHublotComponent [left]: Carte initialisée avec succès
+ NG0303: Can't bind to 'ngIf' since it isn't a known property of 'div' (used in the '_WindowHublotComponent' component template).
+If the 'ngIf' is an Angular control flow directive, please make sure that either the 'NgIf' directive or the 'CommonModule' is included in the '@Component.imports' of this component.
+reportUnknownPropertyError @ chunk-NI5J3JS7.js?v=a1637aa6:8456
+ WindowHublotComponent [right]: initMap Object
+ WindowHublotComponent [right]: Carte initialisée avec succès
+ NG0303: Can't bind to 'ngIf' since it isn't a known property of 'div' (used in the '_WindowHublotComponent' component template).
+If the 'ngIf' is an Angular control flow directive, please make sure that either the 'NgIf' directive or the 'CommonModule' is included in the '@Component.imports' of this component.
+reportUnknownPropertyError @ chunk-NI5J3JS7.js?v=a1637aa6:8456
+ 2025-07-24T16:26:00.188Z | ERROR | Demo | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Erreur lors de la récupération des données de démo dynamiques | {"error":{"code":"permission-denied","name":"FirebaseError"}}
+logToConsole @ chunk-VH4W7DF6.js:282
+ [LOG] 2025-07-24T16:26:00.188Z | ERROR | Demo | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Erreur lors de la récupération des données de démo dynamiques | {"error":{"code":"permission-denied","name":"FirebaseError"}}
+ 2025-07-24T16:26:00.188Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Aucun vol automatique trouvé | {"hasOngoingTrip":false,"ongoingTripsCount":0}
+ [LOG] 2025-07-24T16:26:00.188Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Aucun vol automatique trouvé | {"hasOngoingTrip":false,"ongoingTripsCount":0}
+ 2025-07-24T16:26:00.189Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Mode démo activé - recherche manuelle autorisée | 
+ [LOG] 2025-07-24T16:26:00.189Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Mode démo activé - recherche manuelle autorisée | 
+ 2025-07-24T16:26:00.341Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Initialisation de la carte | {"flightNumber":"LX5678","departure":"GVA","arrival":"ATH"}
+ [LOG] 2025-07-24T16:26:00.341Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Initialisation de la carte | {"flightNumber":"LX5678","departure":"GVA","arrival":"ATH"}
+ 2025-07-24T16:26:00.342Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Carte initialisée pour le vol | {"flightNumber":"LX5678","progress":50}
+ [LOG] 2025-07-24T16:26:00.342Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Carte initialisée pour le vol | {"flightNumber":"LX5678","progress":50}
+ WindowHublotComponent [left]: ngOnChanges Object
+ WindowHublotComponent [left]: updateMapView Object
+ WindowHublotComponent [right]: ngOnChanges Object
+ WindowHublotComponent [right]: updateMapView Object
+ NG0303: Can't bind to 'ngIf' since it isn't a known property of 'div' (used in the '_WindowHublotComponent' component template).
+If the 'ngIf' is an Angular control flow directive, please make sure that either the 'NgIf' directive or the 'CommonModule' is included in the '@Component.imports' of this component.
+reportUnknownPropertyError @ chunk-NI5J3JS7.js?v=a1637aa6:8456
+ NG0303: Can't bind to 'ngIf' since it isn't a known property of 'div' (used in the '_WindowHublotComponent' component template).
+If the 'ngIf' is an Angular control flow directive, please make sure that either the 'NgIf' directive or the 'CommonModule' is included in the '@Component.imports' of this component.
+reportUnknownPropertyError @ chunk-NI5J3JS7.js?v=a1637aa6:8456
+ 2025-07-24T16:26:00.355Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Initialisation de la carte | {"flightNumber":"LX5678","departure":"GVA","arrival":"ATH"}
+ [LOG] 2025-07-24T16:26:00.355Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Initialisation de la carte | {"flightNumber":"LX5678","departure":"GVA","arrival":"ATH"}
+ 2025-07-24T16:26:00.356Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Carte initialisée pour le vol | {"flightNumber":"LX5678","progress":50}
+ [LOG] 2025-07-24T16:26:00.356Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 77MB |  | Carte initialisée pour le vol | {"flightNumber":"LX5678","progress":50}
+ 2025-07-24T16:26:00.543Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Création de la carte Leaflet | 
+ [LOG] 2025-07-24T16:26:00.543Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Création de la carte Leaflet | 
+ 2025-07-24T16:26:00.547Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Création des données de vol pour la carte | {"flightNumber":"LX5678","departure":"GVA","arrival":"ATH","originIata":"GVA","destinationIata":"ATH"}
+ [LOG] 2025-07-24T16:26:00.547Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Création des données de vol pour la carte | {"flightNumber":"LX5678","departure":"GVA","arrival":"ATH","originIata":"GVA","destinationIata":"ATH"}
+ 2025-07-24T16:26:00.548Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Coordonnées d'aéroports trouvées | {"origin":{"iata":"GVA","coords":{"lat":46.2381,"lng":6.1089}},"destination":{"iata":"ATH","coords":{"lat":37.9364,"lng":23.9445}}}
+ [LOG] 2025-07-24T16:26:00.548Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Coordonnées d'aéroports trouvées | {"origin":{"iata":"GVA","coords":{"lat":46.2381,"lng":6.1089}},"destination":{"iata":"ATH","coords":{"lat":37.9364,"lng":23.9445}}}
+ 2025-07-24T16:26:00.549Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Points de trajectoire générés | {"pointCount":100,"firstPoint":{"latitude":46.238099999999996,"longitude":6.108899999999998},"lastPoint":{"latitude":37.9364,"longitude":23.9445}}
+ [LOG] 2025-07-24T16:26:00.549Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Points de trajectoire générés | {"pointCount":100,"firstPoint":{"latitude":46.238099999999996,"longitude":6.108899999999998},"lastPoint":{"latitude":37.9364,"longitude":23.9445}}
+ 2025-07-24T16:26:00.549Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Données de vol créées pour la carte | {"departure":{"name":"GVA","code":"GVA","latitude":46.2381,"longitude":6.1089},"arrival":{"name":"ATH","code":"ATH","latitude":37.9364,"longitude":23.9445},"waypoints":[{"latitude":46.238099999999996,"longitude":6.108899999999998},{"latitude":46.1693582693365,"longitude":6.3132830303270655},{"latitude":46.10025322000392,"longitude":6.517154489148796},{"latitude":46.030786636514684,"longitude":6.720514212311879},{"latitude":45.96096030160831,"longitude":6.923362072674537},{"latitude":45.89077599612104,"longitude":7.125697979672481},{"latitude":45.82023549885761,"longitude":7.327521878883925},{"latitude":45.74934058646513,"longitude":7.528833751593795},{"latitude":45.67809303330922,"longitude":7.729633614357369},{"latitude":45.606494611352396,"longitude":7.929921518563389},{"latitude":45.53454709003447,"longitude":8.129697549996905},{"latitude":45.46225223615525,"longitude":8.328961828401896},{"latitude":45.38961181375933,"longitude":8.5277145070439},{"latitude":45.316627584023,"longitude":8.72595577227271},{"latitude":45.24330130514336,"longitude":8.923685843085357},{"latitude":45.169634732229525,"longitude":9.120904970689416},{"latitude":45.09562961719597,"longitude":9.317613438066868},{"latitude":45.02128770865788,"longitude":9.513811559538562},{"latitude":44.9466107518288,"longitude":9.709499680329438},{"latitude":44.871600488420114,"longitude":9.90467817613462},{"latitude":44.796258656542754,"longitude":10.099347452686533},{"latitude":44.720586990610926,"longitude":10.293507945323075},{"latitude":44.644587221247875,"longitude":10.487160118557041},{"latitude":44.56826107519369,"longitude":10.680304465646868},{"latitude":44.49161027521498,"longitude":10.872941508168791},{"latitude":44.414636540016815,"longitude":11.065071795590558},{"latitude":44.33734158415643,"longitude":11.256695904846746},{"latitude":44.25972711795892,"longitude":11.447814439915815},{"latitude":44.18179484743503,"longitude":11.638428031398997},{"latitude":44.10354647420062,"longitude":11.828537336101045},{"latitude":44.02498369539835,"longitude":12.018143036613019},{"latitude":43.94610820362101,"longitude":12.20724584089717},{"latitude":43.86692168683684,"longitude":12.395846481873875},{"latitude":43.787425828316735,"longitude":12.58394571701095},{"latitude":43.707622306563266,"longitude":12.771544327915187},{"latitude":43.627512795241486,"longitude":12.958643119926286},{"latitude":43.547098963111594,"longitude":13.145242921713276},{"latitude":43.46638247396341,"longitude":13.331344584873415},{"latitude":43.38536498655255,"longitude":13.516948983533721},{"latitude":43.30404815453849,"longitude":13.702057013955116},{"latitude":43.22243362642411,"longitude":13.88666959413929},{"latitude":43.14052304549726,"longitude":14.070787663438352},{"latitude":43.05831804977381,"longitude":14.25441218216726},{"latitude":42.97582027194247,"longitude":14.437544131219171},{"latitude":42.89303133931121,"longitude":14.62018451168366},{"latitude":42.809952873755336,"longitude":14.802334344467965},{"latitude":42.726586491667284,"longitude":14.983994669921184},{"latitude":42.64293380390779,"longitude":15.165166547461586},{"latitude":42.55899641575889,"longitude":15.345851055206996},{"latitude":42.47477592687827,"longitude":15.526049289608293},{"latitude":42.39027393125528,"longitude":15.705762365086098},{"latitude":42.30549201716846,"longitude":15.884991413670722},{"latitude":42.22043176714445,"longitude":16.06373758464521},{"latitude":42.13509475791852,"longitude":16.242002044191814},{"latitude":42.04948256039649,"longitude":16.419785975041655},{"latitude":41.963596739618104,"longitude":16.597090576127748},{"latitude":41.87743885472176,"longitude":16.77391706224133},{"latitude":41.791010458910755,"longitude":16.950266663691632},{"latitude":41.70431309942083,"longitude":17.12614062596896},{"latitude":41.61734831748901,"longitude":17.301540209411236},{"latitude":41.53011764832401,"longitude":17.476466688873906},{"latitude":41.442622621077625,"longitude":17.65092135340333},{"latitude":41.35486475881778,"longitude":17.824905505913662},{"latitude":41.26684557850252,"longitude":17.998420462867053},{"latitude":41.17856659095551,"longitude":18.17146755395748},{"latitude":41.0900293008427,"longitude":18.344048121797965},{"latitude":41.00123520665008,"longitude":18.516163521611343},{"latitude":40.91218580066287,"longitude":18.687815120924437},{"latitude":40.82288256894566,"longitude":18.85900429926586},{"latitude":40.733326991323906,"longitude":19.029732447867165},{"latitude":40.643520541366435,"longitude":19.200000969367657},{"latitude":40.55346468636911,"longitude":19.369811277522583},{"latitude":40.46316088733966,"longitude":19.539164796914907},{"latitude":40.37261059898344,"longitude":19.70806296267052},{"latitude":40.28181526969049,"longitude":19.876507220177036},{"latitude":40.19077634152342,"longitude":20.044499024805948},{"latitude":40.09949525020643,"longitude":20.212039841638443},{"latitude":40.007973425115395,"longitude":20.379131145194545},{"latitude":39.916212289268785,"longitude":20.545774419165802},{"latitude":39.82421325931973,"longitude":20.71197115615145},{"latitude":39.73197774554891,"longitude":20.877722857397995},{"latitude":39.63950715185848,"longitude":21.04303103254225},{"latitude":39.54680287576688,"longitude":21.207897199357834},{"latitude":39.45386630840449,"longitude":21.37232288350503},{"latitude":39.36069883451033,"longitude":21.536309618284136},{"latitude":39.267301832429425,"longitude":21.699858944392098},{"latitude":39.173676674111206,"longitude":21.86297240968264},{"latitude":39.07982472510866,"longitude":22.025651568929668},{"latitude":38.98574734457828,"longitude":22.187897983594038},{"latitude":38.891445885280866,"longitude":22.349713221593724},{"latitude":38.79692169358315,"longitude":22.511098857077158},{"latitude":38.70217610946005,"longitude":22.672056470200015},{"latitude":38.60721046649783,"longitude":22.832587646905132},{"latitude":38.51202609189798,"longitude":22.992693978705823},{"latitude":38.41662430648168,"longitude":23.152377062472297},{"latitude":38.32100642469514,"longitude":23.31163850022134},{"latitude":38.225173754615575,"longitude":23.470479898909236},{"latitude":38.129127597957854,"longitude":23.62890287022779},{"latitude":38.03286925008175,"longitude":23.78690903040352},{"latitude":37.9364,"longitude":23.9445}],"flightNumber":"LX5678","airline":"Swiss International Air Lines"}
+ [LOG] 2025-07-24T16:26:00.549Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Données de vol créées pour la carte | {"departure":{"name":"GVA","code":"GVA","latitude":46.2381,"longitude":6.1089},"arrival":{"name":"ATH","code":"ATH","latitude":37.9364,"longitude":23.9445},"waypoints":[{"latitude":46.238099999999996,"longitude":6.108899999999998},{"latitude":46.1693582693365,"longitude":6.3132830303270655},{"latitude":46.10025322000392,"longitude":6.517154489148796},{"latitude":46.030786636514684,"longitude":6.720514212311879},{"latitude":45.96096030160831,"longitude":6.923362072674537},{"latitude":45.89077599612104,"longitude":7.125697979672481},{"latitude":45.82023549885761,"longitude":7.327521878883925},{"latitude":45.74934058646513,"longitude":7.528833751593795},{"latitude":45.67809303330922,"longitude":7.729633614357369},{"latitude":45.606494611352396,"longitude":7.929921518563389},{"latitude":45.53454709003447,"longitude":8.129697549996905},{"latitude":45.46225223615525,"longitude":8.328961828401896},{"latitude":45.38961181375933,"longitude":8.5277145070439},{"latitude":45.316627584023,"longitude":8.72595577227271},{"latitude":45.24330130514336,"longitude":8.923685843085357},{"latitude":45.169634732229525,"longitude":9.120904970689416},{"latitude":45.09562961719597,"longitude":9.317613438066868},{"latitude":45.02128770865788,"longitude":9.513811559538562},{"latitude":44.9466107518288,"longitude":9.709499680329438},{"latitude":44.871600488420114,"longitude":9.90467817613462},{"latitude":44.796258656542754,"longitude":10.099347452686533},{"latitude":44.720586990610926,"longitude":10.293507945323075},{"latitude":44.644587221247875,"longitude":10.487160118557041},{"latitude":44.56826107519369,"longitude":10.680304465646868},{"latitude":44.49161027521498,"longitude":10.872941508168791},{"latitude":44.414636540016815,"longitude":11.065071795590558},{"latitude":44.33734158415643,"longitude":11.256695904846746},{"latitude":44.25972711795892,"longitude":11.447814439915815},{"latitude":44.18179484743503,"longitude":11.638428031398997},{"latitude":44.10354647420062,"longitude":11.828537336101045},{"latitude":44.02498369539835,"longitude":12.018143036613019},{"latitude":43.94610820362101,"longitude":12.20724584089717},{"latitude":43.86692168683684,"longitude":12.395846481873875},{"latitude":43.787425828316735,"longitude":12.58394571701095},{"latitude":43.707622306563266,"longitude":12.771544327915187},{"latitude":43.627512795241486,"longitude":12.958643119926286},{"latitude":43.547098963111594,"longitude":13.145242921713276},{"latitude":43.46638247396341,"longitude":13.331344584873415},{"latitude":43.38536498655255,"longitude":13.516948983533721},{"latitude":43.30404815453849,"longitude":13.702057013955116},{"latitude":43.22243362642411,"longitude":13.88666959413929},{"latitude":43.14052304549726,"longitude":14.070787663438352},{"latitude":43.05831804977381,"longitude":14.25441218216726},{"latitude":42.97582027194247,"longitude":14.437544131219171},{"latitude":42.89303133931121,"longitude":14.62018451168366},{"latitude":42.809952873755336,"longitude":14.802334344467965},{"latitude":42.726586491667284,"longitude":14.983994669921184},{"latitude":42.64293380390779,"longitude":15.165166547461586},{"latitude":42.55899641575889,"longitude":15.345851055206996},{"latitude":42.47477592687827,"longitude":15.526049289608293},{"latitude":42.39027393125528,"longitude":15.705762365086098},{"latitude":42.30549201716846,"longitude":15.884991413670722},{"latitude":42.22043176714445,"longitude":16.06373758464521},{"latitude":42.13509475791852,"longitude":16.242002044191814},{"latitude":42.04948256039649,"longitude":16.419785975041655},{"latitude":41.963596739618104,"longitude":16.597090576127748},{"latitude":41.87743885472176,"longitude":16.77391706224133},{"latitude":41.791010458910755,"longitude":16.950266663691632},{"latitude":41.70431309942083,"longitude":17.12614062596896},{"latitude":41.61734831748901,"longitude":17.301540209411236},{"latitude":41.53011764832401,"longitude":17.476466688873906},{"latitude":41.442622621077625,"longitude":17.65092135340333},{"latitude":41.35486475881778,"longitude":17.824905505913662},{"latitude":41.26684557850252,"longitude":17.998420462867053},{"latitude":41.17856659095551,"longitude":18.17146755395748},{"latitude":41.0900293008427,"longitude":18.344048121797965},{"latitude":41.00123520665008,"longitude":18.516163521611343},{"latitude":40.91218580066287,"longitude":18.687815120924437},{"latitude":40.82288256894566,"longitude":18.85900429926586},{"latitude":40.733326991323906,"longitude":19.029732447867165},{"latitude":40.643520541366435,"longitude":19.200000969367657},{"latitude":40.55346468636911,"longitude":19.369811277522583},{"latitude":40.46316088733966,"longitude":19.539164796914907},{"latitude":40.37261059898344,"longitude":19.70806296267052},{"latitude":40.28181526969049,"longitude":19.876507220177036},{"latitude":40.19077634152342,"longitude":20.044499024805948},{"latitude":40.09949525020643,"longitude":20.212039841638443},{"latitude":40.007973425115395,"longitude":20.379131145194545},{"latitude":39.916212289268785,"longitude":20.545774419165802},{"latitude":39.82421325931973,"longitude":20.71197115615145},{"latitude":39.73197774554891,"longitude":20.877722857397995},{"latitude":39.63950715185848,"longitude":21.04303103254225},{"latitude":39.54680287576688,"longitude":21.207897199357834},{"latitude":39.45386630840449,"longitude":21.37232288350503},{"latitude":39.36069883451033,"longitude":21.536309618284136},{"latitude":39.267301832429425,"longitude":21.699858944392098},{"latitude":39.173676674111206,"longitude":21.86297240968264},{"latitude":39.07982472510866,"longitude":22.025651568929668},{"latitude":38.98574734457828,"longitude":22.187897983594038},{"latitude":38.891445885280866,"longitude":22.349713221593724},{"latitude":38.79692169358315,"longitude":22.511098857077158},{"latitude":38.70217610946005,"longitude":22.672056470200015},{"latitude":38.60721046649783,"longitude":22.832587646905132},{"latitude":38.51202609189798,"longitude":22.992693978705823},{"latitude":38.41662430648168,"longitude":23.152377062472297},{"latitude":38.32100642469514,"longitude":23.31163850022134},{"latitude":38.225173754615575,"longitude":23.470479898909236},{"latitude":38.129127597957854,"longitude":23.62890287022779},{"latitude":38.03286925008175,"longitude":23.78690903040352},{"latitude":37.9364,"longitude":23.9445}],"flightNumber":"LX5678","airline":"Swiss International Air Lines"}
+ 2025-07-24T16:26:00.549Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Affichage du vol sur la carte | 
+ [LOG] 2025-07-24T16:26:00.549Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Affichage du vol sur la carte | 
+ FlightMapService: Affichage du vol Object
+ FlightMapService: Création des marqueurs d'aéroports Object
+ FlightMapService: Mise à jour du tracé Object
+flight-map.service.ts:386 FlightMapService: Utilisation de l'icône d'avion Object
+flight-map.service.ts:250 FlightMapService: POIs visibles calculés Object
+logger.service.ts:409 2025-07-24T16:26:00.553Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | POIs visibles mis à jour | {"total":6,"left":6,"right":0}
+logger.service.ts:441 [LOG] 2025-07-24T16:26:00.553Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | POIs visibles mis à jour | {"total":6,"left":6,"right":0}
+flight-map.service.ts:642 FlightMapService: Mise à jour du tracé Object
+flight-map.service.ts:386 FlightMapService: Utilisation de l'icône d'avion Object
+flight-map.service.ts:250 FlightMapService: POIs visibles calculés Object
+logger.service.ts:409 2025-07-24T16:26:00.555Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | POIs visibles mis à jour | {"total":7,"left":3,"right":4}
+logger.service.ts:441 [LOG] 2025-07-24T16:26:00.555Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | POIs visibles mis à jour | {"total":7,"left":3,"right":4}
+logger.service.ts:409 2025-07-24T16:26:00.566Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Création de la carte Leaflet | 
+logger.service.ts:441 [LOG] 2025-07-24T16:26:00.566Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 78MB |  | Création de la carte Leaflet | 
+core.mjs:6547 ERROR Error: Map container is already initialized.
+    at NewClass._initContainer (leaflet-src.js:3776:15)
+    at NewClass.initialize (leaflet-src.js:2952:12)
+    at new NewClass (leaflet-src.js:292:25)
+    at Object.createMap [as map] (leaflet-src.js:4337:12)
+    at _FlightMapService.createMap (flight-map.service.ts:40:18)
+    at window.page.ts:727:43
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+    at AsyncStackTaggingZoneSpec.onInvokeTask (core.mjs:6070:30)
+handleError @ core.mjs:6547
+logger.service.ts:409 2025-07-24T16:26:00.764Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 80MB |  | Refresh de la carte | 
+logger.service.ts:441 [LOG] 2025-07-24T16:26:00.764Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 80MB |  | Refresh de la carte | 
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _LoggerService.initializeService (logger.service.ts:152:10)
+    at new _LoggerService (logger.service.ts:144:10)
+    at Object.LoggerService_Factory [as factory] (logger.service.ts:835:3)
+    at core.mjs:2243:35
+    at runInInjectorProfilerContext (core.mjs:881:5)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at Object.next (logger.service.ts:164:16)
+    at ConsumerObserver2.next (Subscriber.js:90:25)
+    at Subscriber2._next (Subscriber.js:59:22)
+    at Subscriber2.next (Subscriber.js:32:12)
+    at Object.next (rxjs-interop.mjs:302:30)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.detectDemoMode (window.page.ts:592:26)
+    at _WindowPage.ngOnInit (window.page.ts:191:10)
+    at callHookInternal (core.mjs:4140:10)
+    at callHook (core.mjs:4164:7)
+    at callHooks (core.mjs:4124:9)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.<anonymous> (window.page.ts:611:24)
+    at Generator.next (<anonymous>)
+    at chunk-PIAPPY66.js:41:61
+    at new ZoneAwarePromise (zone.js:2590:23)
+    at __async (chunk-PIAPPY66.js:25:10)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at Object.next (window.page.ts:212:26)
+    at ConsumerObserver2.next (Subscriber.js:90:25)
+    at Subscriber2._next (Subscriber.js:59:22)
+    at Subscriber2.next (Subscriber.js:32:12)
+    at BehaviorSubject2._subscribe (BehaviorSubject.js:19:40)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.error (logger.service.ts:234:10)
+    at _DemoService.<anonymous> (demo.service.ts:358:19)
+    at Generator.throw (<anonymous>)
+    at rejected (chunk-PIAPPY66.js:35:29)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.<anonymous> (window.page.ts:674:26)
+    at Generator.next (<anonymous>)
+    at fulfilled (chunk-PIAPPY66.js:28:24)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.<anonymous> (window.page.ts:682:28)
+    at Generator.next (<anonymous>)
+    at fulfilled (chunk-PIAPPY66.js:28:24)
+    at _ZoneDelegate.invoke (zone.js:366:158)
+    at Object.onInvoke (core.mjs:6401:25)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.initializeMap (window.page.ts:714:24)
+    at window.page.ts:152:18
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.initializeMap (window.page.ts:746:26)
+    at window.page.ts:152:18
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.initializeMap (window.page.ts:714:24)
+    at window.page.ts:202:14
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.initializeMap (window.page.ts:746:26)
+    at window.page.ts:202:14
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at window.page.ts:726:28
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+    at AsyncStackTaggingZoneSpec.onInvokeTask (core.mjs:6070:30)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.createFlightDataForMap (window.page.ts:762:24)
+    at window.page.ts:730:33
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.createFlightDataForMap (window.page.ts:858:24)
+    at window.page.ts:730:33
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.createFlightDataForMap (window.page.ts:876:24)
+    at window.page.ts:730:33
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.createFlightDataForMap (window.page.ts:900:24)
+    at window.page.ts:730:33
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at window.page.ts:732:30
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+    at AsyncStackTaggingZoneSpec.onInvokeTask (core.mjs:6070:30)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at Object.next (window.page.ts:212:26)
+    at ConsumerObserver2.next (Subscriber.js:90:25)
+    at Subscriber2._next (Subscriber.js:59:22)
+    at Subscriber2.next (Subscriber.js:32:12)
+    at Subject.js:41:22
+(anonymous) @ logger.service.ts:437
+logger.service.ts:409 2025-07-24T16:26:08.867Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 69MB |  | Onglet changé vers: hublot | 
+logger.service.ts:441 [LOG] 2025-07-24T16:26:08.867Z | INFO | Window | fUBBVpboDeaUjD6w2nz0xKni9mG3 | session_1753374359364_x01zrtb5j | 69MB |  | Onglet changé vers: hublot | 
+icon.js:54 [Ionicons Warning]: Could not load icon with name "eye-outline". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c415254630 name=​"eye-outline" color=​"primary" ng-reflect-name=​"eye-outline" ng-reflect-color=​"primary" role=​"img" class=​"md ion-color ion-color-primary">​…​</ion-icon>​slot
+getNamedUrl @ icon.js:54
+icon.js:54 [Ionicons Warning]: Could not load icon with name "eye-outline". Ensure that the icon is registered using addIcons or that the icon SVG data is passed directly to the icon component. <ion-icon _ngcontent-ng-c415254630 name=​"eye-outline" color=​"primary" ng-reflect-name=​"eye-outline" ng-reflect-color=​"primary" role=​"img" class=​"md ion-color ion-color-primary">​…​</ion-icon>​slot
+getNamedUrl @ icon.js:54
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at Object.next (window.page.ts:212:26)
+    at ConsumerObserver2.next (Subscriber.js:90:25)
+    at Subscriber2._next (Subscriber.js:59:22)
+    at Subscriber2.next (Subscriber.js:32:12)
+    at Subject.js:41:22
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at window.page.ts:726:28
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+    at AsyncStackTaggingZoneSpec.onInvokeTask (core.mjs:6070:30)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at window.page.ts:738:32
+    at timer (zone.js:1752:27)
+    at _ZoneDelegate.invokeTask (zone.js:391:171)
+    at core.mjs:6070:49
+    at AsyncStackTaggingZoneSpec.onInvokeTask (core.mjs:6070:30)
+(anonymous) @ logger.service.ts:437
+:3040/:1 
+            
+            
+           Failed to load resource: net::ERR_CONNECTION_REFUSED
+logger.service.ts:437 [LoggerService] Echec d'envoi au proxy: TypeError: Failed to fetch
+    at zone.js:2674:32
+    at proto.<computed> (zone.js:988:16)
+    at _LoggerService.logToFile (logger.service.ts:432:9)
+    at _LoggerService.log (logger.service.ts:352:12)
+    at _LoggerService.info (logger.service.ts:220:10)
+    at _WindowPage.onTabChange (window.page.ts:697:24)
+    at WindowPage_ion_segment_7_Template_ion_segment_ionChange_0_listener (window.page.html:34:55)
+    at executeListenerWithErrorHandling (core.mjs:29299:12)
+    at wrapListenerIn_markDirtyAndPreventDefault (core.mjs:29288:16)
+    at Segment2.<anonymous> (dom_renderer-DGKzginR.mjs:709:112)
+(anonymous) @ logger.service.ts:437

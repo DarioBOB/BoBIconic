@@ -1,0 +1,87 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/games"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Pac-Man</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="restart()">
+        🔄 Recommencer
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="pacman-container">
+  <!-- En-tête du jeu -->
+  <div class="game-header">
+    <div class="stats-row">
+      <div class="stat-card">
+        <h3>Score</h3>
+        <p>{{ gameState.score }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Pastilles</h3>
+        <p>{{ gameState.dotsRemaining }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Status</h3>
+        <p *ngIf="!gameState.gameOver">🎮 En jeu</p>
+        <p *ngIf="gameState.gameOver && gameState.won" class="won">🎉 Victoire !</p>
+        <p *ngIf="gameState.gameOver && !gameState.won" class="lost">💀 Game Over</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions" *ngIf="!gameState.gameOver">
+    <ion-card>
+      <ion-card-content>
+        <p>🎮 <strong>Contrôles :</strong> Utilisez les flèches du clavier pour déplacer Pac-Man</p>
+        <p>🎯 <strong>Objectif :</strong> Mangez toutes les pastilles avant que le fantôme ne vous attrape !</p>
+        <p>🔄 <strong>Recommencer :</strong> Appuyez sur Espace ou cliquez sur le bouton</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Labyrinthe -->
+  <div class="maze-container">
+    <div class="maze">
+      <div *ngFor="let row of gameState.grid; let rowIndex = index" class="row">
+        <div 
+          *ngFor="let cell of row; let colIndex = index" 
+          [ngClass]="getCellClass(cell)"
+          class="cell">
+          <span *ngIf="cell === '.'" class="dot">•</span>
+          <span *ngIf="cell === 'P'" class="pacman-emoji">😀</span>
+          <span *ngIf="cell === 'G'" class="ghost-emoji">👻</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Écran de fin de partie -->
+  <div class="game-over-screen" *ngIf="gameState.gameOver">
+    <div class="game-over-content">
+      <h1 *ngIf="gameState.won">🎉 Victoire !</h1>
+      <h1 *ngIf="!gameState.won">💀 Game Over</h1>
+      
+      <div class="final-stats">
+        <div class="stat-item">
+          <h3>Score Final</h3>
+          <p class="final-score">{{ gameState.score }}</p>
+        </div>
+        <div class="stat-item">
+          <h3>Pastilles Mangees</h3>
+          <p>{{ gameState.dotsRemaining === 0 ? 'Toutes !' : gameState.dotsRemaining + ' restantes' }}</p>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <ion-button size="large" (click)="restart()">
+          🔄 Nouvelle Partie
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content> 

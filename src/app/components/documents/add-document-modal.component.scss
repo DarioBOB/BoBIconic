@@ -1,0 +1,119 @@
+ion-content {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+ion-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  margin: 16px 0;
+  
+  ion-card-header {
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
+    ion-card-title {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  }
+  
+  ion-card-content {
+    color: white;
+  }
+}
+
+ion-item {
+  --background: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-radius: 8px;
+  margin-bottom: 8px;
+  backdrop-filter: blur(5px);
+  
+  ion-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+  }
+  
+  ion-input, ion-textarea, ion-select {
+    --color: white;
+    --placeholder-color: rgba(255, 255, 255, 0.6);
+  }
+  
+  ion-select {
+    --icon-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  
+  ion-icon {
+    font-size: 1.2rem;
+  }
+  
+  span {
+    color: white;
+    font-size: 0.9rem;
+    
+    &.file-size {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.action-buttons {
+  margin-top: 24px;
+  padding: 0 16px;
+  
+  .submit-btn {
+    --background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    --color: white;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    font-weight: 600;
+    
+    &:hover {
+      --box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+    
+    &:disabled {
+      --background: rgba(255, 255, 255, 0.2);
+      --color: rgba(255, 255, 255, 0.5);
+      --box-shadow: none;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  ion-card {
+    margin: 12px 0;
+  }
+  
+  .action-buttons {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  ion-item {
+    margin-bottom: 6px;
+  }
+  
+  .file-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+} 

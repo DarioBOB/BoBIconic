@@ -1,0 +1,96 @@
+// 🟡 PROMPT COMPLET POUR CURSOR – INTÉGRATION PARSING D'EMAILS DANS BoredOnBoardIonic
+
+/*
+Objectif : ajouter au projet Angular/Ionic (BoredOnBoardIonic) un système backend + frontend permettant de :
+- Lire automatiquement les e-mails non lus adressés à bobplans@sunshine-adventures.net (Zoho Mail, IMAP)
+- Parser leur contenu via OpenAI (clé dans .env) pour produire un JSON structuré
+- Sauvegarder ce JSON localement
+- Permettre l'affichage de ces données dans l'application Ionic (type de contenu, détails, recherche, etc.)
+
+📁 Structure du projet déjà en place (racine) :
+- frontend : `/src`
+- scripts utils : `/scripts`
+- .env déjà présent
+- pas de dossier backend existant, mais possibilité d’en créer un (ex: `/email-parser`)
+
+────────────────────────────────────────────────────────────────────
+
+🧠 CE QUE CURSOR DOIT FAIRE :
+
+### 1. 🔧 Backend - Création du module `email-parser`
+Créer un dossier `email-parser/` à la racine avec :
+
+- `imap.service.ts` : Connexion IMAP à Zoho Mail (imap.zoho.eu:993) pour l'adresse `bobplans@sunshine-adventures.net`. Lire tous les e-mails **non lus**, les parser avec `mailparser`, puis les marquer comme lus.
+
+- `openai.service.ts` : Utilise `openai` (GPT-4) pour transformer l'email brut en JSON structuré.
+  - L’appel doit contenir un prompt du style :
+    "Extract structured booking data (type, provider, reference, name, dates, price, address...) from the email below and return JSON only."
+
+- `storage.service.ts` : Sauvegarde le JSON dans `./parsed-emails/booking_<timestamp>.json` (créer le dossier s'il n’existe pas).
+
+- `index.ts` : Point d’entrée qui appelle les services ci-dessus et boucle sur tous les emails non lus.
+
+- `.env` doit contenir :
+```env
+IMAP_USER=bobplans@sunshine-adventures.net
+IMAP_PASS=HzCXsEafd6PK
+IMAP_HOST=imap.zoho.eu
+IMAP_PORT=993
+OPENAI_API_KEY=sk-...
+```
+
+- Ajouter un script `scripts/parse-mails.js` :
+```ts
+import { parseEmails } from '../email-parser';
+parseEmails().then(() => console.log('Parsing done')).catch(console.error);
+```
+
+────────────────────────────────────────────────────────────────────
+
+### 2. 🌐 Endpoint REST (optionnel mais utile)
+Dans `server.js`, exposer un endpoint `/api/parse-mails` qui appelle `parseEmails()` pour déclencher le parsing depuis le frontend.
+
+────────────────────────────────────────────────────────────────────
+
+### 3. 📱 Frontend Ionic - Page `parsed-mails`
+Créer un dossier `/src/app/pages/parsed-mails/` avec :
+
+- `parsed-mails.page.ts/html/scss/module.ts` pour :
+  - Lister tous les fichiers JSON dans `parsed-emails/` (via un appel REST ou lecture locale)
+  - Afficher pour chaque entrée : `type`, `provider`, `reference_number`, `location`, `dates`, etc.
+  - Affichage format clé/valeur en accordéon ou carte
+  - Barre de recherche (filtrage par `booking_type`, ex: flight, hotel...)
+
+────────────────────────────────────────────────────────────────────
+
+### 🔁 Exemple de JSON attendu :
+```json
+{
+  "booking_type": "hotel",
+  "provider": "Booking.com",
+  "reference_number": "4709721403",
+  "location": "Frascati",
+  "checkin_date": "2025-06-20",
+  "checkout_date": "2025-06-22",
+  "name": "Hotel & Spa Villa Mercede",
+  "price": 400,
+  "currency": "EUR",
+  "address": "Via Tuscolana 20, Frascati, 00044, Italie",
+  "contact_info": {
+    "phone": "+390699291979"
+  }
+}
+```
+
+────────────────────────────────────────────────────────────────────
+
+### ✅ Contraintes :
+- Utiliser TypeScript partout
+- Utiliser `mailparser` pour lire les emails
+- Utiliser `openai` pour l’analyse
+- Utiliser `fs` pour écrire les fichiers JSON
+- Les nouveaux fichiers doivent s’intégrer proprement au projet sans casser l’existant
+
+────────────────────────────────────────────────────────────────────
+
+➡️ Fin du prompt – Génère maintenant tous les fichiers nécessaires (backend et frontend) en respectant cette architecture.

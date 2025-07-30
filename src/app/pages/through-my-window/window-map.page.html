@@ -1,0 +1,46 @@
+<div style="background: #1976d2; color: #fff; padding: 12px; text-align: center; font-size: 1.2em; font-weight: bold;">
+  [DEBUG] Ceci est la page Ma Fenêtre (window-map.page.html)
+</div>
+
+<ion-content fullscreen>
+  <div *ngIf="isLoadingMap" class="spinner-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <div>Chargement de la carte…</div>
+  </div>
+
+  <div *ngIf="!isLoadingMap" #map class="map-container"></div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="updateZoom(0)">
+      <ion-icon name="locate-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-list>
+    <ion-item-divider>
+      <ion-label>Points d'intérêt (POIs)</ion-label>
+    </ion-item-divider>
+    <ion-item *ngFor="let poi of pois">
+      <ion-label>
+        <h2>{{ poi.name }}</h2>
+        <p>{{ poi.description }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+
+<style>
+  .map-container {
+    width: 100%;
+    height: 100%;
+  }
+  .spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    font-size: 1.2em;
+    color: #888;
+  }
+</style> 

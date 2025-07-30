@@ -1,0 +1,192 @@
+Créer un jeu comme **"4096"** (variante du populaire **2048**, avec des tuiles allant jusqu’à 4096) en **Angular avec Ionic** nécessite une combinaison de logique de jeu (TypeScript), d’interface utilisateur (HTML/CSS), et de gestion d’événements (touches, glisser-déposer, etc.).
+
+Je vais te donner une version de base d'une application **Ionic/Angular** avec :
+
+* Une **grille de jeu 4x4**.
+* La logique de fusion des tuiles.
+* Les contrôles clavier et tactiles.
+* Un design simple.
+
+---
+
+### 🧱 Étapes de base pour créer le projet
+
+```bash
+ionic start game4096 blank --type=angular
+cd game4096
+```
+
+---
+
+## 1. `src/app/home/home.page.ts` – Logique du jeu
+
+```ts
+import { Component, HostListener, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: 'home.page.html',
+  styleUrls: ['home.page.scss'],
+})
+export class HomePage implements OnInit {
+  board: number[][] = [];
+  size = 4;
+
+  ngOnInit() {
+    this.initBoard();
+  }
+
+  initBoard() {
+    this.board = Array(this.size).fill(null).map(() => Array(this.size).fill(0));
+    this.addRandomTile();
+    this.addRandomTile();
+  }
+
+  addRandomTile() {
+    const empty = [];
+    for (let r = 0; r < this.size; r++) {
+      for (let c = 0; c < this.size; c++) {
+        if (this.board[r][c] === 0) empty.push([r, c]);
+      }
+    }
+    if (empty.length === 0) return;
+    const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+    this.board[r][c] = Math.random() < 0.9 ? 2 : 4;
+  }
+
+  move(direction: string) {
+    let moved = false;
+    const original = JSON.stringify(this.board);
+
+    for (let i = 0; i < this.size; i++) {
+      let line = this.getLine(i, direction);
+      let merged = this.merge(line);
+      this.setLine(i, direction, merged);
+    }
+
+    if (JSON.stringify(this.board) !== original) {
+      this.addRandomTile();
+    }
+  }
+
+  getLine(i: number, dir: string): number[] {
+    const line: number[] = [];
+    for (let j = 0; j < this.size; j++) {
+      if (dir === 'left') line.push(this.board[i][j]);
+      else if (dir === 'right') line.push(this.board[i][this.size - 1 - j]);
+      else if (dir === 'up') line.push(this.board[j][i]);
+      else if (dir === 'down') line.push(this.board[this.size - 1 - j][i]);
+    }
+    return line;
+  }
+
+  setLine(i: number, dir: string, line: number[]) {
+    for (let j = 0; j < this.size; j++) {
+      if (dir === 'left') this.board[i][j] = line[j];
+      else if (dir === 'right') this.board[i][this.size - 1 - j] = line[j];
+      else if (dir === 'up') this.board[j][i] = line[j];
+      else if (dir === 'down') this.board[this.size - 1 - j][i] = line[j];
+    }
+  }
+
+  merge(line: number[]): number[] {
+    const filtered = line.filter(n => n !== 0);
+    for (let i = 0; i < filtered.length - 1; i++) {
+      if (filtered[i] === filtered[i + 1]) {
+        filtered[i] *= 2;
+        filtered[i + 1] = 0;
+      }
+    }
+    const merged = filtered.filter(n => n !== 0);
+    while (merged.length < this.size) merged.push(0);
+    return merged;
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKey(event: KeyboardEvent) {
+    if (event.key === 'ArrowLeft') this.move('left');
+    else if (event.key === 'ArrowRight') this.move('right');
+    else if (event.key === 'ArrowUp') this.move('up');
+    else if (event.key === 'ArrowDown') this.move('down');
+  }
+}
+```
+
+---
+
+## 2. `src/app/home/home.page.html` – Interface utilisateur
+
+```html
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Jeu 4096</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="board">
+    <div *ngFor="let row of board" class="row">
+      <div *ngFor="let tile of row" class="tile" [ngClass]="'t' + tile">
+        {{ tile > 0 ? tile : '' }}
+      </div>
+    </div>
+  </div>
+</ion-content>
+```
+
+---
+
+## 3. `src/app/home/home.page.scss` – Styles simples
+
+```scss
+.board {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+}
+
+.row {
+  display: flex;
+}
+
+.tile {
+  width: 70px;
+  height: 70px;
+  background-color: #ccc;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.tile.t2 { background-color: #eee4da; }
+.tile.t4 { background-color: #ede0c8; }
+.tile.t8 { background-color: #f2b179; }
+.tile.t16 { background-color: #f59563; }
+.tile.t32 { background-color: #f67c5f; }
+.tile.t64 { background-color: #f65e3b; }
+.tile.t128 { background-color: #edcf72; }
+.tile.t256 { background-color: #edcc61; }
+.tile.t512 { background-color: #edc850; }
+.tile.t1024 { background-color: #edc53f; }
+.tile.t2048 { background-color: #edc22e; }
+.tile.t4096 { background-color: #3c3a32; color: white; }
+```
+
+---
+
+### ✅ À faire ensuite :
+
+* Ajouter le **score**.
+* Gérer la **fin de partie / victoire**.
+* Ajouter un **bouton "Recommencer"**.
+* Ajouter le **glisser** pour les mobiles (`HammerJS` ou `Ionic Gestures`).
+
+---
+
+Voici la structure complète des fichiers nécessaires pour créer une version impressionnante du jeu **4096** avec **Angular/Ionic**. Pour chaque fichier listé, je peux te fournir son contenu complet. Dis-moi simplement si tu veux tout d’un coup ou un fichier à la fois.
+
+Souhaites-tu maintenant recevoir tout le **code source complet** ou un fichier en particulier ?

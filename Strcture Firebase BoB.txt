@@ -1,0 +1,249 @@
+Voici la **structure complète et détaillée** à implémenter dans Firestore pour stocker un voyage et ses plans, modulable pour une application Angular/Ionic de type “TripIt Pro+” :
+
+---
+
+## Résumé des préconisations
+
+Nous mettons en œuvre un **modèle de données flexible** basé sur :
+
+* des **documents** dans des **collections** pour chaque entité principale (utilisateurs, voyages),
+* des **sous-collections** pour les étapes du voyage (vols, hôtels, voitures, activités, etc.),
+* une **structure à plat** pour optimiser les lectures et éviter les hotspots,
+* des **index exemptions** là où nécessaire pour limiter la latence et le coût d’écriture.
+  Cette modélisation suit les recommandations officielles de Firestore et s’inspire de schémas éprouvés pour les itinéraires de voyage ([firebase.google.com][1], [stackoverflow.com][2]).
+
+---
+
+## 1. Principes de modélisation Firestore
+
+1. **Collections & Documents**
+
+   * Chaque document est stocké dans une collection et identifié par son chemin unique ([firebase.google.com][1]).
+   * On privilégie les **sous-collections** pour représenter la hiérarchie (ex. voyages → items).
+
+2. **Structure à plat**
+
+   * Éviter l’imbrication profonde : chaque document doit rester relativement “léger” pour que les requêtes ne ramènent pas toute une arborescence inutile ([firebase.google.com][3]).
+
+3. **Éviter les hotspots**
+
+   * Ne pas concentrer trop d’opérations de lecture/écriture sur un même document : répartir la charge via des sous-collections ou documents séparés ([firebase.google.com][4]).
+
+4. **Index Exemptions & Performance**
+
+   * Désactiver l’indexation par défaut sur les champs DESCENDING et ARRAY si non nécessaires, pour réduire les coûts et la latence ([firebase.google.com][5]).
+
+5. **Schéma cohérent**
+
+   * Même si Firestore est “schemaless”, conserver des champs et types constants entre documents facilite le développement et les requêtes ([firebase.google.com][6]).
+
+---
+
+## 2. Collections et documents
+
+### 2.1. `users/{userId}`
+
+Profil de l’utilisateur et paramètres globaux.
+
+```jsonc
+{
+  "displayName":   "Jean Dupont",
+  "email":         "jean.dupont@example.com",
+  "preferences": {
+    "language":   "fr",
+    "currency":   "EUR",
+    "defaultView":"map"
+  },
+  "loyaltyPrograms": [   // programmes de fidélité
+    { "program":"FlyingBlue","number":"FB123456","status":"Gold","expiry":"2026-03-01" },
+    { "program":"Hilton Honors","number":"HH987654","status":"Diamond" }
+  ],
+  "notificationSettings": {
+    "flightStatus":    true,
+    "checkInReminders":true,
+    "securityAlerts":  true
+  },
+  "createdAt":      Timestamp,
+  "updatedAt":      Timestamp
+}
+```
+
+### 2.2. `users/{userId}/trips/{tripId}`
+
+Document de voyage principal.
+
+```jsonc
+{
+  "title":        "Grèce été 2024",
+  "startDate":    Timestamp("2024-07-05T07:15:00+02:00"),
+  "endDate":      Timestamp("2024-07-15T13:00:00+02:00"),
+  "origin":       { "code":"GVA","city":"Genève","country":"Suisse" },
+  "destination":  { "code":"ATH","city":"Athènes","country":"Grèce" },
+  "summary":      "Voyage multi-étapes : Athènes, Santorin",
+  "currency":     "EUR",
+  "totalBudget":  2500,
+  "createdAt":    FieldValue.serverTimestamp(),
+  "updatedAt":    FieldValue.serverTimestamp()
+}
+```
+
+### 2.3. `users/{userId}/trips/{tripId}/items/{itemId}`
+
+Sous-collection des **étapes** (`type`: flight, hotel, car, ferry, activity, expense, document, guidance, poi). Le champ `order` détermine l’ordre chronologique.
+
+#### 2.3.1. Exemple générique
+
+```jsonc
+{
+  "type":       "flight",        // ou "hotel","car","activity",...
+  "order":      1,
+  "title":      "Vol A3 847 – Aegean Airlines",
+  "startTime":  Timestamp,
+  "endTime":    Timestamp,
+  "location":   { "code":"GVA","name":"Genève Aéroport","address":"" },
+  "notes":      "Check-in en ligne conseillé 24h avant"
+}
+```
+
+#### 2.3.2. Vols (`type: "flight"`)
+
+```jsonc
+{
+  "airline": {
+    "name":     "Aegean Airlines",
+    "iata":     "A3",
+    "icao":     "AEE",
+    "callsign": "AEGEAN"
+  },
+  "flightNumber":      "847",
+  "callSign":          "AEGEAN847",
+  "confirmationNumber":"A3GVAATH567",
+  "aircraftType":      "Airbus A320-232",
+  "departureAirport":  { "code":"GVA","name":"Genève Aéroport","terminal":"1","gate":"A3" },
+  "arrivalAirport":    { "code":"ATH","name":"Aéroport ATH","terminal":"1","gate":"B12" },
+  "startTime":         Timestamp("2024-07-05T07:15:00+02:00"),
+  "endTime":           Timestamp("2024-07-05T10:45:00+03:00"),
+  "durationMin":       210,
+  "distanceKm":        1940
+}
+```
+
+#### 2.3.3. Hôtels (`type: "hotel"`)
+
+```jsonc
+{
+  "hotelName":      "Electra Palace Athens",
+  "address":        "18-20 Nikodimou St, Plaka, Athènes 105 57",
+  "checkIn":        Timestamp("2024-07-05T14:00:00+03:00"),
+  "checkOut":       Timestamp("2024-07-07T09:00:00+03:00"),
+  "phone":          "+30 210 3370000",
+  "reservationId":  "HOTEL-ATH123"
+}
+```
+
+#### 2.3.4. Location de voiture (`type: "car"`)
+
+```jsonc
+{
+  "company":        "Europcar",
+  "pickupLocation": "Terminal 1, ATH Arrivées",
+  "pickupTime":     Timestamp("2024-07-05T11:30:00+03:00"),
+  "dropoffLocation":"ATH Départs",
+  "vehicle":        { "model":"Peugeot 2008","transmission":"automatique" },
+  "reservationId":  "EUROP-ATH2024"
+}
+```
+
+#### 2.3.5. Ferry (`type: "ferry"`)
+
+```jsonc
+{
+  "company":        "Blue Star Delos",
+  "departurePort":  "Patras",
+  "arrivalPort":    "Santorin",
+  "departureTime":  Timestamp("2024-07-07T14:30:00+03:00"),
+  "arrivalTime":    Timestamp("2024-07-08T06:30:00+03:00"),
+  "cabin":          { "type":"hublot double","occupants":2 },
+  "reservationId":  "BSF2024-710"
+}
+```
+
+#### 2.3.6. Activités (`type: "activity"`)
+
+```jsonc
+{
+  "activityName":   "Visite guidée Acropole & musée",
+  "meetingPoint":   "Station Acropolis Metro",
+  "startTime":      Timestamp("2024-07-06T09:00:00+03:00"),
+  "endTime":        Timestamp("2024-07-06T13:00:00+03:00"),
+  "reservationId":  "ACRO-ACT105"
+}
+```
+
+#### 2.3.7. Dépenses (`type: "expense"`)
+
+```jsonc
+{
+  "title":      "Repas Taverne Plaka",
+  "amount":     45.00,
+  "currency":   "EUR",
+  "category":   "Food",
+  "receiptUrl": "https://.../receipt.jpg",
+  "date":       Timestamp("2024-07-06T14:30:00+03:00")
+}
+```
+
+#### 2.3.8. Documents (`type: "document"`)
+
+```jsonc
+{
+  "docType":    "passport",
+  "name":       "Passeport CE",
+  "expiryDate": "2029-05-01",
+  "fileUrl":    "https://.../passport.pdf"
+}
+```
+
+#### 2.3.9. Guidance Visa/Santé (`type: "guidance"`)
+
+```jsonc
+{
+  "source":     "Riskline",
+  "title":      "Exigences Visa Grèce",
+  "url":        "https://riskline.com/visa-greece",
+  "lastUpdated":"2025-06-01"
+}
+```
+
+#### 2.3.10. Points d’intérêt (`type: "poi"`)
+
+```jsonc
+{
+  "name":        "Oia",
+  "description": "Village pittoresque pour coucher de soleil",
+  "lat":         36.4610,
+  "lng":         25.3750,
+  "mediaUrls":   ["https://.../oia1.jpg","https://.../oia2.jpg"]
+}
+```
+
+---
+
+## 3. Bonnes pratiques additionnelles
+
+* **Sécurité & Règles** : utilisez des [Security Rules](https://firebase.google.com/docs/firestore/security/get-started) adaptées pour restreindre l’accès selon `userId` ([firebase.google.com][1]).
+* **Pagination & Requêtes** : indexez les champs `startTime`, `order` pour faciliter le tri et la pagination.
+* **Migrations & Évolution** : gérez l’évolution du schéma sans downtime via des converters ou des scripts de mise à jour progressive ([strift.medium.com][7]).
+* **Optimisation coûts** : surveillez le nombre de lectures/écritures et limitez la taille des documents (max 1 MiB).
+
+---
+
+Cette **structure clé-en-main** couvre l’ensemble des besoins d’un “TripIt Pro++” : itinéraires, notifications, documents de voyage, dépenses, guides et points d’intérêt. Vous pouvez l’étendre à volonté en ajoutant de nouveaux `type` d’`items` ou des champs métier spécifiques.
+
+[1]: https://firebase.google.com/docs/firestore?utm_source=chatgpt.com "Firestore | Firebase - Google"
+[2]: https://stackoverflow.com/questions/27644540/database-schema-for-itinerary?utm_source=chatgpt.com "Database Schema for Itinerary - sql - Stack Overflow"
+[3]: https://firebase.google.com/docs/database/ios/structure-data?utm_source=chatgpt.com "Structure Your Database | Firebase Realtime Database - Google"
+[4]: https://firebase.google.com/docs/firestore/understand-reads-writes-scale?utm_source=chatgpt.com "Understand reads and writes at scale | Firestore - Firebase - Google"
+[5]: https://firebase.google.com/docs/firestore/best-practices?utm_source=chatgpt.com "Best practices for Cloud Firestore - Firebase - Google"
+[6]: https://firebase.google.com/docs/firestore/data-model?utm_source=chatgpt.com "Cloud Firestore Data model - Firebase"
+[7]: https://strift.medium.com/handling-schema-evolution-with-cloud-firestore-22d94fb9722f?utm_source=chatgpt.com "Handling schema evolution with Cloud Firestore"

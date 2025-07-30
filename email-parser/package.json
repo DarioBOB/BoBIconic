@@ -1,0 +1,23 @@
+{
+  "name": "email-parser",
+  "version": "1.0.0",
+  "description": "Email parsing module for BoredOnBoardIonic",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "parse": "node index.js"
+  },
+  "dependencies": {
+    "imap": "^0.8.19",
+    "mailparser": "^3.6.5",
+    "openai": "^5.8.2",
+    "dotenv": "^16.6.1",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/imap": "^0.8.35",
+    "@types/mailparser": "^3.4.0",
+    "@types/fs-extra": "^11.0.4"
+  }
+} 

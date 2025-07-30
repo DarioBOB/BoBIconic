@@ -1,0 +1,131 @@
+Pour recréer ce type de nuages blancs, gonflés et découpés nettement – comme vus depuis un avion – vous avez grosso modo deux approches en 3D/WebGL :
+
+---
+
+## 1. Nuages “volumétriques” par ray‑marching dans un shader
+
+1. **Champ de densité 3D**
+
+   * Créez un **volume** (une texture 3D ou un simple cube) dont chaque voxel a une densité basée sur du **Perlin** ou **Simplex noise** (voire du Worley noise pour des cumulus plus “moutonneux”).
+
+2. **Ray‑marching**
+
+   * Dans un fragment shader, pour chaque pixel, vous “marchez” un rayon à travers ce volume, en accumulant la densité pour calculer un alpha + couleur de nuage.
+   * Exemples de bibliothèques/demos :
+
+     * The Book of Shaders “Volumetric Clouds”
+     * three.js + GLSL raymarching (cf. `examples/webgl_volumetric_clouds.html`)
+
+3. **Paramètres clés**
+
+   * **Échafaudage** (tiled noise) pour couvrir un volume infini.
+   * **Lighting** approximatif (Lambert + expo sur la densité) pour donner du relief.
+   * **Billow** noise (abs(noise)) pour avoir des “boules” plutôt que du simple brouillard.
+
+> **Avantage** : ultra-réaliste, “profil 3D” exact
+>
+> **Inconvénient** : coûteux GPU, délicat à optimiser sur mobile
+
+---
+
+## 2. Nuages “billboards” ou “slice‐clouds” (plus simple / plus rapide)
+
+1. **Sprites alpha‑texturés**
+
+   * Préparez quelques textures de nuages PNG (ou générez‑les en 2D avec du Perlin noise + niveaux de gris + contours floutés).
+   * Instanciez des **billboards** (plans qui tournent toujours vers la caméra) dans la scène, à différentes hauteurs et profondeurs.
+
+2. **Plans “feuilles” empilés**
+
+   * Empilez 4–8 plans semi‑transparents au sein de chaque nuage, chacun utilisant la même texture mais offseté en position & rotation.
+   * En variant l’échelle et la rotation, on obtient un volume “faux 3D” assez convaincant.
+
+3. **Animation**
+
+   * Déplacez ces clusters de billboards doucement selon la direction du vent :
+
+     ```ts
+     cloudGroup.position.x += wind.x * deltaTime;
+     cloudGroup.position.y += wind.y * deltaTime;
+     ```
+   * Faites tourner/modifier leur opacité pour simuler la forme changeante.
+
+> **Avantage** : simple à implémenter, performant sur mobile
+>
+> **Inconvénient** : moins réaliste si on est trop près ou si on a beaucoup de nuages
+
+---
+
+## 3. Exemple minimal en Three.js (billboard clouds)
+
+```ts
+import * as THREE from 'three';
+
+class CloudGenerator {
+  constructor(scene: THREE.Scene, camera: THREE.Camera) {
+    this.scene = scene;
+    this.texture = new THREE.TextureLoader().load('assets/cloud.png');
+  }
+
+  createCloudCluster(count = 10) {
+    const group = new THREE.Group();
+    for (let i = 0; i < count; i++) {
+      const mat = new THREE.SpriteMaterial({
+        map: this.texture,
+        transparent: true,
+        opacity: 0.8,
+        depthWrite: false
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.position.set(
+        (Math.random() - 0.5) * 50,
+        (Math.random() - 0.5) * 20 + 10,
+        (Math.random() - 0.5) * 50
+      );
+      sprite.scale.set(10 + Math.random()*10, 6 + Math.random()*6, 1);
+      group.add(sprite);
+    }
+    this.scene.add(group);
+    return group;
+  }
+
+  animateClusters(clusters: THREE.Group[], wind: THREE.Vector2, delta: number) {
+    clusters.forEach(cluster => {
+      cluster.position.x += wind.x * delta;
+      cluster.position.z += wind.y * delta;
+      // optionnel : moduler opacité, tourner les sprites…
+    });
+  }
+}
+```
+
+1. **Préparez** un PNG de nuage (fond transparent, forme arrondie, floutée).
+2. **Générez** plusieurs `Group` de sprites : ils “flottent” dans votre skybox.
+3. **Mouvement** via `requestAnimationFrame` + `clock.getDelta()`.
+
+---
+
+## 4. Pour de la vraie volumétrie
+
+Si vous visez un rendu **très** réaliste :
+
+* **Shader GLSL** : implémentez du ray‑marching et du Worley noise
+* **Optimisations** : LOD, tileable 3D noise, march steps adaptatifs
+* **Référence** :
+
+  * Iñigo Quilez “Volumetric Cloud Rendering”
+  * Shadertoy : cherchez “Cumulus Clouds”
+
+---
+
+### En pratique
+
+* **Sur mobile** ou pour de simples hublots, je vous recommande la méthode **billboard + slices** :
+
+  * Rapide à mettre en place
+  * Conserve un look très “fluffy” si vos textures sont de bonne qualité
+  * Permet “multilayer” pour de la profondeur
+
+* **Si GPU desktop only**, partez sur la volumétrie pure en ray‑marching.
+
+Avec ça vous aurez des nuages très proches de ceux vus d’un avion, sans surcharger vos perfs.

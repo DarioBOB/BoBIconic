@@ -1,0 +1,534 @@
+.games-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--ion-color-medium);
+}
+
+.loading-container p {
+  margin-top: 16px;
+  font-size: 1rem;
+}
+
+// Tab navigation
+ion-segment {
+  margin: 16px;
+  border-radius: 12px;
+  background: var(--ion-color-light);
+}
+
+ion-segment-button {
+  --indicator-color: var(--ion-color-primary);
+  --color: var(--ion-color-medium);
+  --color-checked: var(--ion-color-primary);
+  font-size: 0.8rem;
+}
+
+ion-segment-button ion-icon {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+// Search and filters
+.search-filters {
+  padding: 0 16px 16px 16px;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-chips ion-chip {
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+// Tab content
+.tab-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-pane {
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 16px 16px 16px;
+}
+
+// Games grid
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+// Empty state
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--ion-color-medium);
+}
+
+.empty-state ion-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  color: var(--ion-color-dark);
+}
+
+.empty-state p {
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+// Section headers
+.section-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.section-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.section-header p {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}
+
+// Sessions
+.sessions-container {
+  height: 100%;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.session-card ion-card-header {
+  padding: 16px 16px 8px 16px;
+}
+
+.session-card ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.session-card ion-card-title ion-icon {
+  color: var(--ion-color-primary);
+}
+
+.session-card ion-card-subtitle {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.session-players {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+}
+
+.player-item ion-avatar {
+  width: 40px;
+  height: 40px;
+}
+
+.player-info h4 {
+  margin: 0 0 2px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.player-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.session-actions {
+  display: flex;
+  gap: 8px;
+}
+
+// Leaderboards
+.leaderboard-container {
+  height: 100%;
+}
+
+.leaderboards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.leaderboard-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-card ion-card-header {
+  padding: 16px 16px 8px 16px;
+}
+
+.leaderboard-card ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.leaderboard-card ion-card-title ion-icon {
+  color: var(--ion-color-primary);
+}
+
+.leaderboard-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leaderboard-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+}
+
+.leaderboard-entry .rank {
+  width: 24px;
+  height: 24px;
+  background: var(--ion-color-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.leaderboard-entry:nth-child(1) .rank {
+  background: gold;
+  color: var(--ion-color-dark);
+}
+
+.leaderboard-entry:nth-child(2) .rank {
+  background: silver;
+  color: var(--ion-color-dark);
+}
+
+.leaderboard-entry:nth-child(3) .rank {
+  background: #cd7f32;
+  color: white;
+}
+
+.leaderboard-entry ion-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.leaderboard-entry .player-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaderboard-entry .player-info h4 {
+  margin: 0 0 2px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.leaderboard-entry .player-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.leaderboard-entry .score {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+// Achievements
+.achievements-container {
+  height: 100%;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.achievement-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.achievement-card.unlocked {
+  border: 2px solid var(--ion-color-success);
+  background: linear-gradient(135deg, rgba(var(--ion-color-success-rgb), 0.1) 0%, rgba(var(--ion-color-success-rgb), 0.05) 100%);
+}
+
+.achievement-card ion-card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.achievement-icon {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.achievement-icon ion-icon {
+  font-size: 1.5rem;
+}
+
+.achievement-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.achievement-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.achievement-info p {
+  margin: 0 0 4px 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  line-height: 1.3;
+}
+
+.achievement-info small {
+  font-size: 0.7rem;
+  color: var(--ion-color-medium);
+  font-style: italic;
+}
+
+.achievement-info ion-badge {
+  margin-top: 4px;
+  font-size: 0.7rem;
+}
+
+// Statistics
+.statistics-container {
+  height: 100%;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-item ion-icon {
+  font-size: 2rem;
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+.stat-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.stat-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.favorite-game {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: var(--ion-color-dark);
+}
+
+// Create session modal
+.create-session-container {
+  padding: 20px;
+}
+
+.selected-game {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+}
+
+.selected-game h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.selected-game p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+// Game icons
+.game-icon {
+  font-size: 2rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--ion-color-light);
+}
+
+// Responsive design
+@media (max-width: 480px) {
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievements-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filter-chips {
+    justify-content: center;
+  }
+
+  .session-players {
+    gap: 8px;
+  }
+
+  .player-item {
+    padding: 6px;
+  }
+
+  .leaderboard-entry {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  ion-segment {
+    margin: 8px;
+  }
+
+  .tab-pane {
+    padding: 0 8px 16px 8px;
+  }
+
+  .search-filters {
+    padding: 0 8px 16px 8px;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .achievement-card.unlocked {
+    background: linear-gradient(135deg, rgba(var(--ion-color-success-rgb), 0.2) 0%, rgba(var(--ion-color-success-rgb), 0.1) 100%);
+  }
+
+  .player-item,
+  .leaderboard-entry {
+    background: var(--ion-color-dark);
+  }
+
+  .achievement-icon {
+    background: var(--ion-color-dark);
+  }
+} 

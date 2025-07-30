@@ -1,0 +1,165 @@
+Voici comment j’aborderais la réalisation de ces deux hublots 3D avec carte défilante et nuages factices, en partant d’une appli Ionic/Angular :
+
+---
+
+## 1. Architecture générale
+
+1. **Deux composants “Porthole”**
+
+   * `<app-porthole-left>` et `<app-porthole-right>`, chacun encapsulant un `<canvas>` ou un `<div>` masqué en forme de cercle/ovale.
+   * Chaque porthole expose une API (`@Input() cameraParams`, `@Input() speed`, …) et gère son propre rendu.
+
+2. **Moteur de rendu**
+
+   * **WebGL via Three.js** (ou Babylon.js) pour un contrôle fin de la 3D, des caméras et des particules.
+   * Alternativement un rendu Mapbox GL JS embarqué dans un `<div>` avec `clip-path: circle()` pour la fenêtre.
+
+3. **Services de données**
+
+   * **GeoService** : récupère `navigator.geolocation.watchPosition()` pour la position et la vitesse.
+   * **OrientationService** : utilise `window.addEventListener('deviceorientation')` pour capter le yaw/pitch/roll.
+   * Un **SharedStateService** qui mutualise `position`, `heading` et `speed` et diffuse par RxJS.
+
+---
+
+## 2. Mise en place du PortholeComponent
+
+### 2.1 Template HTML & CSS
+
+```html
+<!-- app-porthole.component.html -->
+<div class="porthole-mask">
+  <canvas #glCanvas></canvas>
+</div>
+```
+
+```scss
+/* app-porthole.component.scss */
+.porthole-mask {
+  width: 200px; height: 200px;
+  border: 8px solid #333;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+canvas {
+  width: 100%; height: 100%;
+  display: block;
+}
+```
+
+### 2.2 Initialisation Three.js
+
+Dans le composant TypeScript :
+
+```ts
+@ViewChild('glCanvas') canvasRef: ElementRef<HTMLCanvasElement>;
+
+ngAfterViewInit() {
+  const canvas = this.canvasRef.nativeElement;
+  this.renderer = new THREE.WebGLRenderer({ canvas, alpha:true });
+  this.scene    = new THREE.Scene();
+  this.camera   = new THREE.PerspectiveCamera( 60, 1, 0.1, 1000 );
+  this.camera.position.set(0, 0, 5);
+
+  // Plan carte : un grand plan texturé
+  const geo = new THREE.PlaneGeometry(20,20);
+  const mat = new THREE.MeshBasicMaterial({ map: this.mapTexture, depthTest:false });
+  this.mapMesh = new THREE.Mesh(geo, mat);
+  this.scene.add(this.mapMesh);
+
+  // Nuages : un système de particules
+  this.initClouds();
+
+  // Boucle de rendu
+  requestAnimationFrame(this.renderLoop.bind(this));
+}
+```
+
+---
+
+## 3. Gestion de la carte et du déplacement
+
+1. **Texture de la carte** :
+
+   * Soit un **tileserver** (Mapbox, OpenStreetMap) rendu en arrière‑plan sur un `<canvas>`, soit un atlas de tuiles appliqué comme texture.
+2. **Défilement**
+
+   * À chaque `tick` (rafraîchissement), on met à jour la position de la mesh-map en fonction de :
+
+     ```ts
+     // dx, dy calculés d’après la vitesse (m/s) et l’orientation
+     this.mapMesh.position.x += dx * deltaTime;
+     this.mapMesh.position.y += dy * deltaTime;
+     ```
+   * L’orientation (`heading`) pilote la **rotation** de la caméra ou de la mapMesh :
+
+     ```ts
+     this.mapMesh.rotation.z = - headingInRadians;
+     ```
+
+---
+
+## 4. Les nuages factices
+
+1. **Système de particules**
+
+   * Créer une `THREE.Points` avec une texture “sprite” (nuage semi‑transparent).
+   * Distribuer aléatoirement les particules sur un plan **au‑dessus** de la carte, à une hauteur fixe (e.g. z = 1).
+2. **Animation**
+
+   * À chaque frame, décaler légèrement leur `position.x` (ou en fonction du vent simulé) :
+
+     ```ts
+     cloudParticleSystem.geometry.vertices.forEach(v => {
+       v.x += cloudSpeed * deltaTime;
+       if (v.x > boundary) v.x = -boundary;
+     });
+     cloudParticleSystem.geometry.verticesNeedUpdate = true;
+     ```
+
+---
+
+## 5. Pilotage par position et angle
+
+* **Subscription RxJS** dans `PortholeComponent` :
+
+  ```ts
+  this.sharedState.position$.subscribe(pos => {
+    // on peut re‑projeter la carte selon pos.lat/pos.lng
+    this.updateMapOffset(pos);
+  });
+  this.sharedState.heading$.subscribe(heading => {
+    this.mapMesh.rotation.z = - heading * Math.PI/180;
+  });
+  this.sharedState.speed$.subscribe(speed => {
+    this.cloudSpeed = baseCloudSpeed * (speed / maxSpeed);
+  });
+  ```
+* **deltaTime** calculé entre deux `requestAnimationFrame` pour un mouvement fluide quelle que soit la fréquence d’affichage.
+
+---
+
+## 6. Intégration Ionic/Angular
+
+* En page `trips2.page.html`, placer à droite et à gauche :
+
+  ```html
+  <app-porthole-left></app-porthole-left>
+  <!-- centre : la timeline ou autre -->
+  <app-porthole-right></app-porthole-right>
+  ```
+* Charger `SharedStateService` au démarrage de la page et démarrer la veille géo/orientation.
+
+---
+
+## 7. Optimisations et bonnes pratiques
+
+* **LOD** pour la carte : charger moins de détails si la vitesse est élevée.
+* **Frustum culling** : désactiver le rendu des nuages hors champ.
+* **WebGL context loss** : gérer la restauration du contexte.
+* **Mobile** : limiter la taille de la texture et le nombre de particules pour préserver la batterie.
+
+---
+
+**En résumé**, je monterais deux composants canvas masqués en forme de hublot, chacun piloté par Three.js (scène+caméra), qui reçoit en temps réel position, cap et vitesse ; j’y fais défiler un plan texturé avec la carte et un système de particules nuageuses, tout en respectant les contraintes de performance mobile et d’intégration dans Ionic.
