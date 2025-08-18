@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoredOnBoard (BoB) - Infographie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            text-align: center;
+        }
+        .kpi-number {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .kpi-label {
+            font-size: 1.125rem;
+            color: #4A5568;
+            margin-top: 0.5rem;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #4A5568;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+        }
+        .ai-feature-button {
+            background-color: #06D6A0; /* Couleur verte de la palette */
+            color: #073B4C; /* Texte bleu foncé de la palette */
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .ai-feature-button:hover {
+            background-color: #00B289; /* Vert légèrement plus foncé */
+        }
+        .ai-response-box {
+            background-color: #E0F7FA; /* Bleu très clair */
+            border-left: 4px solid #118AB2; /* Bordure bleue */
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            text-align: left;
+            color: #073B4C;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #118AB2;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-[#073B4C]">
+
+    <header class="bg-[#118AB2] text-white text-center py-12 px-4">
+        <h1 class="text-5xl font-black mb-2">BoredOnBoard (BoB)</h1>
+        <p class="text-2xl font-semibold text-[#FFD166]">“From Bored to OnBoarded”</p>
+        <p class="mt-4 max-w-3xl mx-auto text-lg">Une infographie interactive présentant notre vision pour transformer l'ennui en vol en un engagement numérique intelligent et personnalisé.</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="problem" class="text-center py-12">
+            <h2 class="section-title">Le Problème : Une Expérience en Vol Défaillante</h2>
+            <p class="section-subtitle">Le divertissement à bord est souvent inexistant ou obsolète, en particulier sur les vols low-cost, créant une expérience frustrante pour des millions de passagers.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold mb-4">Divertissement Manquant</h3>
+                    <div class="chart-container">
+                        <canvas id="missingEntertainmentChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-gray-600">Une visualisation frappante du manque d'options de divertissement sur une grande partie des vols économiques.</p>
+                </div>
+                <div class="stat-card space-y-6">
+                    <h3 class="text-xl font-bold mb-4">Points Douloureux Majeurs</h3>
+                    <div class="text-left space-y-4">
+                        <p class="flex items-start"><span class="text-2xl mr-3">🚫</span> <strong>Contenu non personnalisé :</strong> Les systèmes IFE sont rigides et ne s'adaptent pas aux goûts individuels.</p>
+                        <p class="flex items-start"><span class="text-2xl mr-3">&#x1F6AB;</span> <strong>Manque d'engagement :</strong> Aucune possibilité d'interagir ou de se connecter pendant les longs trajets.</p>
+                        <p class="flex items-start"><span class="text-2xl mr-3">💰</span> <strong>Coûts prohibitifs pour les compagnies :</strong> Les IFE modernes représentent un investissement trop lourd pour de nombreux transporteurs.</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold mb-4">Taille du Marché (TAM)</h3>
+                    <p class="text-[#118AB2] kpi-number">$30B+</p>
+                    <p class="kpi-label">Technologies de l'aviation et services en vol</p>
+                    <p class="mt-4 text-gray-600">Un marché vaste et en croissance, prêt pour une solution innovante et légère comme BoB.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="solution" class="text-center py-12 bg-white rounded-lg shadow-lg my-8 p-8">
+            <h2 class="section-title">Notre Solution : BoB, le Compagnon de Voyage Intelligent</h2>
+            <p class="section-subtitle">BoB transforme chaque appareil personnel en une plateforme d'engagement complète, offrant une expérience riche et interactive sans nécessiter d'investissements matériels coûteux pour les compagnies aériennes.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 bg-gray-50 rounded-lg">
+                    <p class="text-4xl mb-4">🗺️</p>
+                    <h3 class="text-xl font-bold mb-2">Suivi de Vol Interactif</h3>
+                    <p class="text-gray-600">Cartes 3D, météo en temps réel, vitesse, altitude et ETA. Le vol devient une expérience immersive et éducative.</p>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-lg">
+                    <p class="text-4xl mb-4">🎮</p>
+                    <h3 class="text-xl font-bold mb-2">Divertissement & Social</h3>
+                    <p class="text-gray-600">Suite de mini-jeux, messagerie entre passagers et guide d'escale pour rester connecté et diverti.</p>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-lg">
+                    <p class="text-4xl mb-4">⚡</p>
+                    <h3 class="text-xl font-bold mb-2">Déploiement Agile</h3>
+                    <p class="text-gray-600">Une approche "Offline-first" et une faible consommation de bande passante garantissent une performance optimale et un déploiement rapide.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="traction" class="text-center py-12">
+            <h2 class="section-title">Traction et Validation du Marché</h2>
+            <p class="section-subtitle">Depuis notre lancement en bêta, BoB a démontré un fort engagement des utilisateurs et un intérêt significatif de la part des compagnies aériennes.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold mb-4">Utilisateurs Bêta</h3>
+                    <p class="text-[#06D6A0] kpi-number">400+</p>
+                    <p class="kpi-label">engagés dans nos tests pilotes</p>
+                </div>
+                 <div class="stat-card">
+                    <h3 class="text-xl font-bold mb-4">Qualité de Vol Perçue</h3>
+                    <div class="chart-container">
+                        <canvas id="satisfactionChart"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold mb-4">Partenariats Stratégiques</h3>
+                    <p class="text-[#118AB2] kpi-number">3</p>
+                    <p class="kpi-label">Compagnies aériennes en discussion (sous NDA)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="funding" class="text-center py-12 bg-white rounded-lg shadow-lg my-8 p-8">
+            <h2 class="section-title">Financement et Utilisation des Fonds</h2>
+            <p class="section-subtitle">Nous levons 2 millions de CHF en pré-amorçage pour accélérer notre croissance, recruter une équipe d'experts et sécuriser nos premiers partenariats B2B.</p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold mb-4">Répartition des Fonds</h3>
+                    <div class="chart-container">
+                        <canvas id="fundingChart"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold mb-4">Plan d'Équipe</h3>
+                    <p class="text-xl text-gray-600">Budget Annuel :</p>
+                    <p class="text-[#FF6B6B] text-5xl font-extrabold my-2">916k CHF</p>
+                    <p class="text-gray-600">Pour une équipe d'exécution complète de 6 personnes, couvrant le développement, le design, le marketing et les opérations.</p>
+                     <div class="mt-6 text-left">
+                        <h4 class="font-bold">Rôles Clés à Recruter :</h4>
+                        <ul class="list-disc list-inside text-gray-600 mt-2">
+                            <li>Développeur Frontend</li>
+                            <li>Développeur Backend</li>
+                            <li>Designer UX/UI</li>
+                            <li>Ingénieur QA</li>
+                            <li>Responsable Ventes & Marketing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="vision" class="text-center py-12">
+            <h2 class="section-title">Notre Vision : Devenir la Norme Mondiale</h2>
+            <p class="section-subtitle">BoB ambitionne de devenir le standard mondial de l'engagement en vol, avec des cibles de sortie stratégiques claires.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <p class="text-4xl mb-4">🔧</p>
+                    <h3 class="text-xl font-bold mb-2">Acquéreurs Tech Aéronautiques</h3>
+                    <p class="text-gray-600">Intégration dans les écosystèmes IFE de grands acteurs comme Thales ou Panasonic.</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <p class="text-4xl mb-4">📱</p>
+                    <h3 class="text-xl font-bold mb-2">Super-apps & OTAs</h3>
+                    <p class="text-gray-600">Ajout d'une couche d'engagement unique à des plateformes comme Hopper ou Booking.com.</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <p class="text-4xl mb-4">🤝</p>
+                    <h3 class="text-xl font-bold mb-2">Partenariats Stratégiques</h3>
+                    <p class="text-gray-600">Collaboration avec des géants du voyage comme Expedia ou des offices de tourisme régionaux.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ai-features" class="text-center py-12 bg-[#FFD166] rounded-lg shadow-lg my-8 p-8 text-[#073B4C]">
+            <h2 class="section-title text-[#073B4C]">Explorez BoB avec l'IA de Gemini ✨</h2>
+            <p class="section-subtitle text-[#073B4C]">Utilisez la puissance de l'IA pour obtenir des informations complémentaires sur notre pitch.</p>
+            <button id="summarizePitchButton" class="ai-feature-button">
+                Générer un résumé du pitch ✨
+            </button>
+            <div id="summaryOutput" class="ai-response-box hidden">
+                <div class="flex items-center justify-center">
+                    <div class="loading-spinner"></div>
+                    <p class="ml-2">Génération du résumé...</p>
+                </div>
+            </div>
+            <p id="errorOutput" class="text-red-600 mt-2 hidden">Une erreur est survenue lors de la génération du résumé. Veuillez réessayer plus tard.</p>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 bg-[#073B4C] text-white mt-8">
+        <p>&copy; 2025 BoredOnBoard (BoB). Tous droits réservés.</p>
+    </footer>
+
+    <script>
+        const PALETTE = {
+            red: '#FF6B6B',
+            yellow: '#FFD166',
+            green: '#06D6A0',
+            blue: '#118AB2',
+            darkBlue: '#073B4C',
+            lightGray: '#F0F4F8'
+        };
+
+        const tooltipConfig = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        function wrapLabel(label, maxWidth) {
+            if (label.length <= maxWidth) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > maxWidth) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            });
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        const missingEntertainmentCtx = document.getElementById('missingEntertainmentChart').getContext('2d');
+        new Chart(missingEntertainmentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Vols sans divertissement', 'Vols avec divertissement'],
+                datasets: [{
+                    data: [70, 30],
+                    backgroundColor: [PALETTE.red, PALETTE.lightGray],
+                    borderColor: ['#FFFFFF'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    ...tooltipConfig.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: '70% des vols low-cost sans divertissement',
+                        font: { size: 14 }
+                    }
+                }
+            }
+        });
+
+        const satisfactionCtx = document.getElementById('satisfactionChart').getContext('2d');
+        new Chart(satisfactionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Qualité de vol perçue améliorée', 'Autres avis'],
+                datasets: [{
+                    data: [82, 18],
+                    backgroundColor: [PALETTE.green, PALETTE.lightGray],
+                    borderColor: ['#FFFFFF'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    ...tooltipConfig.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: '82% des utilisateurs rapportent une amélioration',
+                        font: { size: 14 }
+                    }
+                }
+            }
+        });
+
+        const fundingCtx = document.getElementById('fundingChart').getContext('2d');
+        new Chart(fundingCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Recrutement (50%)', 'Produit (20%)', 'Marketing (20%)', 'Opérations (10%)'],
+                datasets: [{
+                    data: [50, 20, 20, 10],
+                    backgroundColor: [PALETTE.blue, PALETTE.green, PALETTE.yellow, PALETTE.red],
+                    borderColor: ['#FFFFFF'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    ...tooltipConfig.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Levée de fonds de 2M CHF',
+                        font: { size: 16 }
+                    }
+                }
+            }
+        });
+
+        const summarizePitchButton = document.getElementById('summarizePitchButton');
+        const summaryOutput = document.getElementById('summaryOutput');
+        const errorOutput = document.getElementById('errorOutput');
+
+        const pitchContent = `
+            BoredOnBoard (BoB) est une application mobile innovante qui transforme l'ennui en vol, surtout sur les compagnies low-cost, en engagement numérique. Le problème actuel est le manque de divertissement personnalisé et interactif, et le coût élevé des systèmes IFE pour les compagnies.
+            BoB offre un suivi de vol interactif, des jeux, du chat et un planificateur de voyage, fonctionnant hors ligne et étant facile à déployer.
+            Le projet a été développé en 6 mois par un CTO solo avec l'aide de 7 agents IA (pour UI, code review, traduction, tests). Le marché des technologies aériennes est de 30B$+. BoB se concentre d'abord sur les compagnies low-cost européennes, puis s'étendra aux aéroports, trains et croisières.
+            Le MVP est fonctionnel, "offline-first" et multiplateforme (Ionic + Firebase). Il y a déjà 400+ utilisateurs bêta et 3 partenariats aériens en discussion, avec 82% des utilisateurs rapportant une amélioration de la qualité de vol.
+            La stratégie Go-To-Market prévoit des pilotes avec des compagnies en Année 1 et une expansion de l'écosystème en Année 2.
+            L'équipe actuelle est le fondateur solo, mais le plan est d'embaucher 6 rôles clés (Frontend, Backend, UX/UI, QA, Marketing) pour un budget annuel de 916k CHF.
+            BoB cherche à lever 2M CHF en pré-amorçage pour 18 mois, dont 50% pour le recrutement.
+            La vision est de devenir le standard mondial de l'engagement en vol, avec des cibles de sortie incluant les acquéreurs tech aéronautiques, les super-apps et les partenariats stratégiques.
+        `;
+
+        summarizePitchButton.addEventListener('click', async () => {
+            summaryOutput.classList.remove('hidden');
+            summaryOutput.innerHTML = '<div class="flex items-center justify-center"><div class="loading-spinner"></div><p class="ml-2">Génération du résumé...</p></div>';
+            errorOutput.classList.add('hidden');
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: `Résumez le pitch suivant en 3 phrases, en français : "${pitchContent.trim()}"` }] });
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Canvas fournira la clé API à l'exécution.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            let retries = 0;
+            const maxRetries = 3;
+            const baseDelay = 1000; // 1 second
+
+            while (retries < maxRetries) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API error: ${response.status} ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        summaryOutput.innerHTML = `<p>${text}</p>`;
+                        return;
+                    } else {
+                        throw new Error("Structure de réponse inattendue ou contenu manquant.");
+                    }
+                } catch (error) {
+                    retries++;
+                    if (retries < maxRetries) {
+                        const delay = baseDelay * Math.pow(2, retries - 1);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        console.error("Erreur Gemini API après plusieurs tentatives:", error);
+                        summaryOutput.classList.add('hidden');
+                        errorOutput.classList.remove('hidden');
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

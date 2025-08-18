@@ -1,0 +1,324 @@
+.pacman-container {
+  --background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+  padding: 16px;
+  min-height: 100vh;
+}
+
+// En-tête du jeu
+.game-header {
+  margin-bottom: 20px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  border-radius: 16px;
+  padding: 16px 20px;
+  text-align: center;
+  min-width: 100px;
+  box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  flex: 1;
+  
+  h3 {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  p {
+    color: white;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 900;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    
+    &.won {
+      color: #4CAF50;
+    }
+    
+    &.lost {
+      color: #f44336;
+    }
+  }
+}
+
+// Instructions
+.instructions {
+  margin-bottom: 20px;
+  
+  ion-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    ion-card-content {
+      color: white;
+      
+      p {
+        margin: 8px 0;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Labyrinthe
+.maze-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.maze {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 25px;
+  height: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  
+  &.wall {
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+    border-color: #3f51b5;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  &.dot {
+    background: transparent;
+    color: #ffd700;
+    font-size: 20px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  &.pacman {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+    animation: pacmanAnimation 0.5s ease-in-out infinite alternate;
+  }
+  
+  &.ghost {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.5);
+    animation: ghostAnimation 1s ease-in-out infinite;
+  }
+  
+  &.empty {
+    background: transparent;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes pacmanAnimation {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.7);
+  }
+}
+
+@keyframes ghostAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.pacman-emoji {
+  font-size: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.ghost-emoji {
+  font-size: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.dot {
+  font-size: 20px;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+// Écran de fin de partie
+.game-over-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.game-over-content {
+  text-align: center;
+  color: white;
+  max-width: 500px;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0 0 30px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.final-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    opacity: 0.9;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    
+    &.final-score {
+      font-size: 2rem;
+      color: #ffd700;
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .stats-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat-card {
+    min-width: 150px;
+  }
+  
+  .cell {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+  }
+  
+  .pacman-emoji,
+  .ghost-emoji {
+    font-size: 14px;
+  }
+  
+  .dot {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pacman-container {
+    padding: 12px;
+  }
+  
+  .maze {
+    padding: 15px;
+  }
+  
+  .cell {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+  }
+  
+  .pacman-emoji,
+  .ghost-emoji {
+    font-size: 12px;
+  }
+  
+  .dot {
+    font-size: 14px;
+  }
+  
+  .game-over-content h1 {
+    font-size: 2rem;
+  }
+} 

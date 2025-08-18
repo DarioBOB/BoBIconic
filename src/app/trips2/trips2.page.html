@@ -1,0 +1,605 @@
+<!-- src/app/trips2/trips2.page.html -->
+
+<ion-header class="modern-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="header-title">
+      <div class="title-content">
+        <ion-icon name="airplane" class="title-icon"></ion-icon>
+        <span>{{ getPageTitle() }}</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <!-- Bouton de debug (visible) -->
+      <ion-button (click)="debugLocalDB()" title="Debug DB Locale" color="warning" fill="clear">
+        <ion-icon name="information-circle"></ion-icon>
+      </ion-button>
+      
+      <!-- Menu principal avec toutes les actions -->
+      <ion-button (click)="showMainMenu()" title="Menu principal" color="primary" fill="clear">
+        <ion-icon name="ellipsis-horizontal"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="trips-content-modern">
+  <!-- Hero Section avec métriques -->
+  <div class="hero-section">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+      <div class="hero-title">
+        <h1>{{ getPageTitle() }}</h1>
+        <p class="hero-subtitle">Voyages intelligents avec IA</p>
+      </div>
+      
+      <!-- Métriques en temps réel -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon ongoing">
+            <ion-icon name="airplane"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ ongoingTripsGenerated.length }}</div>
+            <div class="metric-label">{{ getTabLabel('ongoing') }}</div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon upcoming">
+            <ion-icon name="calendar"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ upcomingTripsGenerated.length }}</div>
+            <div class="metric-label">{{ getTabLabel('upcoming') }}</div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon past">
+            <ion-icon name="time"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ pastTripsGenerated.length }}</div>
+            <div class="metric-label">{{ getTabLabel('past') }}</div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon total">
+            <ion-icon name="stats-chart"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ ongoingTripsGenerated.length + upcomingTripsGenerated.length + pastTripsGenerated.length }}</div>
+            <div class="metric-label">Total</div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon local-db" (click)="getLocalDBStats()" title="Cliquer pour voir les stats">
+            <ion-icon name="server"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ trips2LocalDBService.isLocalDBAvailable() ? 'ON' : 'OFF' }}</div>
+            <div class="metric-label">DB Locale</div>
+          </div>
+        </div>
+        
+        <!-- Boutons d'action visibles -->
+        <div class="metric-card action-buttons">
+          <div class="metric-icon actions">
+            <ion-icon name="construct"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">Actions</div>
+            <div class="metric-label">
+              <button class="action-btn window-btn" (click)="openWindow()" title="Ouvrir Hublot avec vol en cours">
+                <ion-icon name="eye"></ion-icon>
+                Hublot
+              </button>
+              <button class="action-btn debug-btn" (click)="debugLocalDB()" title="Debug DB Locale">
+                <ion-icon name="information-circle"></ion-icon>
+                Debug
+              </button>
+              <button class="action-btn menu-btn" (click)="showMainMenu()" title="Menu principal">
+                <ion-icon name="ellipsis-horizontal"></ion-icon>
+                Menu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation moderne avec onglets -->
+  <div class="modern-tabs">
+    <div class="tabs-container">
+      <div class="tab-item" 
+           [class.active]="selectedSegmentGenerated === 'ongoing'"
+           (click)="selectedSegmentGenerated = 'ongoing'">
+        <div class="tab-icon">
+          <ion-icon name="airplane"></ion-icon>
+        </div>
+        <div class="tab-content">
+          <div class="tab-label">{{ getTabLabel('ongoing') }}</div>
+          <div class="tab-count">{{ ongoingTripsGenerated.length }}</div>
+        </div>
+        <div class="tab-indicator" *ngIf="selectedSegmentGenerated === 'ongoing'"></div>
+    </div>
+
+      <div class="tab-item" 
+           [class.active]="selectedSegmentGenerated === 'upcoming'"
+           (click)="selectedSegmentGenerated = 'upcoming'">
+        <div class="tab-icon">
+          <ion-icon name="calendar"></ion-icon>
+        </div>
+        <div class="tab-content">
+          <div class="tab-label">{{ getTabLabel('upcoming') }}</div>
+          <div class="tab-count">{{ upcomingTripsGenerated.length }}</div>
+        </div>
+        <div class="tab-indicator" *ngIf="selectedSegmentGenerated === 'upcoming'"></div>
+      </div>
+      
+      <div class="tab-item" 
+           [class.active]="selectedSegmentGenerated === 'past'"
+           (click)="selectedSegmentGenerated = 'past'">
+        <div class="tab-icon">
+          <ion-icon name="time"></ion-icon>
+        </div>
+        <div class="tab-content">
+          <div class="tab-label">{{ getTabLabel('past') }}</div>
+          <div class="tab-count">{{ pastTripsGenerated.length }}</div>
+        </div>
+        <div class="tab-indicator" *ngIf="selectedSegmentGenerated === 'past'"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="trips-container-modern">
+    <!-- Liste des voyages -->
+    <div>
+      <div *ngFor="let segment of ['ongoing', 'upcoming', 'past']">
+        <div *ngIf="selectedSegmentGenerated === segment">
+          <!-- État vide moderne -->
+          <div *ngIf="(segment === 'ongoing' ? ongoingTripsGenerated : segment === 'upcoming' ? upcomingTripsGenerated : pastTripsGenerated).length === 0" 
+               class="empty-state-modern">
+            <div class="empty-icon">
+              <ion-icon [name]="segment === 'ongoing' ? 'airplane-outline' : segment === 'upcoming' ? 'calendar-outline' : 'time-outline'"></ion-icon>
+            </div>
+            <div class="empty-content">
+              <h2>{{ segment === 'ongoing' ? 'Aucun voyage en cours' : segment === 'upcoming' ? 'Aucun voyage à venir' : 'Aucun voyage passé' }}</h2>
+              <p>{{ segment === 'ongoing' ? 'Vous n\'avez pas de voyage en cours pour le moment.' : segment === 'upcoming' ? 'Aucun voyage planifié pour l\'avenir.' : 'Aucun voyage terminé enregistré.' }}</p>
+              <ion-button fill="solid" (click)="addNewTrip()" class="empty-action">
+                <ion-icon name="add" slot="start"></ion-icon>
+                Créer votre premier voyage
+              </ion-button>
+      </div>
+    </div>
+
+          <!-- Cartes de voyage immersives unifiées -->
+          <div *ngFor="let trip of (segment === 'ongoing' ? ongoingTripsGenerated : segment === 'upcoming' ? upcomingTripsGenerated : pastTripsGenerated); let i = index">
+            <div class="trip-card-waw" [ngClass]="[segment, 'card-' + (i % 3)]" [style.animation-delay]="(i * 0.1) + 's'">
+              <!-- Image de fond immersive uniquement sur la carte -->
+              <div class="trip-background-waw">
+                <img [src]="trip.image" alt="Image du voyage" />
+                <div class="trip-overlay-waw"></div>
+              </div>
+              <div class="trip-content-waw">
+                <div class="trip-header-waw">
+                  <div class="trip-title-section">
+                    <h2 class="trip-title-waw">{{ trip.name }}</h2>
+                    <div class="trip-badge-waw" [ngClass]="trip.status">
+                      <span class="badge-icon">
+                        <ion-icon [name]="getStatusIcon(trip.status)"></ion-icon>
+                      </span>
+                      <span class="badge-text">{{ getStatusLabel(trip.status) }}</span>
+                    </div>
+                  </div>
+                  <div class="trip-actions-waw">
+                    <ion-button fill="clear" size="small" 
+                               (click)="openImageModal(trip); $event.stopPropagation();" 
+                               class="action-btn-waw upload-action-btn"
+                               title="Changer l'image du voyage"
+                               aria-label="Changer l'image du voyage">
+                      <ion-icon name="camera"></ion-icon>
+                      <span class="button-label">Image</span>
+                    </ion-button>
+                  </div>
+                </div>
+                <div class="trip-info-waw">
+                  <div class="trip-location-waw">
+                    <ion-icon name="location"></ion-icon>
+                    <span>{{ trip.description }}</span>
+                  </div>
+                  <div class="trip-dates-waw">
+                    <ion-icon name="calendar"></ion-icon>
+                    <span>{{ formatDateGeminiGenerated(trip.startDate) }} – {{ formatDateGeminiGenerated(trip.endDate) }}</span>
+                    <span class="trip-duration-waw">({{ getTripDuration(trip) }})</span>
+                  </div>
+                  <div class="trip-countdown-waw" *ngIf="trip.status === 'upcoming'">
+                    <ion-icon name="time"></ion-icon>
+                    <span>{{ getCountdown(trip.startDate) }}</span>
+                  </div>
+                </div>
+                <div class="trip-summary-waw" *ngIf="trip.plans?.length">
+                  <div class="summary-stats">
+                    <div class="stat-item">
+                      <span class="stat-value">{{ trip.plans.length }}</span>
+                      <span class="stat-label">plans</span>
+                    </div>
+                    <div class="stat-item" *ngIf="hasFlights(trip)">
+                      <span class="stat-value">{{ getFlightsCount(trip) }}</span>
+                      <span class="stat-label">vols</span>
+                    </div>
+                    <div class="stat-item" *ngIf="hasHotels(trip)">
+                      <span class="stat-value">{{ getHotelsCount(trip) }}</span>
+                      <span class="stat-label">hôtels</span>
+                    </div>
+                    <div class="stat-item" *ngIf="hasActivities(trip)">
+                      <span class="stat-value">{{ getActivitiesCount(trip) }}</span>
+                      <span class="stat-label">activités</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="trip-actions-bottom-waw">
+                  <ion-button fill="outline" size="small" 
+                             (click)="addPlanToTrip(trip); $event.stopPropagation();" 
+                             class="add-plan-btn-waw"
+                             title="Ajouter un nouveau plan à ce voyage"
+                             aria-label="Ajouter un nouveau plan à ce voyage">
+                    <ion-icon name="add" slot="start"></ion-icon>
+                    Ajouter un plan
+                  </ion-button>
+                </div>
+              </div>
+              <div class="expand-indicator-waw" [class.expanded]="trip.showDetails" (click)="toggleTripDetails(trip); $event.stopPropagation()">
+                <ion-icon name="chevron-down"></ion-icon>
+              </div>
+            </div>
+            
+            <!-- Timeline TripIt Pro++ WAW++ -->
+            <div *ngIf="trip.showDetails" class="tripit-timeline-waw-container">
+              <div *ngIf="trip.plans?.length; else noPlans" class="tripit-timeline-waw tripit-timeline-pro">
+                <ng-container *ngFor="let plan of trip.plans; let j = index">
+                  <div *ngIf="j === 0 || (trip.plans && !isSameDay(plan.startDate, trip.plans[j-1]?.startDate))" class="timeline-day-sticky-pro pastel">
+                    <span class="timeline-day-label">{{ formatPlanDay(plan.startDate) }}</span>
+                  </div>
+                  <div class="timeline-row-ultra animate-fadein" role="listitem">
+                    <div class="timeline-time-ultra">
+                      <div class="time-main-ultra">
+                        <span>{{ formatTimeGeminiGenerated(plan.startDate) }}</span>
+                      </div>
+                    </div>
+                    <div class="timeline-icon-ultra">
+                      <div class="icon-circle-ultra {{ plan.type }}" tabindex="0" [attr.aria-label]="getPlanTypeLabel(plan.type) || ''">
+                        <ion-icon [name]="getPlanIcon(plan.type)" class="timeline-icon"></ion-icon>
+                      </div>
+                      <div class="timeline-ultra-line shadow-line" [ngStyle]="{'background': getPlanLineColor(plan.type || 'other')}" *ngIf="trip.plans && j < trip.plans.length - 1"></div>
+                    </div>
+                    <div class="timeline-content-ultra glass animate-slidein">
+                      <div class="plan-header-ultra">
+                        <span class="plan-title-ultra">{{ plan.name }}</span>
+                        <span class="plan-badge-ultra" [ngClass]="plan.status">{{ getPlanStatusLabel(plan.status || 'upcoming') }}</span>
+                        <span class="plan-actions-ultra" (click)="showPlanMenu(plan, $event)" tabindex="0" aria-label="Actions">&#x22EE;</span>
+                      </div>
+                      <div class="plan-details-ultra">
+                        <span class="plan-location-ultra">{{ plan.location }}</span>
+                        <span class="plan-timezone-ultra">({{ plan.timezone }})</span>
+                        <span class="plan-time-ultra">
+                          {{ formatDateGeminiGenerated(plan.startDate) }} {{ formatTimeGeminiGenerated(plan.startDate) }} - {{ formatDateGeminiGenerated(plan.endDate) }} {{ formatTimeGeminiGenerated(plan.endDate) }}
+                        </span>
+                        
+                        <!-- Détails enrichis selon le type de plan -->
+                        <div class="plan-enriched-details" *ngIf="plan.details">
+                          
+                          <!-- Détails pour les vols -->
+                          <div *ngIf="plan.type === 'flight' && getFlightDetails(plan)" class="flight-details">
+                            <div class="detail-row">
+                              <ion-icon name="airplane" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Vol:</span>
+                              <span class="detail-value">{{ getFlightNumber(plan) }} - {{ getAirline(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="airplane-outline" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Avion:</span>
+                              <span class="detail-value">{{ getAircraft(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="location" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Départ:</span>
+                              <span class="detail-value">{{ getDepartureAirport(plan) }} (Porte {{ getDepartureGate(plan) }})</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="location-outline" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Arrivée:</span>
+                              <span class="detail-value">{{ getArrivalAirport(plan) }} (Porte {{ getArrivalGate(plan) }})</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getBaggageClaim(plan)">
+                              <ion-icon name="bag-handle" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Bagages:</span>
+                              <span class="detail-value">{{ getBaggageClaim(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="time" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Durée:</span>
+                              <span class="detail-value">{{ getDuration(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="resize" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Distance:</span>
+                              <span class="detail-value">{{ getDistance(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="checkmark-circle" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Statut:</span>
+                              <span class="detail-value status-{{ getFlightStatus(plan).toLowerCase() }}">{{ getFlightStatus(plan) }}</span>
+                            </div>
+                          </div>
+
+                          <!-- Détails pour les hôtels -->
+                          <div *ngIf="plan.type === 'hotel' && getHotelDetails(plan)" class="hotel-details">
+                            <div class="detail-row">
+                              <ion-icon name="business" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Hôtel:</span>
+                              <span class="detail-value">{{ getHotelName(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="star" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Classement:</span>
+                              <span class="detail-value">{{ getHotelStars(plan) }} étoiles</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="location" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Adresse:</span>
+                              <span class="detail-value">{{ getHotelAddress(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="call" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Téléphone:</span>
+                              <span class="detail-value">{{ getHotelPhone(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getRoomNumber(plan)">
+                              <ion-icon name="bed" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Chambre:</span>
+                              <span class="detail-value">{{ getRoomNumber(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getPrice(plan)">
+                              <ion-icon name="card" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Prix:</span>
+                              <span class="detail-value">{{ getPrice(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getAmenities(plan).length > 0">
+                              <ion-icon name="list" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Équipements:</span>
+                              <span class="detail-value">{{ getAmenities(plan).join(', ') }}</span>
+                            </div>
+                          </div>
+
+                          <!-- Détails pour les activités -->
+                          <div *ngIf="plan.type === 'activity' && getActivityDetails(plan)" class="activity-details">
+                            <div class="detail-row">
+                              <ion-icon name="briefcase" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Type:</span>
+                              <span class="detail-value">{{ getActivityType(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getActivityCompany(plan)">
+                              <ion-icon name="business" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Entreprise:</span>
+                              <span class="detail-value">{{ getActivityCompany(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getActivityGuide(plan)">
+                              <ion-icon name="person" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Guide:</span>
+                              <span class="detail-value">{{ getActivityGuide(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getActivityPhone(plan)">
+                              <ion-icon name="call" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Téléphone:</span>
+                              <span class="detail-value">{{ getActivityPhone(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getDuration(plan)">
+                              <ion-icon name="time" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Durée:</span>
+                              <span class="detail-value">{{ getDuration(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getPrice(plan)">
+                              <ion-icon name="card" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Prix:</span>
+                              <span class="detail-value">{{ getPrice(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getItinerary(plan).length > 0">
+                              <ion-icon name="map" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Itinéraire:</span>
+                              <span class="detail-value">{{ getItinerary(plan).join(', ') }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getServices(plan).length > 0">
+                              <ion-icon name="checkmark" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Inclus:</span>
+                              <span class="detail-value">{{ getServices(plan).join(', ') }}</span>
+                            </div>
+                          </div>
+
+                          <!-- Détails pour les transports -->
+                          <div *ngIf="plan.type === 'transport' && getTransportDetails(plan)" class="transport-details">
+                            <div class="detail-row">
+                              <ion-icon name="car" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Entreprise:</span>
+                              <span class="detail-value">{{ getTransportCompany(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="car-sport" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Véhicule:</span>
+                              <span class="detail-value">{{ getTransportVehicle(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="person" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Chauffeur:</span>
+                              <span class="detail-value">{{ getTransportDriver(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getDistance(plan)">
+                              <ion-icon name="resize" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Distance:</span>
+                              <span class="detail-value">{{ getDistance(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getDuration(plan)">
+                              <ion-icon name="time" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Durée:</span>
+                              <span class="detail-value">{{ getDuration(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getPrice(plan)">
+                              <ion-icon name="card" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Prix:</span>
+                              <span class="detail-value">{{ getPrice(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getAmenities(plan).length > 0">
+                              <ion-icon name="checkmark" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Inclus:</span>
+                              <span class="detail-value">{{ getAmenities(plan).join(', ') }}</span>
+                            </div>
+                          </div>
+
+                          <!-- Détails pour les locations de voiture -->
+                          <div *ngIf="plan.type === 'car_rental' && getCarRentalDetails(plan)" class="car-rental-details">
+                            <div class="detail-row">
+                              <ion-icon name="business" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Entreprise:</span>
+                              <span class="detail-value">{{ getCarRentalCompany(plan) }}</span>
+                            </div>
+                            <div class="detail-row">
+                              <ion-icon name="car" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Véhicule:</span>
+                              <span class="detail-value">{{ getCarRentalVehicle(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getCarRentalLicensePlate(plan)">
+                              <ion-icon name="card" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Plaque:</span>
+                              <span class="detail-value">{{ getCarRentalLicensePlate(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getPrice(plan)">
+                              <ion-icon name="card" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Prix:</span>
+                              <span class="detail-value">{{ getPrice(plan) }}</span>
+                            </div>
+                            <div class="detail-row" *ngIf="getAmenities(plan).length > 0">
+                              <ion-icon name="checkmark" class="detail-icon"></ion-icon>
+                              <span class="detail-label">Inclus:</span>
+                              <span class="detail-value">{{ getAmenities(plan).join(', ') }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+                <button class="add-plan-fab animate-fadein" 
+                        title="Ajouter un nouveau plan à ce voyage" 
+                        aria-label="Ajouter un nouveau plan à ce voyage"
+                        (click)="addPlanToTrip(trip)">
+                  <div class="fab-content">
+                    <ion-icon name="add-circle" class="fab-icon"></ion-icon>
+                    <span class="fab-label">+ Plan</span>
+                  </div>
+                </button>
+              </div>
+              <ng-template #noPlans>
+                <div class="timeline-empty">Aucun plan pour ce voyage</div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour changer l'image du voyage -->
+  <ion-modal [isOpen]="showImageModal" (didDismiss)="closeImageModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Changer l'image du voyage</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeImageModal()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <!-- Onglets -->
+        <ion-segment [(ngModel)]="activeTab" class="image-modal-tabs">
+          <ion-segment-button value="upload">
+            <ion-label>Upload</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="url">
+            <ion-label>URL</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="preset">
+            <ion-label>Prédéfinies</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- Section Upload -->
+        <div *ngIf="activeTab === 'upload'" class="upload-section">
+          <ion-item>
+            <ion-label position="stacked">Sélectionner un fichier image</ion-label>
+            <ion-input type="file" accept="image/*" (change)="onFileSelected($event)"></ion-input>
+          </ion-item>
+          <div *ngIf="selectedFile" class="file-info">
+            <p><strong>{{ selectedFile.name }}</strong></p>
+            <p>{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</p>
+            <ion-button fill="solid" (click)="uploadSelectedFile()" class="upload-btn">
+              <ion-icon name="cloud-upload" slot="start"></ion-icon>
+              Utiliser cette image
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Section URL -->
+        <div *ngIf="activeTab === 'url'" class="url-section">
+          <ion-item>
+            <ion-label position="stacked">URL de l'image</ion-label>
+            <ion-input 
+              type="url" 
+              placeholder="https://example.com/image.jpg"
+              [(ngModel)]="customImageUrl">
+            </ion-input>
+          </ion-item>
+          <div *ngIf="customImageUrl" class="url-preview">
+            <img [src]="customImageUrl" alt="Aperçu URL" class="preview-image"
+                 (error)="onImageError($event)">   
+            <ion-button fill="solid" (click)="useCustomUrl()" class="use-url-btn">
+              <ion-icon name="checkmark" slot="start"></ion-icon>
+              Utiliser cette URL
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Section Images prédéfinies -->
+        <div *ngIf="activeTab === 'preset'" class="preset-section">
+          <div class="preset-grid">
+            <div *ngFor="let imageUrl of predefinedImages; let i = index"
+                 class="preset-item"
+                 (click)="changeTripImage(imageUrl)"
+                 [class.selected]="selectedTripForImage?.image === imageUrl">
+              <img [src]="imageUrl" alt="Image prédéfinie" class="preset-image">
+            </div>
+          </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="modal-actions">
+          <ion-button fill="outline" (click)="closeImageModal()">
+            <ion-icon name="close" slot="start"></ion-icon>
+            Annuler
+          </ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+
+

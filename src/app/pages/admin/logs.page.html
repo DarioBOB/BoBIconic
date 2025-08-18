@@ -1,0 +1,240 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      <ion-icon name="document-text-outline"></ion-icon>
+      {{ 'LOGS.TITLE' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Statistiques -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="stats-chart-outline"></ion-icon>
+        {{ 'LOGS.STATISTICS' | translate }}
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6" size-md="3">
+            <div class="stat-item">
+              <div class="stat-value">{{ getTotalCount() }}</div>
+              <div class="stat-label">{{ 'LOGS.TOTAL_LOGS' | translate }}</div>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3">
+            <div class="stat-item">
+              <div class="stat-value">{{ getFilteredCount() }}</div>
+              <div class="stat-label">{{ 'LOGS.FILTERED_LOGS' | translate }}</div>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3">
+            <div class="stat-item">
+              <div class="stat-value">{{ stats.byLevel?.ERROR || 0 }}</div>
+              <div class="stat-label">{{ 'LOGS.ERRORS' | translate }}</div>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3">
+            <div class="stat-item">
+              <div class="stat-value">{{ categories.length }}</div>
+              <div class="stat-label">{{ 'LOGS.CATEGORIES' | translate }}</div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Filtres -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="filter-outline"></ion-icon>
+        {{ 'LOGS.FILTERS' | translate }}
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" size-md="6">
+            <ion-item>
+              <ion-label position="stacked">{{ 'LOGS.LEVEL' | translate }}</ion-label>
+              <ion-select [(ngModel)]="selectedLevel" (ionChange)="applyFilters()">
+                <ion-select-option value="">{{ 'LOGS.ALL_LEVELS' | translate }}</ion-select-option>
+                <ion-select-option *ngFor="let level of logLevels" [value]="level">
+                  {{ level }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12" size-md="6">
+            <ion-item>
+              <ion-label position="stacked">{{ 'LOGS.CATEGORY' | translate }}</ion-label>
+              <ion-select [(ngModel)]="selectedCategory" (ionChange)="applyFilters()">
+                <ion-select-option value="">{{ 'LOGS.ALL_CATEGORIES' | translate }}</ion-select-option>
+                <ion-select-option *ngFor="let category of categories" [value]="category">
+                  {{ category }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="12" size-md="6">
+            <ion-item>
+              <ion-label position="stacked">{{ 'LOGS.USER' | translate }}</ion-label>
+              <ion-select [(ngModel)]="selectedUser" (ionChange)="applyFilters()">
+                <ion-select-option value="">{{ 'LOGS.ALL_USERS' | translate }}</ion-select-option>
+                <ion-select-option *ngFor="let user of users" [value]="user">
+                  {{ user }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12" size-md="6">
+            <ion-item>
+              <ion-label position="stacked">{{ 'LOGS.SEARCH' | translate }}</ion-label>
+              <ion-input 
+                [(ngModel)]="searchTerm" 
+                (ionInput)="applyFilters()"
+                [placeholder]="'LOGS.SEARCH_PLACEHOLDER' | translate">
+              </ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="12" size-md="6">
+            <ion-item>
+              <ion-label position="stacked">{{ 'LOGS.START_DATE' | translate }}</ion-label>
+              <ion-input 
+                type="date" 
+                [(ngModel)]="startDate" 
+                (ionChange)="applyFilters()">
+              </ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12" size-md="6">
+            <ion-item>
+              <ion-label position="stacked">{{ 'LOGS.END_DATE' | translate }}</ion-label>
+              <ion-input 
+                type="date" 
+                [(ngModel)]="endDate" 
+                (ionChange)="applyFilters()">
+              </ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="12">
+            <ion-button fill="clear" (click)="resetFilters()">
+              <ion-icon name="refresh-outline"></ion-icon>
+              {{ 'LOGS.RESET_FILTERS' | translate }}
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Actions -->
+  <ion-card>
+    <ion-card-content>
+      <ion-button (click)="exportJSON()" color="primary">
+        <ion-icon name="download-outline"></ion-icon>
+        {{ 'LOGS.EXPORT_JSON' | translate }}
+      </ion-button>
+      <ion-button (click)="exportCSV()" color="secondary">
+        <ion-icon name="document-outline"></ion-icon>
+        {{ 'LOGS.EXPORT_CSV' | translate }}
+      </ion-button>
+      <ion-button (click)="clearLogs()" color="danger">
+        <ion-icon name="trash-outline"></ion-icon>
+        {{ 'LOGS.CLEAR_LOGS' | translate }}
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Liste des logs -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="list-outline"></ion-icon>
+        {{ 'LOGS.LOG_ENTRIES' | translate }}
+        <span class="log-count">({{ getFilteredCount() }})</span>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Pagination -->
+      <div class="pagination-controls" *ngIf="totalPages > 1">
+        <ion-button 
+          [disabled]="currentPage === 1" 
+          (click)="changePage(currentPage - 1)"
+          size="small">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </ion-button>
+        <span class="page-info">
+          {{ 'LOGS.PAGE' | translate }} {{ currentPage }} / {{ totalPages }}
+        </span>
+        <ion-button 
+          [disabled]="currentPage === totalPages" 
+          (click)="changePage(currentPage + 1)"
+          size="small">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="loading-container">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>{{ 'LOGS.LOADING' | translate }}</p>
+      </div>
+
+      <!-- Liste des logs -->
+      <div *ngIf="!isLoading && getCurrentPageLogs().length > 0" class="logs-container">
+        <ion-item *ngFor="let log of getCurrentPageLogs()" class="log-item">
+          <ion-label>
+            <div class="log-header">
+              <ion-badge [color]="getLevelColor(log.level)" class="log-level">
+                {{ getLogLevelName(log.level) }}
+              </ion-badge>
+              <span class="log-category">{{ log.category }}</span>
+              <span class="log-timestamp">{{ formatTimestamp(log.timestamp) }}</span>
+            </div>
+            <div class="log-message">{{ log.message }}</div>
+            <div class="log-meta">
+              <span class="log-user" *ngIf="log.userId">
+                <ion-icon name="person-outline"></ion-icon>
+                {{ log.userId }}
+              </span>
+              <span class="log-session" *ngIf="log.sessionId">
+                <ion-icon name="key-outline"></ion-icon>
+                {{ log.sessionId }}
+              </span>
+            </div>
+            <div class="log-context" *ngIf="log.context">
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                (click)="log.showContext = !log.showContext">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                {{ 'LOGS.SHOW_CONTEXT' | translate }}
+              </ion-button>
+              <pre *ngIf="log.showContext" class="context-content">
+                {{ formatContext(log.context) }}
+              </pre>
+            </div>
+          </ion-label>
+        </ion-item>
+      </div>
+
+      <!-- Aucun log -->
+      <div *ngIf="!isLoading && getCurrentPageLogs().length === 0" class="no-logs">
+        <ion-icon name="document-outline" size="large"></ion-icon>
+        <p>{{ 'LOGS.NO_LOGS' | translate }}</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content> 

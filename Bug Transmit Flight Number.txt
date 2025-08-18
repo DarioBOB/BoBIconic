@@ -1,0 +1,126 @@
+Le zip lu intégralement montre que **le “vol en cours” est bien détecté et stocké dans `OngoingFlightService` depuis `Trips2PageGenerated`, mais il n’est jamais “envoyé” (navigué ou injecté) vers la page Window de façon fiable.** Résumé des causes :
+
+---
+
+## Pourquoi le vol n’arrive pas sur Window
+
+1. **Aucune navigation avec état (`router.navigate`) depuis Trips2 → Window**
+
+   * Window essaie d’abord de récupérer `ongoingFlight` via :
+
+     ```ts
+     const navigation = this.router.getCurrentNavigation();
+     const ongoingFlight = navigation?.extras?.state?.['ongoingFlight'];
+     ```
+
+     Or, dans `trips2.page.ts`, tu n’appelles **jamais** `router.navigate(['/window'], { state: { ongoingFlight: flightInfo } })`.
+   * Résultat : `navigation?.extras?.state` est vide.
+
+2. **Tu comptes uniquement sur le service, mais l’initialisation de Window peut “rater” l’info**
+
+   * Certes, tu fais :
+
+     ```ts
+     this.ongoingFlightService.setOngoingFlight(flightInfo);
+     ```
+   * Window s’abonne bien à `ongoingFlight$`, **mais** :
+
+     * Le `BehaviorSubject` diffuse la valeur *au moment de l’abonnement*. Si Window est déjà chargée avant que Trips2 ait fait son `next()`, il ne reçoit rien, puis tu relies sur `getCurrentFlightInfo()` qui lit le localStorage.
+     * Tu appelles parfois `clearOngoingFlight()` (ex. si aucun vol trouvé) : si l’ordre d’exécution fait que cette purge arrive après le `set`, Window se retrouve avec… rien.
+
+3. **Le “vol en cours” détecté n’est pas forcément un vol « en cours »**
+
+   * `detectAndSaveOngoingFlight()` prend *le premier plan de type `flight`* :
+
+     ```ts
+     const ongoingFlight = trip.plans.find(plan => plan.type === 'flight');
+     ```
+
+     Si ton premier plan “flight” n’est **pas** celui que tu as décalé pour être en cours (par ex. il est déjà passé ou pas encore commencé après le recalage), tu enregistres la mauvaise info : Window la rejette ou n’affiche rien de cohérent.
+
+4. **Champs attendus par Window parfois vides/mal remplis**
+
+   * Tu remplis `departureIata` / `arrivalIata` avec `details?.flight?.departure?.airport` (le nom, pas le code IATA), alors que Window affiche et cherche un callsign/IATA.
+   * `flightNumber` est OK, mais si les autres champs clefs sont `''`, Window peut ne pas réussir sa recherche complémentaire (ex. météo, API, etc.) et ne rien afficher.
+
+5. **Pas d’UI/CTA dans Trips2 pour “ouvrir Window”**
+
+   * Dans `trips2.page.html`, je ne vois aucun bouton/ion-item qui lance Window ni qui passe l’état. On compte donc uniquement sur le service et/ou un test manuel. C’est fragile.
+
+---
+
+## Ce qu’il faut corriger (minimal mais fiable)
+
+### A. Envoyer explicitement le vol à Window
+
+Dans `trips2.page.ts`, quand tu as construit `flightInfo`, fais :
+
+```ts
+this.ongoingFlightService.setOngoingFlight(flightInfo);
+
+// Navigation explicite + état
+this.router.navigate(['/window'], {
+  state: { ongoingFlight: flightInfo }
+});
+```
+
+> Ajoute `private router: Router` dans le constructeur.
+
+### B. Sécuriser la détection du “bon” vol
+
+```ts
+const firstFlight = trip.plans
+  .filter(p => p.type === 'flight')
+  .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())[0];
+
+if (!firstFlight) { /* clear & return */ }
+
+// Vérifier que "now" est bien entre startDate et endDate de CE vol
+const nowMs = Date.now();
+if (nowMs < firstFlight.startDate.getTime() || nowMs > firstFlight.endDate.getTime()) {
+  console.warn('[Trips2] Le premier vol n’est pas en cours, je ne l’envoie pas.');
+  // soit tu cherches un autre vol, soit tu ajustes la logique
+}
+```
+
+### C. Ne pas effacer juste après avoir sauvegardé
+
+* Enlève le `clearOngoingFlight()` dans la branche “aucun vol trouvé” si tu en as trouvé un avant, ou mieux : retourne immédiatement dès que tu as fait `setOngoingFlight`.
+* Ou mets un flag “found” et ne nettoie que si `!found`.
+
+### D. Compléter les champs attendus
+
+* `departureIata` = code IATA (ex. `details.flight.departure.iataCode`)
+* `arrivalIata` idem
+* Assure-toi que `flightNumber` est bien “LX1822” et pas “1822” seul.
+* Si tu n’as pas ces champs, laisse-les `null` mais n’invente pas un nom d’aéroport à la place du code.
+
+### E. Ajouter un bouton d’accès Window dans l’UI
+
+Dans `trips2.page.html`, quelque chose du genre :
+
+```html
+<ion-button (click)="openWindow()" color="primary">
+  Ouvrir Hublot
+</ion-button>
+```
+
+Et dans TS :
+
+```ts
+openWindow() {
+  const current = this.ongoingFlightService.getCurrentFlightInfo();
+  if (current) {
+    this.router.navigate(['/window'], { state: { ongoingFlight: current } });
+  }
+}
+```
+
+---
+
+### En bref
+
+* **Raison principale :** tu ne passes jamais `ongoingFlight` à Window par navigation, et tu dépends d’un service + localStorage que Window peut ne pas lire à temps ou que tu vides.
+* **Fix rapide :** `router.navigate(... state: {...})` + ne pas effacer immédiatement + s’assurer que le vol détecté est le bon et que ses champs sont complets.
+
+Dis-moi si tu veux que je t’écrive le diff exact (patch) pour `trips2.page.ts` et la logique côté Window.

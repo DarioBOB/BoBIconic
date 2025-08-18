@@ -1,0 +1,1509 @@
+/* src/app/trips2/trips2.page.scss - Design ultra-moderne et immersif WAW */
+
+// Variables modernes
+$primary-color: #1bb6b1;
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$danger-color: #f44336;
+$medium-color: #607d8b;
+$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+$gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+$gradient-danger: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+$gradient-ultra: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+
+// Styles pour les boutons d'action
+.action-buttons {
+  .metric-label {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 4px;
+    
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 32px;
+      min-width: 60px;
+      white-space: nowrap;
+      overflow: visible;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+      
+      ion-icon {
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+    }
+    
+    .debug-btn {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+      color: white;
+      box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+      
+      &:hover {
+        background: linear-gradient(135deg, #f57c00, #ef6c00);
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        transform: translateY(-1px);
+      }
+    }
+    
+    .window-btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      
+      &:hover {
+        background: linear-gradient(135deg, #764ba2, #667eea);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        transform: translateY(-1px);
+      }
+    }
+    
+    .menu-btn {
+      background: linear-gradient(135deg, #1bb6b1, #15a39e);
+      color: white;
+      box-shadow: 0 2px 8px rgba(27, 182, 177, 0.3);
+      
+      &:hover {
+        background: linear-gradient(135deg, #15a39e, #0d8a85);
+        box-shadow: 0 4px 12px rgba(27, 182, 177, 0.4);
+        transform: translateY(-1px);
+      }
+    }
+  }
+  
+  .metric-icon.actions {
+    background: $gradient-ultra;
+    color: white;
+  }
+}
+
+// Mixins ultra-modernes
+@mixin glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@mixin glass-effect-dark {
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@mixin card-shadow-ultra {
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.15),
+      0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-8px) scale(1.02);
+  }
+}
+
+@mixin gradient-text($gradient) {
+  background: $gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@mixin floating-animation {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@mixin pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@mixin shimmer-effect {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+  }
+}
+
+// Animations sophistiquées
+@keyframes floating {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
+  }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Header ultra-moderne
+.modern-header {
+  ion-toolbar {
+    --background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: $gradient-ultra;
+      opacity: 0.05;
+      z-index: -1;
+    }
+  }
+  
+  .header-title {
+    .title-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .title-icon {
+        font-size: 28px;
+        @include gradient-text($gradient-primary);
+        @include floating-animation;
+      }
+      
+      span {
+        font-weight: 800;
+        font-size: 1.3rem;
+        @include gradient-text($gradient-primary);
+        letter-spacing: -0.5px;
+      }
+    }
+  }
+  
+  .action-btn {
+    --color: #666;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    
+    &:hover {
+      --color: $primary-color;
+      transform: scale(1.1) rotate(180deg);
+    }
+  }
+  
+  .add-btn {
+    --color: white;
+    --background: $gradient-primary;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    transition: all 0.3s ease;
+    @include pulse-glow;
+    
+    &:hover {
+      transform: scale(1.1) rotate(90deg);
+      @include shimmer-effect;
+    }
+  }
+}
+
+// Content ultra-moderne
+.trips-content-modern {
+  --background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+// Hero Section ultra-immersive
+.hero-section {
+  position: relative;
+  padding: 60px 20px 80px;
+  margin-bottom: 0;
+  overflow: hidden;
+  
+  .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: $gradient-ultra;
+    opacity: 0.15;
+    z-index: 0;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255,255,255,0.05) 0%, transparent 50%);
+    }
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .hero-title {
+    text-align: center;
+    margin-bottom: 50px;
+    
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      margin: 0;
+      @include gradient-text($gradient-ultra);
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      @include floating-animation;
+      letter-spacing: -1px;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.3rem;
+      color: #666;
+      margin: 12px 0 0;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+  }
+}
+
+// Métriques ultra-modernes
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
+  
+  .metric-card {
+    @include glass-effect;
+    @include card-shadow-ultra;
+    border-radius: 24px;
+    padding: 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: $gradient-primary;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+    
+    &:hover {
+      transform: translateY(-12px) scale(1.05);
+      
+      &::before {
+        opacity: 0.1;
+      }
+      
+      .metric-icon {
+        transform: scale(1.2) rotate(360deg);
+      }
+      
+      .metric-content .metric-value {
+        @include gradient-text($gradient-primary);
+      }
+    }
+    
+    .metric-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: white;
+      transition: all 0.4s ease;
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 50%;
+        background: $gradient-primary;
+        z-index: -1;
+        opacity: 0.3;
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+      
+      &.ongoing {
+        background: $gradient-success;
+      }
+      
+      &.upcoming {
+        background: $gradient-primary;
+      }
+      
+      &.past {
+        background: $gradient-warning;
+      }
+      
+      &.total {
+        background: $gradient-danger;
+      }
+    }
+    
+    .metric-content {
+      flex: 1;
+      
+      .metric-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #333;
+        line-height: 1;
+        transition: all 0.3s ease;
+      }
+      
+      .metric-label {
+        font-size: 1rem;
+        color: #666;
+        margin-top: 6px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+// Navigation ultra-moderne
+.modern-tabs {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  
+  .tabs-container {
+  display: flex;
+    gap: 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+    
+    .tab-item {
+      flex: 1;
+      padding: 20px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      text-align: center;
+      overflow: hidden;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: $gradient-primary;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+      }
+      
+      &:hover {
+        transform: translateY(-4px);
+        
+        &::before {
+          opacity: 0.1;
+        }
+        
+        .tab-icon {
+          transform: scale(1.2);
+        }
+      }
+      
+      &.active {
+        background: $gradient-primary;
+        color: white;
+        transform: translateY(-4px);
+        @include pulse-glow;
+        
+        .tab-icon {
+          color: white;
+          transform: scale(1.2);
+        }
+        
+        .tab-label {
+          color: white;
+        }
+        
+        .tab-count {
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+        }
+      }
+      
+      .tab-icon {
+        font-size: 28px;
+        color: #666;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+      }
+      
+      .tab-content {
+        .tab-label {
+          font-weight: 700;
+          font-size: 1rem;
+          color: #333;
+          margin-bottom: 6px;
+          transition: all 0.3s ease;
+        }
+        
+        .tab-count {
+          background: rgba(27, 182, 177, 0.1);
+          color: $primary-color;
+          padding: 6px 12px;
+          border-radius: 16px;
+          font-size: 0.9rem;
+          font-weight: 800;
+          display: inline-block;
+          transition: all 0.3s ease;
+        }
+      }
+    }
+  }
+}
+
+// Container ultra-moderne
+.trips-container-modern {
+  padding: 30px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+// État vide ultra-moderne
+.empty-state-modern {
+  @include glass-effect;
+  @include card-shadow-ultra;
+  border-radius: 30px;
+  padding: 80px 40px;
+  text-align: center;
+  margin: 60px 0;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: $gradient-primary;
+    opacity: 0.05;
+    z-index: -1;
+  }
+  
+  .empty-icon {
+    font-size: 5rem;
+    @include gradient-text($gradient-primary);
+    margin-bottom: 30px;
+    @include floating-animation;
+  }
+  
+  .empty-content {
+    h2 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 800;
+    }
+    
+    p {
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+    
+    .empty-action {
+      --background: $gradient-primary;
+      --color: white;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 16px 32px;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+        @include shimmer-effect;
+      }
+    }
+  }
+}
+
+// Cartes de voyage ultra-WAW
+.trip-card-waw {
+  @include card-shadow-ultra;
+  border-radius: 30px;
+  margin-bottom: 30px;
+  overflow: hidden;
+  background: white;
+  animation: slideInUp 0.8s ease-out;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: $gradient-primary;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+  
+  &:hover {
+    &::before {
+      opacity: 0.02;
+    }
+    
+    .trip-background-waw img {
+      transform: scale(1.1);
+    }
+    
+    .trip-content-waw .trip-title-waw {
+      @include gradient-text($gradient-primary);
+    }
+  }
+  
+  &.ongoing {
+    border-left: 6px solid $success-color;
+    
+    .trip-badge-waw.ongoing {
+      @include pulse-glow;
+    }
+  }
+  
+  &.upcoming {
+    border-left: 6px solid $primary-color;
+  }
+  
+  &.past {
+    border-left: 6px solid $medium-color;
+  }
+  
+  &.card-0 { animation-delay: 0.1s; }
+  &.card-1 { animation-delay: 0.2s; }
+  &.card-2 { animation-delay: 0.3s; }
+  
+  .trip-background-waw {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 0.6s ease;
+    }
+    
+    .trip-overlay-waw {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%);
+      transition: all 0.3s ease;
+    }
+  }
+  
+  .trip-content-waw {
+    padding: 30px;
+    
+    .trip-header-waw {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      
+      .trip-title-section {
+        flex: 1;
+        
+        .trip-title-waw {
+          font-size: 1.8rem;
+          font-weight: 800;
+          color: #333;
+          margin: 0 0 12px 0;
+          transition: all 0.3s ease;
+          line-height: 1.2;
+        }
+        
+        .trip-badge-waw {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 25px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          transition: all 0.3s ease;
+          
+          &.ongoing {
+            background: rgba(79, 172, 254, 0.15);
+            color: #4facfe;
+            border: 2px solid rgba(79, 172, 254, 0.3);
+          }
+          
+          &.upcoming {
+            background: rgba(240, 147, 251, 0.15);
+            color: #f093fb;
+            border: 2px solid rgba(240, 147, 251, 0.3);
+          }
+          
+          &.past {
+            background: rgba(102, 126, 234, 0.15);
+            color: #667eea;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+          }
+          
+          .badge-icon {
+            font-size: 16px;
+          }
+        }
+      }
+      
+      .trip-actions-waw {
+        display: flex;
+        gap: 10px;
+        
+        .action-btn-waw {
+          --color: var(--ion-color-medium);
+          --color-hover: var(--ion-color-primary);
+          transition: all 0.3s ease;
+          border-radius: 25px;
+          padding: 8px 12px;
+          height: auto;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          
+          &:hover {
+            transform: scale(1.05) translateY(-2px);
+            @include shimmer-effect;
+          }
+          
+          &.upload-action-btn {
+            --color: $primary-color;
+            background: rgba(27, 182, 177, 0.1);
+            border: 2px solid rgba(27, 182, 177, 0.3);
+            
+            &:hover {
+              --color: white;
+              background: $gradient-primary;
+              border-color: transparent;
+            }
+            
+            ion-icon {
+              font-size: 20px;
+            }
+          }
+          
+          .button-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+          }
+          
+          &:hover .button-label {
+            opacity: 1;
+          }
+          
+          // Sur mobile, masquer les labels pour économiser l'espace
+          @media (max-width: 768px) {
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            
+            .button-label {
+              display: none;
+            }
+            
+            &:hover {
+              transform: scale(1.2) rotate(180deg);
+            }
+          }
+        }
+      }
+    }
+    
+    .trip-info-waw {
+      margin-bottom: 25px;
+      
+      > div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        color: var(--ion-color-medium);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          color: $primary-color;
+          transform: translateX(5px);
+        }
+        
+        ion-icon {
+          font-size: 18px;
+          color: $primary-color;
+        }
+        
+        .trip-duration-waw {
+          color: var(--ion-color-medium);
+          font-style: italic;
+          font-weight: 500;
+        }
+      }
+    }
+    
+    .trip-summary-waw {
+      margin-bottom: 25px;
+      
+      .summary-stats {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        
+        .stat-item {
+          text-align: center;
+          padding: 12px 16px;
+          border-radius: 16px;
+          background: rgba(102, 126, 234, 0.05);
+          border: 1px solid rgba(102, 126, 234, 0.1);
+          transition: all 0.3s ease;
+          
+          &:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-4px);
+          }
+          
+          .stat-value {
+            display: block;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: $primary-color;
+            margin-bottom: 4px;
+          }
+          
+          .stat-label {
+            font-size: 0.8rem;
+            color: var(--ion-color-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+    
+    .trip-actions-bottom-waw {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .add-plan-btn-waw {
+        --border-color: $primary-color;
+        --color: $primary-color;
+        --border-radius: 25px;
+        font-weight: 700;
+        padding: 12px 24px;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          --background: $gradient-primary;
+          --color: white;
+          transform: scale(1.05);
+        }
+      }
+      
+      .upload-btn-waw {
+        --background: $gradient-primary;
+        --color: white;
+        --border-radius: 25px;
+        font-weight: 600;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        @include card-shadow-ultra;
+        
+        &:hover {
+          --background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%);
+          transform: scale(1.05) translateY(-2px);
+          @include shimmer-effect;
+        }
+        
+        ion-icon {
+          margin-right: 6px;
+        }
+      }
+    }
+  }
+  
+  .expand-indicator-waw {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    @include glass-effect;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    @include pulse-glow;
+    
+    &:hover {
+      transform: scale(1.2);
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    &.expanded {
+      transform: rotate(180deg) scale(1.1);
+  }
+
+  ion-icon {
+      color: $primary-color;
+      font-size: 24px;
+    }
+  }
+}
+
+// Timeline TripIt Pro++ Ultra-WAW
+.tripit-timeline-waw-container {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 0 0 30px 30px;
+  margin-top: -10px;
+  padding: 30px;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  
+  .tripit-timeline-waw {
+    position: relative;
+    
+    .timeline-day-sticky-pro {
+      @include glass-effect;
+      @include card-shadow-ultra;
+      border-radius: 20px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: $gradient-primary;
+        opacity: 0.1;
+        z-index: -1;
+      }
+      
+      .timeline-day-label {
+        font-weight: 700;
+        @include gradient-text($gradient-primary);
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+    
+    .timeline-row-ultra {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 30px;
+      position: relative;
+      animation: fadeInScale 0.6s ease-out;
+      
+      .timeline-time-ultra {
+        width: 90px;
+        flex-shrink: 0;
+        text-align: right;
+        padding-right: 20px;
+        
+        .time-main-ultra {
+          font-weight: 700;
+          color: #333;
+          font-size: 1rem;
+          background: rgba(102, 126, 234, 0.1);
+          padding: 8px 12px;
+          border-radius: 12px;
+          display: inline-block;
+        }
+      }
+      
+      .timeline-icon-ultra {
+        position: relative;
+        margin: 0 20px;
+        
+        .icon-circle-ultra {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: white;
+          @include card-shadow-ultra;
+          border: 3px solid white;
+          z-index: 2;
+          position: relative;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: scale(1.2) rotate(360deg);
+          }
+          
+          &.flight {
+            background: $gradient-success;
+          }
+          
+          &.hotel {
+            background: $gradient-primary;
+          }
+          
+          &.activity {
+            background: $gradient-warning;
+          }
+          
+          &.car_rental {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          }
+          
+          &.transport {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+          }
+          
+          .timeline-icon {
+            color: white;
+            font-size: 22px;
+          }
+        }
+        
+        .timeline-ultra-line {
+          position: absolute;
+          left: 50%;
+          top: 50px;
+          bottom: -30px;
+          width: 3px;
+          transform: translateX(-50%);
+          z-index: 1;
+          border-radius: 2px;
+        }
+      }
+      
+      .timeline-content-ultra {
+        flex: 1;
+        @include glass-effect;
+        @include card-shadow-ultra;
+        border-radius: 20px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: $gradient-primary;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          z-index: -1;
+        }
+        
+        &:hover {
+          transform: translateX(10px) scale(1.02);
+          
+          &::before {
+            opacity: 0.05;
+          }
+          
+          .plan-header-ultra .plan-title-ultra {
+            @include gradient-text($gradient-primary);
+          }
+        }
+        
+        .plan-header-ultra {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+          
+          .plan-title-ultra {
+            font-weight: 700;
+            color: #333;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+          }
+          
+          .plan-badge-ultra {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            
+            &.ongoing {
+              background: rgba(79, 172, 254, 0.15);
+              color: #4facfe;
+              border: 1px solid rgba(79, 172, 254, 0.3);
+            }
+            
+            &.upcoming {
+              background: rgba(240, 147, 251, 0.15);
+              color: #f093fb;
+              border: 1px solid rgba(240, 147, 251, 0.3);
+            }
+            
+            &.past {
+              background: rgba(102, 126, 234, 0.15);
+              color: #667eea;
+              border: 1px solid rgba(102, 126, 234, 0.3);
+            }
+          }
+          
+          .plan-actions-ultra {
+            cursor: pointer;
+            color: var(--ion-color-medium);
+            font-size: 20px;
+            transition: all 0.3s ease;
+            
+            &:hover {
+              color: $primary-color;
+              transform: scale(1.2) rotate(90deg);
+            }
+          }
+        }
+        
+        .plan-details-ultra {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          
+          > span {
+            font-size: 0.9rem;
+            color: var(--ion-color-medium);
+            transition: all 0.3s ease;
+            
+            &.plan-location-ultra {
+              color: #333;
+              font-weight: 600;
+            }
+            
+            &.plan-timezone-ultra {
+              color: $primary-color;
+              font-style: italic;
+              font-weight: 500;
+            }
+            
+            &.plan-time-ultra {
+              color: #333;
+              font-weight: 500;
+            }
+          }
+        }
+
+        .plan-enriched-details {
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 6px;
+          font-size: 0.8rem;
+          line-height: 1.4;
+        }
+
+        .detail-icon {
+          width: 16px;
+          height: 16px;
+          color: var(--ion-color-primary);
+          flex-shrink: 0;
+        }
+
+        .detail-label {
+          font-weight: 600;
+          color: var(--ion-color-medium);
+          min-width: 60px;
+          flex-shrink: 0;
+        }
+
+        .detail-value {
+          color: var(--ion-color-dark);
+          flex: 1;
+          word-break: break-word;
+        }
+
+        .status-on_time {
+          color: #28a745;
+          font-weight: 600;
+        }
+
+        .status-delayed {
+          color: #ffc107;
+          font-weight: 600;
+        }
+
+        .status-cancelled {
+          color: #dc3545;
+          font-weight: 600;
+        }
+
+        .flight-details,
+        .hotel-details,
+        .activity-details,
+        .transport-details,
+        .car-rental-details {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          padding: 12px;
+          margin-top: 8px;
+          border-left: 3px solid var(--ion-color-primary);
+        }
+
+        .flight-details {
+          border-left-color: #007bff;
+        }
+
+        .hotel-details {
+          border-left-color: #28a745;
+        }
+
+        .activity-details {
+          border-left-color: #ffc107;
+        }
+
+        .transport-details {
+          border-left-color: #6f42c1;
+        }
+
+        .car-rental-details {
+          border-left-color: #fd7e14;
+        }
+      }
+    }
+    
+    .add-plan-fab {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      min-width: 120px;
+      height: 56px;
+      border-radius: 28px;
+      background: $gradient-primary;
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      @include card-shadow-ultra;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      @include pulse-glow;
+      padding: 0 20px;
+      
+      &:hover {
+        transform: scale(1.05) translateY(-2px);
+        @include shimmer-effect;
+        min-width: 140px;
+        
+        .fab-label {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      .fab-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .fab-icon {
+        font-size: 24px;
+        color: white;
+        flex-shrink: 0;
+      }
+      
+      .fab-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        opacity: 0.9;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+      }
+    }
+  }
+  
+  .timeline-empty {
+    text-align: center;
+    padding: 60px;
+    color: var(--ion-color-medium);
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+}
+
+// Responsive design ultra-moderne
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 40px 16px 60px;
+    
+    .hero-content .hero-title h1 {
+      font-size: 2.5rem;
+    }
+  }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .modern-tabs .tabs-container {
+    padding: 0 16px;
+    
+    .tab-item {
+      padding: 16px 12px;
+      
+      .tab-icon {
+        font-size: 24px;
+      }
+      
+      .tab-content .tab-label {
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .trips-container-modern {
+    padding: 20px 16px;
+  }
+  
+  .trip-card-waw .trip-content-waw {
+    padding: 24px;
+    
+    .trip-header-waw .trip-title-section .trip-title-waw {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .tripit-timeline-waw-container {
+    padding: 20px;
+    
+    .tripit-timeline-waw .timeline-row-ultra {
+      .timeline-time-ultra {
+        width: 70px;
+        padding-right: 12px;
+      }
+      
+      .timeline-icon-ultra {
+        margin: 0 12px;
+        
+        .icon-circle-ultra {
+          width: 40px;
+          height: 40px;
+          
+          .timeline-icon {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+    
+    .add-plan-fab {
+      bottom: 20px;
+      right: 20px;
+      min-width: 100px;
+      height: 48px;
+      border-radius: 24px;
+      padding: 0 16px;
+      
+      .fab-icon {
+        font-size: 20px;
+      }
+      
+      .fab-label {
+        font-size: 12px;
+      }
+      
+      &:hover {
+        min-width: 110px;
+      }
+    }
+  }
+}
+
+// Effets de glassmorphism ultra-modernes
+.glass {
+  @include glass-effect;
+}
+
+// Effets d'ombre ultra-modernes
+.shadow-line {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+

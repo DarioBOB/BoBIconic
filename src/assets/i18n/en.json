@@ -1,0 +1,172 @@
+{
+  "LANDING": {
+    "TILES": {
+      "TRIPS": "Trips",
+      "WINDOW": "My Window",
+      "WINDOW2": "My Window 3D",
+      "CHAT": "Chat",
+      "BOBBERS": "Bobbers",
+    "GAMES": "Games",
+      "GAMES": "Games",
+      "NOTIFICATIONS": "Notifications",
+      "DOCUMENTS": "Documents",
+      "SUPPORT": "Support",
+      "PREFERENCES": "Preferences",
+      "IN_PROGRESS": "In Progress"
+    }
+  },
+  "WINDOW": {
+    "TITLE": "My Journey through my Window",
+    "SEARCH": {
+      "PLACEHOLDER": "Enter flight number (ex: LX1820)",
+      "BUTTON": "Search",
+      "LOADING": "Searching...",
+      "ERROR": "Error during search",
+      "NO_RESULTS": "No flight found",
+      "ERRORS": {
+        "EMPTY_CALLSIGN": "Please enter a flight number",
+        "API_ERROR": "Error during search"
+      }
+    },
+    "FLIGHT_INFO": {
+      "TITLE": "Flight Information",
+      "FLIGHT_NUMBER": "Flight Number",
+      "AIRLINE": "Airline",
+      "AIRCRAFT": "Aircraft Type",
+      "DEPARTURE": "Departure",
+      "ARRIVAL": "Arrival",
+      "SCHEDULED_TIME": "Scheduled Time",
+      "ACTUAL_TIME": "Actual Time",
+      "STATUS": "Status",
+      "ALTITUDE": "Altitude",
+      "SPEED": "Speed",
+      "WEATHER": "Weather",
+      "TIME_REMAINING": "Time Remaining"
+    },
+    "STATUS": {
+      "SCHEDULED": "Scheduled",
+      "ACTIVE": "In Flight",
+      "LANDED": "Landed",
+      "CANCELLED": "Cancelled",
+      "DIVERTED": "Diverted",
+      "UNKNOWN": "Unknown"
+    },
+    "POIS": {
+      "GENEVA": {
+        "TITLE": "Geneva",
+        "DESCRIPTION": "Starting point"
+      },
+      "MILAN": {
+        "TITLE": "Milan",
+        "DESCRIPTION": "First stop"
+      },
+      "ROME": {
+        "TITLE": "Rome",
+        "DESCRIPTION": "Second stop"
+      },
+      "ATHENS": {
+        "TITLE": "Athens",
+        "DESCRIPTION": "Final destination"
+      }
+    },
+    "PROGRESS": {
+      "CURRENT_POSITION": "Current position",
+      "APPROACHING_MILAN": "Approaching Milan",
+      "APPROACHING_ROME": "Approaching Rome",
+      "APPROACHING_ATHENS": "Approaching Athens",
+      "FINAL_APPROACH": "Final approach to Athens"
+    },
+    "NO_FLIGHT_FOUND": "No flight found in the last 8 days.",
+    "NO_FLIGHT_AIRLINE": "Not found",
+    "ERROR_FR24": "Error retrieving data from FR24 server.",
+    "ERROR_PHOTO": "Error retrieving aircraft photo.",
+    "ERROR_METAR": "Error retrieving arrival weather.",
+    "ERROR_UNKNOWN": "Unknown error. Please try again later.",
+    "RESTORE": {
+      "PREVIOUS_DATA": "Previous data available",
+      "BUTTON": "Restore"
+    },
+    "ONGOING_TRIP": {
+      "TITLE": "Ongoing Trip",
+      "STATUS": "Ongoing"
+    },
+    "DEMO": {
+      "ONGOING_TRIP_INFO": "Your ongoing trip is displayed. You can also search for other flights.",
+      "SEARCH_OTHER": "Search another flight"
+    },
+    "SEARCH": {
+      "ERRORS": {
+        "EMPTY_CALLSIGN": "Please enter a flight number",
+        "API_ERROR": "Error during search"
+      }
+    }
+  },
+  "TRIPS": {
+    "TITLE": "My Trips",
+    "SUBTITLE": "Find all your organized trips",
+    "ONGOING": "Ongoing",
+    "UPCOMING": "Upcoming",
+    "PAST": "Past",
+    "STATUS_ONGOING": "Ongoing",
+    "STATUS_UPCOMING": "Upcoming",
+    "STATUS_PAST": "Past",
+    "NO_ONGOING": "No ongoing trips",
+    "NO_ONGOING_DESC": "You don't have any ongoing trips at the moment",
+    "NO_UPCOMING": "No upcoming trips",
+    "NO_UPCOMING_DESC": "You don't have any upcoming trips planned",
+    "NO_PAST": "No past trips",
+    "NO_PAST_DESC": "You don't have any trips in your history yet",
+    "LOADING_PLANS": "Loading steps...",
+    "NO_PLANS": "No planned steps",
+    "ERROR_TITLE": "An error occurred",
+    "ERROR_AUTH": "You must be logged in to view your trips.",
+    "ERROR_ACCESS": "You do not have access to this trip.",
+    "ERROR_LOADING": "Error loading trips.",
+    "ERROR_LOADING_PLANS": "Error loading trip plans.",
+    "ERROR_INVALID_DATA": "Invalid data for this trip.",
+    "ERROR_INVALID_PLAN": "Invalid data for this plan.",
+    "ERROR_UNKNOWN": "Unknown error. Please try again later."
+  },
+  "COMMON": {
+    "LOADING": "Loading...",
+    "SHOW": "Show",
+    "HIDE": "Hide",
+    "LOGOUT": "Logout"
+  },
+  "AUTH": {
+    "LOGIN_TITLE": "Sign in to BoB",
+    "PREFERRED_LANG": "Preferred language",
+    "EMAIL": "Email address",
+    "PASSWORD": "Password",
+    "LOGIN": "Sign in",
+    "FORGOT_PASSWORD": "Forgot password?",
+    "REGISTER": "Create account",
+    "RESET_EMAIL_SENT": "Reset email sent!",
+    "DEMO_ACTIVATED": "Demo mode activated successfully!",
+    "ERRORS": {
+      "EMPTY_FIELDS": "Please fill in all fields.",
+      "INVALID_EMAIL": "Invalid email address.",
+      "USER_DISABLED": "User disabled.",
+      "USER_NOT_FOUND_BOB": "User not found.",
+      "INVALID_CREDENTIALS": "Invalid credentials.",
+      "API_KEY_NOT_VALID": "API key not valid.",
+      "UNKNOWN": "Unknown error.",
+      "EMAIL_REQUIRED": "Please enter your email.",
+      "DEMO_ACTIVATION_FAILED": "Demo mode activation failed."
+    }
+  },
+  "HOME": {
+    "TEST_APP": "Demo mode / Try the app",
+    "BASELINE": "Don't let boredom board, app developed by Sunshine Adventures"
+  },
+  "PROFILE": {
+    "LANGUAGE": "Language",
+    "NOTIFICATIONS": "Notifications",
+    "EMAIL_NOTIFICATIONS": "Email notifications",
+    "SAVE": "Save"
+  },
+  "RESTORE": {
+    "PREVIOUS_DATA": "Previous data available",
+    "BUTTON": "Restore"
+  }
+} 

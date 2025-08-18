@@ -1,0 +1,93 @@
+
+## 📋 Requirements Détaillés des Voyages Démo
+
+### 🎯 **Objectif Principal**
+Implémenter un recalage dynamique des dates des voyages de démonstration pour qu'ils soient toujours pertinents par rapport à la date actuelle.
+
+### 📅 **Spécifications par Type de Voyage**
+
+#### 1. **Voyage Passé (Marrakech)**
+- **Status :** `'past'`
+- **Nouvelle date de début :** `maintenant - 37 jours`
+- **Nouvelle date de fin :** `maintenant - 30 jours`
+- **Objectif :** Voyage terminé il y a environ 1 semaine
+
+#### 2. **Voyage Futur (Montréal)**
+- **Status :** `'upcoming'`
+- **Nouvelle date de début :** `maintenant + 60 jours`
+- **Nouvelle date de fin :** `maintenant + 67 jours`
+- **Objectif :** Voyage prévu dans environ 2 mois
+
+#### 3. **Voyage en Cours (Athènes)**
+- **Status :** `'ongoing'`
+- **Logique spéciale :**
+  1. Identifier le **premier vol** (le plus ancien)
+  2. Calculer sa **durée** = `originalEnd - originalStart`
+  3. Positionner son nouveau départ à `maintenant - durée/3`
+  4. Calculer l'**offset** = `newFirstFlightStart - originalFirstFlightStart`
+  5. **Appliquer cet offset à toutes les dates** du voyage
+- **Objectif :** Vol en cours maintenant, avec 1/3 du temps écoulé
+
+### 🔧 **Contraintes Techniques**
+
+#### **Identification des Voyages**
+- **Avant :** Recherche par titre (recherche partielle)
+- **Après :** Identification par champ `status`
+  ```typescript
+  const pastTplSrc = rawTrips.find(t => t['status'] === 'past');
+  const ongoingTplSrc = rawTrips.find(t => t['status'] === 'ongoing');
+  const futureTplSrc = rawTrips.find(t => t['status'] === 'upcoming');
+  ```
+
+#### **Cohérence des Fuseaux Horaires**
+- Conservation des **horaires relatifs** entre les plans
+- Respect des **fuseaux horaires d'origine** pour chaque plan
+- Pas de modification des **durées** des activités
+
+#### **Gestion des Erreurs**
+- Log explicite si un voyage template manque
+- Retour des données brutes en cas d'erreur
+- Identification précise des voyages manquants
+
+### 📊 **Exemple de Calculs**
+
+Avec `now = 2025-07-04T12:00:00Z` :
+
+#### **Voyage Passé (Marrakech)**
+- **Nouvelles dates :** 2025-05-28 → 2025-06-04
+- **Offset :** +408 jours
+- **Vérification :** ✅ Respecte les requirements
+
+#### **Voyage Futur (Montréal)**
+- **Nouvelles dates :** 2025-09-02 → 2025-09-09
+- **Offset :** -8 jours
+- **Vérification :** ✅ Respecte les requirements
+
+#### **Voyage en Cours (Athènes)**
+- **Vol positionné :** 2025-07-04T10:50:00Z → 2025-07-04T14:20:00Z
+- **Temps écoulé :** 1.2 heures
+- **Temps restant :** 2.3 heures
+- **Vérification :** ✅ Vol en cours maintenant
+
+###    **Corrections Supplémentaires Implémentées**
+
+#### **Correction des Heures d'Activités**
+- **Problème :** Activités programmées entre 22h et 6h du matin
+- **Solution :** Déplacement automatique à 10h00 du matin
+- **Préservation :** Durée de l'activité maintenue
+
+#### **Gestion des Fuseaux Horaires**
+- **Ajout :** Mapping JTR → Europe/Athens pour Santorini
+- **Amélioration :** Affichage des fuseaux horaires locaux
+- **Correction :** Éviter l'affichage UTC par défaut
+
+### 🔄 **Ordre d'Exécution**
+1. **Recalage dynamique** selon les spécifications
+2. **Correction des heures d'activités** (22h-6h → 10h00)
+3. **Enrichissement des fuseaux horaires**
+4. **Tri chronologique** final des plans
+
+Ces requirements garantissent que les voyages de démo sont toujours pertinents et affichent des informations réalistes, peu importe quand l'utilisateur consulte l'application !
+
+
+EN RESUME : juste une précision, je veux juste qu'il y aie un voyage dans le passé (peu importe la date), un dans le futur, peu importe la date, un voyage en cours: dans ce cas précis, je veux que le premier vol soit positionné à 1/3 de son vol. Le reste des dates et heures doivent être calculées en fonction de ce critère. Et les heures des plans doivent être réalistes (pas de visite à 2h du matin par exemple). Les heures doivent être exprimée dans le fuseau horaire de l'endroit où ça se passe. Tous les plans doivent être triés par ordre chronologique.

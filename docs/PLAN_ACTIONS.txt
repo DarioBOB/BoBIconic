@@ -1,0 +1,76 @@
+# PLAN D'ACTIONS POUR AMÉLIORER LE PROJET BOBICONICNEW
+
+Ce plan suit les recommandations issues des fichiers Bug.txt à Bug5.txt. Les actions sont classées par priorité et par logique de dépendance.
+
+---
+
+## 1. Unification des types et des unités (PRIORITÉ 1)
+
+### 1.1. Coordonnées lat/lon
+- S'assurer que `lat_t_deg` et `lon_t_deg` sont toujours des **nombres** (number) dans tout le projet.
+- Corriger dans `WindowPage.updateDemoFlight()` :
+  - Remplacer `.toFixed(4)` par `Number(... .toFixed(4))` ou garder le type number natif.
+- Supprimer tous les `parseFloat` inutiles dans les composants enfants.
+
+### 1.2. Altitude
+- Choisir une unité unique pour l'altitude (**pieds** ou **mètres**) dans tout le projet.
+- Si on choisit les mètres :
+  - Convertir dès la génération de l'altitude (ex : `altitude = getRealisticAltitude(...) * 0.3048`).
+  - Adapter tous les calculs de zoom, de vue, d'affichage.
+- Si on garde les pieds :
+  - Toujours convertir en mètres dans les calculs qui le nécessitent (zoom, distance, etc.).
+
+---
+
+## 2. Uniformisation des formules de zoom (PRIORITÉ 2)
+- Choisir une seule formule de zoom (log2 ou linéaire) pour tous les composants (cockpit et hublots).
+- Appliquer la même formule dans `WindowMapTestComponent` et `WindowHublotComponent`.
+- S'assurer que le zoom réagit bien aux changements d'altitude.
+
+---
+
+## 3. Correction des POIs (PRIORITÉ 3)
+- Ajouter le champ `image_url` dans l'interface POI et dans chaque POI si on veut afficher des images dans la popup.
+- Sinon, supprimer le test `<img *ngIf="selectedPOI.image_url" ...>` dans le template.
+- Vérifier que tous les POIs ont les champs nécessaires (name, description, lat, lon, side, type, image_url?).
+
+---
+
+## 4. Nettoyage et optimisation du code (PRIORITÉ 4)
+- Supprimer les imports inutilisés dans tous les fichiers (ex : Firestore, Auth, IonPopover, etc. si non utilisés).
+- Nettoyer les appels redondants (ex : double appel à `updateCurrentPOI()` dans `WindowPage`).
+- S'assurer que tous les composants détruisent bien leurs ressources (markers, listeners, etc.).
+
+---
+
+## 5. Amélioration de la gestion des erreurs et du cache (PRIORITÉ 5)
+- Dans `FlightDataService` :
+  - Modifier la gestion des erreurs pour pouvoir notifier l'utilisateur en cas d'échec API (utiliser `throwError` au lieu de renvoyer un objet vide).
+  - Vérifier le cache avant tout appel réseau dans `getFlightData()`.
+  - Sauvegarder dans le cache après chaque récupération de données fraîches.
+
+---
+
+## 6. Refactorisation du tracking "live" (PRIORITÉ 6)
+- Dans `FlightDataService.startTracking()` :
+  - Utiliser un `BehaviorSubject<FlightData | null>` pour exposer un flux réactif.
+  - Émettre l'état initial puis toutes les mises à jour périodiques.
+  - Adapter les composants consommateurs pour s'abonner à ce flux.
+
+---
+
+## 7. Modernisation RxJS (PRIORITÉ 7)
+- Remplacer tous les usages de `.toPromise()` par `firstValueFrom()`.
+
+---
+
+## 8. Nettoyage final et tests (PRIORITÉ 8)
+- Vérifier que toutes les pages et composants fonctionnent avec les nouveaux types et la nouvelle logique.
+- Tester la simulation complète d'un vol, l'affichage des hublots, la carte cockpit, les POIs, le tracking live.
+- Corriger les éventuels bugs restants.
+
+---
+
+**Remarque :**
+- Il est conseillé de faire une sauvegarde du projet avant chaque étape majeure.
+- Après chaque étape, tester l'application pour valider que rien n'est cassé avant de poursuivre. 

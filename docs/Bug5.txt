@@ -1,0 +1,319 @@
+**Résumé des points à corriger et améliorer :**
+
+1. **Type de `lat_t_deg` & `lon_t_deg` (chaîne vs nombre)**
+
+   * Dans `updateDemoFlight()`, on assigne les coordonnées à l’aide de `.toFixed(4)`, ce qui les convertit en chaînes (`string`).
+   * Or les composants enfants (`WindowMapTestComponent`, `WindowHublotComponent`) s’attendent à recevoir des nombres (`number`), pas des chaînes.
+
+2. **Unité d’altitude (pieds vs mètres)**
+
+   * Dans `WindowPage`, on manipule systématiquement l’altitude en **pieds** (ft).
+   * Dans `WindowHublotComponent`, plusieurs calculs (zoom, distance) supposent que l’altitude est en **mètres**, et convertissent `altitude * 0.3048`. Il faut unifier cette logique pour éviter tout décalage de zoom.
+
+3. **Double appel à `updateCurrentPOI()`**
+
+   * Dans `WindowPage`, on appelle `updateCurrentPOI()` à la fin de `updateDemoFlight()`, puis à nouveau dans le `setInterval` qui l’entoure.
+   * Ce double appel est redondant et peut être supprimé (1 seule invocation suffit par tick).
+
+4. **Champ `image_url` manquant dans l’interface POI**
+
+   * Dans le template de `WindowPage`, la popup teste `*ngIf="selectedPOI.image_url"`, mais aucun objet POI n’a de champ `image_url`.
+   * Résultat : l’image ne s’affichera jamais. Il faut soit supprimer ce test, soit ajouter un champ `image_url` dans chaque objet POI (et dans l’interface).
+
+5. **Prise en compte de l’`altitude` dans `WindowMapTestComponent`**
+
+   * Le composant `WindowMapTestComponent` ne réagit pas aux changements d’altitude (seul lat/lon déclenche `updatePlaneMarker()`).
+   * Pour que le niveau de zoom suive immédiatement les nouvelles altitudes, il faut ajouter `changes['altitude']` dans le bloc `ngOnChanges`.
+
+6. **Uniformisation des formules de zoom**
+
+   * Deux formules différentes coexistent :
+
+     1. `WindowMapTestComponent.getMapZoomFromAltitude()` (linéaire, pieds → zoom `[13…6]`)
+     2. `WindowHublotComponent.getZoomFromAltitude()` (formule log2 basée sur mètre et latitude).
+   * Les deux n’affichent pas la même échelle visuelle. Il vaut mieux décider d’une seule méthode (par exemple, convertir systématiquement l’altitude en mètres et utiliser la même formule dans les deux composants).
+
+7. **Gestion des erreurs réseau dans `FlightDataService`**
+
+   * `getFlightData()` retourne toujours un objet « vierge » (`FlightData` avec tous les champs vides) en cas d’erreur, sans jamais générer d’erreur réémanant en amont.
+   * Si l’on souhaite notifier l’utilisateur quand l’API Aviationstack ou OpenSky est indisponible, il faut renvoyer `throwError(...)` au lieu d’aplatir en `of(empty FlightData)`.
+
+8. **Cache en amont dans `FlightDataService.getFlightData()`**
+
+   * Actuellement, on interroge systématiquement Aviationstack puis OpenSky, sans vérifier en premier lieu si l’on a déjà des données valides (< 5 min) dans le cache.
+   * Il faut ajuster `getFlightData()` pour qu’elle vérifie d’abord `this.getCachedData()`, et ne fasse l’appel réseau que si aucune entrée valide n’existe.
+
+9. **Retour « live » dans `startTracking()`**
+
+   * La méthode `startTracking()` démarre un `Subscription` pour mettre à jour la position toutes les 10 s, mais retourne uniquement un `Observable<FlightData>` qui fournit l’état initial (avant tracking), sans diffuser les mises à jour périodiques.
+   * Il faudrait exposer un flux réactif (par ex. un `BehaviorSubject<FlightData>`) pour que les composants abonnés reçoivent l’état initial puis toutes les mises à jour en temps réel.
+
+10. **Usage de `.toPromise()` (RxJS déprécié)**
+
+    * Dans `refreshFlightData()`, on utilise `.toPromise()`, qui est désormais déprécié. Il faut remplacer par `firstValueFrom(this.getFlightData(...))`.
+
+---
+
+**Plan d’action détaillé :**
+
+1. **Convertir `lat_t_deg` et `lon_t_deg` en nombres**
+
+   * Dans `WindowPage.updateDemoFlight()`, remplacer :
+
+     ```ts
+     const lat_t_deg = toDeg(φ_t);
+     const lon_t_deg = toDeg(λ_t);
+     // …
+     lat_t_deg: lat_t_deg.toFixed(4),
+     lon_t_deg: lon_t_deg.toFixed(4),
+     ```
+
+     par :
+
+     ```ts
+     const latNum = Number(toDeg(φ_t).toFixed(4));
+     const lonNum = Number(toDeg(λ_t).toFixed(4));
+     // …
+     lat_t_deg: latNum,
+     lon_t_deg: lonNum,
+     ```
+   * De même, supprimer tout parseFloat dans les bindings si désormais `lat_t_deg` & `lon_t_deg` sont bien des `number`.
+
+2. **Unifier l’unité d’altitude**
+
+   * Choisir si l’on stocke l’altitude en **pieds** ou en **mètres** dès l’origine, partout :
+
+     * Option A : rester en pieds dans `WindowPage` (sans changer la simulation), et dans chaque composant (cockpit + hublot), prendre soin de convertir `alt * 0.3048` avant tout calcul de zoom/distance.
+     * Option B : dès qu’on calcule `altitude = getRealisticAltitude(…)` (qui renvoie des pieds), multiplier par `0.3048` pour stocker `altitudeEnMetres` dans `flightData`. Ensuite, on n’utilise plus `*0.3048` dans les composants.
+   * Par exemple, si on choisit **Option B** :
+
+     ```ts
+     const feet = getRealisticAltitude(progressPercent);
+     const meters = Math.round(feet * 0.3048);
+     // …
+     altitude: meters, // dans flightData
+     ```
+
+     et adapter tout le template pour ne plus afficher « X ft » (ou bien faire la conversion à l’affichage : `{{ (flightData.altitude / 0.3048) | number:'1.0-0' }} ft`).
+
+3. **Supprimer l’appel redondant à `updateCurrentPOI()`**
+
+   * Dans `WindowPage.ngOnInit()` :
+
+     ```ts
+     this.setInterval(() => {
+       this.updateDemoFlight();
+       this.updateFlightTestData();
+       this.updateCurrentPOI(); // suppression de cet appel
+     }, 1000);
+     ```
+   * Conserver l’appel unique à `this.updateCurrentPOI()` dans `updateDemoFlight()`.
+
+4. **Ajouter le champ `image_url` (ou supprimer le test) dans la popup POI**
+
+   * **Option A** (ajouter un champ) : dans l’interface `POI` (dans `window.page.ts`), étendre
+
+     ```ts
+     interface POI {
+       // … existants …
+       image_url?: string;
+     }
+     ```
+
+     puis, pour chaque POI dans `ALL_POIS`, ajouter un champ `image_url: 'assets/xxx.jpg'` (ou `null`).
+   * **Option B** (supprimer le test) : dans le template de la popup (`WindowPage`), enlever la ligne `<img *ngIf="selectedPOI.image_url" …>` (ou la remplacer par un `<div>` vide) de sorte que la popup n’affiche jamais d’image si aucune n’est prévue.
+
+5. **Modifier `WindowMapTestComponent.ngOnChanges` pour prendre en compte `altitude`**
+
+   * Remplacer :
+
+     ```ts
+     ngOnChanges(changes: SimpleChanges) {
+       if ((changes['lat'] || changes['lon']) && this.map) {
+         this.updatePlaneMarker();
+       }
+       if (changes['poisVisibles'] && this.map) {
+         this.updatePOIMarkers();
+       }
+     }
+     ```
+
+     par :
+
+     ```ts
+     ngOnChanges(changes: SimpleChanges) {
+       if ((changes['lat'] || changes['lon'] || changes['altitude']) && this.map) {
+         this.updatePlaneMarker();
+       }
+       if (changes['poisVisibles'] && this.map) {
+         this.updatePOIMarkers();
+       }
+     }
+     ```
+   * Ainsi, dès qu’on modifie l’altitude, on re-calculera le zoom dans `updatePlaneMarker()`.
+
+6. **Uniformiser la formule de zoom entre cockpit et hublots**
+
+   * Choisir une seule méthode pour calculer le zoom à partir de l’altitude (en mètres). Par exemple, reprendre la formule “log2” du hublot dans le cockpit :
+
+     ```ts
+     getZoomFromAltitude(altMeters: number, lat: number): number {
+       const EARTH_RADIUS = 6378137;
+       const latRad = (lat * Math.PI) / 180;
+       const denominator = 256 * altMeters;
+       const numerator = Math.cos(latRad) * 2 * Math.PI * EARTH_RADIUS;
+       let zoom = Math.log2(numerator / denominator);
+       zoom = Math.max(8, Math.min(15, zoom));
+       return Math.round(zoom);
+     }
+     ```
+   * Puis, remplacer dans `WindowMapTestComponent` l’appel à `getMapZoomFromAltitude(this.altitude)` par un appel à `this.getZoomFromAltitude(this.altitude, lat)`.
+   * Supprimer la fonction linéaire si on la juge moins réaliste, ou la garder uniquement pour afficher un chiffre indicatif dans la liste détaillée.
+
+7. **Améliorer la gestion des erreurs réseau dans `FlightDataService`**
+
+   * Dans `getFlightData()`, remplacer le `catchError(...)` qui renvoie un `FlightData` vide par :
+
+     ```ts
+     catchError(error => {
+       console.error('Error fetching flight data:', error);
+       return throwError(() => new Error('Impossible de récupérer les données de vol'));
+     })
+     ```
+   * Ainsi, les abonnés peuvent afficher un message d’erreur et réessayer manuellement.
+
+8. **Vérifier le cache avant tout appel réseau dans `getFlightData()`**
+
+   * Ajouter en début de méthode :
+
+     ```ts
+     getFlightData(flightNumber: string): Observable<FlightData> {
+       const cached = this.getCachedData(flightNumber);
+       if (cached) {
+         return of(cached);
+       }
+       // … appel à Aviationstack + OpenSky …
+     }
+     ```
+   * Ensuite, quand on obtient la donnée fraîche, avant de la `return`, passer par un `tap(data => this.setCachedData(flightNumber, data))` pour sauvegarder dans le cache.
+
+9. **Refactor `startTracking()` pour exposer un flux “live”**
+
+   * Créer un `BehaviorSubject<FlightData | null>` en champ privé :
+
+     ```ts
+     private liveFlight$ = new BehaviorSubject<FlightData | null>(null);
+     ```
+   * Dans `startTracking()`, récupérer d’abord l’état initial (via `getFlightData()`), émettre :
+
+     ```ts
+     this.getFlightData(flightNumber).subscribe(data => {
+       this.liveFlight$.next(data);
+       this.setCachedData(flightNumber, data);
+       // puis démarrer le interval pour les updates
+       this.trackingSubscription = interval(10000).pipe(
+         switchMap(() => this.openSkyService.getCurrentPosition(icao24))
+       ).subscribe(position => {
+         if (position) {
+           const cachedData = this.getCachedData(flightNumber);
+           if (cachedData) {
+             const updatedData = { 
+               ...cachedData, 
+               route: { 
+                 ...cachedData.route,
+                 currentPosition: { 
+                   latitude: position.latitude || 0,
+                   longitude: position.longitude || 0,
+                   altitude: position.altitude || 0,
+                   speed: position.speed || 0,
+                   heading: position.heading || 0,
+                   timestamp: position.timestamp || '' 
+                 }
+               }
+             };
+             this.liveFlight$.next(updatedData);
+             this.setCachedData(flightNumber, updatedData);
+           }
+         }
+       });
+     });
+     ```
+   * Enfin, faire :
+
+     ```ts
+     return this.liveFlight$.pipe(
+       filter((fd): fd is FlightData => fd !== null)
+     );
+     ```
+   * Ainsi, tout composant qui s’abonne à `startTracking(...)` recevra l’objet initial, puis toutes les mises à jour toutes les 10 s.
+
+10. **Remplacer `.toPromise()` par `firstValueFrom()`**
+
+    * Dans `refreshFlightData()`, remplacer :
+
+      ```ts
+      const data = await this.getFlightData(flightNumber).toPromise();
+      ```
+
+      par :
+
+      ```ts
+      import { firstValueFrom } from 'rxjs';
+      // …
+      const data = await firstValueFrom(this.getFlightData(flightNumber));
+      ```
+
+---
+
+**Plan d’action (ordre suggéré) :**
+
+1. **Mettre à jour la conversion lat/lon**
+
+   * Modifier `updateDemoFlight()` pour stocker `lat_t_deg` et `lon_t_deg` en `number`.
+   * Ajuster partout où on parseait ces valeurs (supprimer parseFloat / toFixed côté template).
+
+2. **Uniformiser l’unité d’altitude**
+
+   * Choisir si on garde les pieds ou si on stocke directement en mètres.
+   * Ajuster `updateDemoFlight()` et tous les calculs de zoom (dans cockpit et hublot) pour utiliser la même unité.
+   * Corriger les formules `getMapZoomFromAltitude()` et `getZoomFromAltitude()` pour travailler sur la même base (de préférence en mètres).
+
+3. **Supprimer l’appel redondant à `updateCurrentPOI()`**
+
+   * Dans `WindowPage.ngOnInit()`, garder un seul appel (celui qui se trouve dans `updateDemoFlight()`).
+
+4. **Prendre en compte l’altitude dans le cockpit**
+
+   * Modifier `WindowMapTestComponent.ngOnChanges` pour inclure `changes['altitude']` et s’assurer que le zoom suit immédiatement.
+
+5. **Corriger la popup POI (`image_url`)**
+
+   * Soit ajouter le champ `image_url` dans chaque objet POI (et dans l’`interface POI`), soit retirer le `<img *ngIf="selectedPOI.image_url">` pour éviter tout test inutile.
+
+6. **Unifier la formule de zoom**
+
+   * Décider de la formule à utiliser (log2 vs linéaire) et l’appliquer dans les deux composants (`WindowMapTestComponent` & `WindowHublotComponent`).
+   * Supprimer la version non retenue.
+
+7. **Améliorer la gestion d’erreurs de `FlightDataService`**
+
+   * Dans `getFlightData()`, ne plus renvoyer un objet “vierge” en cas d’erreur, mais plutôt `throwError(...)` ou un `Observable` qui émet une erreur.
+   * Ajouter un mécanisme de notification à l’utilisateur dans le composant appelant si nécessaire.
+
+8. **Ajouter une vérification du cache avant appel réseau**
+
+   * Modifier `getFlightData()` pour consulter `getCachedData()` d’abord, et renvoyer la donnée en cache si elle est encore valide (< 5 min).
+   * S’assurer que `setCachedData()` est bien appelé dès qu’on récupère un nouveau `FlightData` depuis l’API.
+
+9. **Refactorer `startTracking()` pour exposer un flux réactif “live”**
+
+   * Introduire un `BehaviorSubject<FlightData>` interne, le remplir avec l’état initial puis avec chaque mise à jour de position fixe.
+   * Faire en sorte que `startTracking()` retourne `liveFlight$.asObservable()` afin que les composants puissent s’abonner et recevoir simultanément l’état initial et toutes les mises à jour en temps réel.
+
+10. **Mettre à jour `refreshFlightData()` pour remplacer `.toPromise()`**
+
+    * Remplacer par un appel à `firstValueFrom(this.getFlightData(...))`.
+
+---
+
+En suivant ces étapes dans l’ordre, vous corrigerez toutes les incohérences de types, d’unités et de logique, et vous mettrez en place un service de données de vol robuste, parfaitement synchronisé avec vos composants carte et hublots. Enfin, vous offrirez une gestion d’erreurs optimale et un cache efficace pour limiter les appels réseau inutiles.

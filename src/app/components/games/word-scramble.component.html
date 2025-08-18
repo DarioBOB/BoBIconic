@@ -1,0 +1,150 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/games"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mots Mêlés</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="restart()">
+        🔄
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="word-scramble-container">
+  <!-- En-tête du jeu -->
+  <div class="game-header">
+    <div class="stats-row">
+      <div class="stat-card">
+        <h3>Score</h3>
+        <p>{{ gameState.score }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Temps</h3>
+        <p [class.time-warning]="gameState.timeLeft <= 60">{{ getTimeString() }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Mots</h3>
+        <p>{{ getFoundWordsCount() }}/{{ getTotalWordsCount() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grille de jeu -->
+  <div class="game-board-container">
+    <div class="game-board" *ngIf="!gameState.gameStarted">
+      <div class="start-screen">
+        <h2>🎯 Mots Mêlés</h2>
+        <p>Trouvez tous les mots cachés dans la grille !</p>
+        <p>Glissez votre doigt ou votre souris pour sélectionner les lettres.</p>
+        <ion-button size="large" (click)="startGame()" class="start-btn">
+          🚀 Commencer
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="game-board active" *ngIf="gameState.gameStarted && !gameState.gameOver">
+      <div class="grid-container">
+        <div class="letter-grid">
+          <div 
+            *ngFor="let row of gameState.grid; let rowIndex = index; trackBy: trackByRow"
+            class="grid-row">
+            <div 
+              *ngFor="let letter of row; let colIndex = index; trackBy: trackByCol"
+              class="grid-cell"
+              [class.selected]="isCellSelected(rowIndex, colIndex)"
+              [attr.data-row]="rowIndex"
+              [attr.data-col]="colIndex">
+              {{ letter }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des mots à trouver -->
+  <div class="words-list-container" *ngIf="gameState.gameStarted">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>📝 Mots à trouver</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="words-grid">
+          <div 
+            *ngFor="let word of gameState.words; trackBy: trackByWord"
+            class="word-item"
+            [class.found]="isWordFound(word)">
+            <span class="word-text">{{ word.word }}</span>
+            <ion-icon 
+              *ngIf="isWordFound(word)" 
+              name="checkmark-circle" 
+              class="found-icon">
+            </ion-icon>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions-container" *ngIf="gameState.gameStarted && !gameState.gameOver">
+    <ion-card>
+      <ion-card-content>
+        <p class="instruction-text">
+          💡 <strong>Comment jouer :</strong> Glissez votre doigt ou votre souris sur les lettres pour former les mots de la liste.
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
+<!-- Modal de victoire -->
+<ion-modal [isOpen]="gameState.gameOver && gameState.won" [backdropDismiss]="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>🎉 Félicitations !</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="modal-content">
+      <div class="victory-message">
+        <h2>Vous avez trouvé tous les mots !</h2>
+        <p>Score final : {{ gameState.score }}</p>
+        <p>Temps restant : {{ getTimeString() }}</p>
+        <div class="modal-buttons">
+          <ion-button fill="outline" (click)="restart()">
+            Nouvelle partie
+          </ion-button>
+          <ion-button (click)="restart()">
+            Rejouer
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal de fin de partie -->
+<ion-modal [isOpen]="gameState.gameOver && !gameState.won" [backdropDismiss]="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>⏰ Temps écoulé</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="modal-content">
+      <div class="gameover-message">
+        <h2>Partie terminée</h2>
+        <p>Score final : {{ gameState.score }}</p>
+        <p>Mots trouvés : {{ getFoundWordsCount() }}/{{ getTotalWordsCount() }}</p>
+        <div class="modal-buttons">
+          <ion-button (click)="restart()">
+            Nouvelle partie
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal> 

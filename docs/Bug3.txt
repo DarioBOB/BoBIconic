@@ -1,0 +1,517 @@
+Le composant **`WindowMapTestComponent`** que vous avez partagé affiche une carte Leaflet “cockpit”/itinéraire sur toute la page et met à jour en temps réel :
+
+1. La position (marker “avion”)
+2. Le tracé grand-cercle Genève – Athènes (polyline rouge en pointillés)
+3. Le zoom en fonction de l’altitude
+4. Les marqueurs POI correspondant à la liste `poisVisibles` reçue en `@Input()`
+
+Je passe en revue chaque section pour m’assurer que tout fonctionne comme prévu et pour pointer quelques petites optimisations ou corrections éventuelles.
+
+---
+
+## 1. Structure générale et cycle de vie
+
+```ts
+@Component({
+  selector: 'app-window-map-test',
+  standalone: true,
+  template: `<div id="map"></div>`,
+  styles: [`
+    #map, .leaflet-container {
+      height: 90vh !important;
+      width: 100vw !important;
+      min-height: 400px !important;
+      background: #fff !important;
+      margin: 0;
+      display: block;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  `]
+})
+export class WindowMapTestComponent implements AfterViewInit, OnDestroy, OnChanges {
+  @Input() lat: number | string = 0;
+  @Input() lon: number | string = 0;
+  @Input() altitude: number = 11000;
+  @Input() poisVisibles: any[] = [];
+
+  map: any;
+  planeMarker: any = null;
+  points: [number, number][] = [];
+  lastLat: number | null = null;
+  lastLon: number | null = null;
+  poiMarkers: any[] = [];
+
+  ngAfterViewInit() {
+    this.map = L.map('map').setView([44, 15], 6);
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { attribution: 'Tiles © Esri' }
+    ).addTo(this.map);
+
+    // Construction de la polyline grand-cercle GVA → ATH
+    this.buildGreatCircleLine();
+    L.polyline(this.points, { color: 'red', weight: 3, dashArray: '8,8' }).addTo(this.map);
+
+    // Forcer un petit délai pour que la carte prenne bien la taille CSS
+    setTimeout(() => this.map.invalidateSize(), 500);
+
+    // Position initiale de l’avion et des POIs
+    this.updatePlaneMarker();
+    this.updatePOIMarkers();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if ((changes['lat'] || changes['lon']) && this.map) {
+      this.updatePlaneMarker();
+    }
+    if (changes['poisVisibles'] && this.map) {
+      this.updatePOIMarkers();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.planeMarker) {
+      this.planeMarker.remove();
+    }
+  }
+
+  // … méthodes internes ci-dessous …
+}
+```
+
+### Vérifications
+
+1. **Initialisation de la carte (`ngAfterViewInit`)**
+
+   * Vous créez un `L.map('map')` en ciblant l’élément `<div id="map">`. Comme c’est un composant autonome, il n’y a qu’un seul élément `#map` dans la page, donc c’est correct.
+   * Vous appliquez directement la couche satellite ESRI “World\_Imagery”. Cela fonctionne et donne un rendu en très haute résolution.
+   * Vous appelez **`this.buildGreatCircleLine()`** (voir plus bas) pour remplir `this.points` avec 101 coordonnées interpolées sur le grand cercle GVA → ATH, puis vous tracez une polyline rouge en pointillés.
+   * Le `setTimeout(() => this.map.invalidateSize(), 500)` force Leaflet à recalculer ses dimensions une fois que le conteneur est rendu, ce qui évite que la carte s’affiche tronquée ou ne prenne pas toute la hauteur.
+   * Enfin, vous appelez immédiatement `this.updatePlaneMarker()` et `this.updatePOIMarkers()` pour afficher le marker avion et les POIs dès la première vue. Très bien.
+
+2. **Réactions aux changements d’`@Input()` (`ngOnChanges`)**
+
+   * Si `lat` ou `lon` change, vous appelez `this.updatePlaneMarker()`.
+   * Si `poisVisibles` change, vous appelez `this.updatePOIMarkers()`.
+   * **Remarque mineure** : si vous modifiez `altitude` sans changer lat/lon, le marker ne bougera pas, mais on ne recalcule pas le zoom. Or dans `updatePlaneMarker()` vous appliquez le zoom en fonction de `this.altitude`. Donc si vous mettez à jour uniquement `altitude`, il faudrait déclencher également `updatePlaneMarker`. Actuellement, `ngOnChanges` ne vérifie que `changes['lat'] || changes['lon']`. Pour que le zoom suive en temps réel un changement d’altitude, vous pourriez ajouter :
+
+     ```ts
+     if (changes['altitude'] && this.map) {
+       this.updatePlaneMarker();
+     }
+     ```
+   * Autrement, tout est bien relié.
+
+3. **Nettoyage (`ngOnDestroy`)**
+
+   * Vous supprimez le `planeMarker` quand le composant est détruit.
+   * Les marqueurs POI (`this.poiMarkers`) ne sont pas explicitement détruits ici, mais Angular nettoiera le conteneur `<div id="map">` lorsque le composant sera retiré de l’écran. Pour être rigoureux, on aurait pu parcourir `this.poiMarkers` et faire un `marker.remove()` chacun, mais le fait que tout le `<div id="map">` disparaisse du DOM basta généralement.
+   * En revanche, si vous revenez fréquemment sur cette page, vous pourriez accumuler d’anciens `poiMarkers` dans la mémoire si vous n’avez jamais appelé `updatePOIMarkers()` pour les effacer. Mais vu que `updatePOIMarkers()` efface tous les marqueurs à chaque nouvelle invasion de POIs, on n’incrustre pas de fuites mémoire majeures.
+
+---
+
+## 2. Construction de la polyline grand-cercle
+
+```ts
+private buildGreatCircleLine() {
+  const from = { lat: 46.2381, lon: 6.1080 };   // Genève
+  const to   = { lat: 37.9364, lon: 23.9445 };  // Athènes
+  const steps = 100;
+  const toRad = (d: number) => d * Math.PI / 180;
+  const toDeg = (r: number) => r * 180 / Math.PI;
+  
+  const lat1 = toRad(from.lat);
+  const lon1 = toRad(from.lon);
+  const lat2 = toRad(to.lat);
+  const lon2 = toRad(to.lon);
+  
+  // distance angulaire sur le rayon terrestre (formule haversine)
+  const d = 2 * Math.asin(
+    Math.sqrt(
+      Math.sin((lat2 - lat1) / 2) ** 2 +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin((lon2 - lon1) / 2) ** 2
+    )
+  );
+
+  this.points = [];
+  for (let i = 0; i <= steps; i++) {
+    const f = i / steps;
+    if (d === 0) {
+      this.points.push([from.lat, from.lon]);
+      continue;
+    }
+    const A = Math.sin((1 - f) * d) / Math.sin(d);
+    const B = Math.sin(f * d) / Math.sin(d);
+    const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+    const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+    const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+    const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
+    const lon = Math.atan2(y, x);
+    this.points.push([toDeg(lat), toDeg(lon)]);
+  }
+}
+```
+
+* **Exactitude**
+
+  * Vous utilisez la formule de la “slerp” sur la sphère (souvent appelée « interpolation grand-cercle »). De ce fait, la trajectoire tracée (101 points) suit vraiment le plus court chemin (orthodromie).
+  * Le calcul de `d` (distance angulaire) est correct, basé sur la formule haversine.
+  * À chaque fraction `f = i/steps`, vous calculez le point intermédiaire `(lat, lon)`.
+
+* **Résultat attendu**
+
+  * Vous obtenez un tableau `this.points` de 101 paires `[latitude, longitude]`, qui sont passées à `L.polyline(this.points, …)`.
+  * La polyline apparaît en rouge sur la carte. Étant donné que vous avez mis `dashArray: '8,8'`, on voit un trait pointillé animé (ou immobile, selon le CSS).
+
+* **Conclusion**
+
+  * Rien à redire : la fonction est parfaitement correcte et produira le tracé attendu.
+
+---
+
+## 3. `updatePlaneMarker()` : position, cap, zoom du marker “avion”
+
+```ts
+updatePlaneMarker() {
+  if (!this.map) return;
+
+  // 1) Enlever l’ancien planeMarker, s’il existe
+  if (this.planeMarker) {
+    this.map.removeLayer(this.planeMarker);
+  }
+
+  // 2) Récupérer lat/lon en nombre
+  const lat = typeof this.lat === 'string' ? parseFloat(this.lat) : this.lat;
+  const lon = typeof this.lon === 'string' ? parseFloat(this.lon) : this.lon;
+  const pos: [number, number] = [lat, lon];
+
+  // 3) Calcul du cap
+  let heading = 0;
+  if (this.lastLat !== null && this.lastLon !== null
+      && (lat !== this.lastLat || lon !== this.lastLon)) {
+    // Si on a déjà une position précédente, on calcule le cap direct
+    heading = this.computeHeading([this.lastLat, this.lastLon], pos);
+  } else {
+    // Sinon, on cherche le “point suivant le plus proche” sur la polyline
+    let next = pos;
+    let minDist = Infinity;
+    for (const p of this.points) {
+      const d = Math.sqrt((p[0] - lat) ** 2 + (p[1] - lon) ** 2);
+      if (d > 0.01 && d < minDist) {
+        minDist = d;
+        next = p;
+      }
+    }
+    heading = this.computeHeading(pos, next);
+  }
+
+  // 4) On arrondit le heading au multiple de 15° (pour matcher un icône plane_XXXdeg.png)
+  const rounded = Math.round(heading / 15) * 15;
+  const normalized = (rounded + 360) % 360;
+  const pad = (n: number) => n.toString().padStart(3, '0');
+  const planeImagePath = `assets/plane_${pad(normalized)}deg.png`;
+
+  // 5) On ajoute le nouveau marker “avion”
+  this.planeMarker = L.marker(pos, {
+    icon: L.icon({
+      iconUrl: planeImagePath,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -20]
+    })
+  }).addTo(this.map);
+
+  // 6) Application du zoom dynamique selon l’altitude
+  const zoom = this.getMapZoomFromAltitude(this.altitude);
+  this.map.setView(pos, zoom);
+
+  // 7) Mémorisation pour le prochain calcul de cap
+  this.lastLat = lat;
+  this.lastLon = lon;
+}
+```
+
+### 3.1 Conversion lat/lon au bon type
+
+* Vous acceptez `@Input() lat: number | string` et `lon: number | string`.
+* Avant toute utilisation, vous faites :
+
+  ```ts
+  const lat = typeof this.lat === 'string'
+                      ? parseFloat(this.lat)
+                      : this.lat;
+  const lon = typeof this.lon === 'string'
+                      ? parseFloat(this.lon)
+                      : this.lon;
+  ```
+* **✅ Cela garantit que `lat` et `lon` sont bien des **nombres** (et non des chaînes) avant de les passer à `L.marker()`.**
+* Si jamais `parseFloat()` échouait (chaîne non numérique), `NaN` apparaîtrait, mais dans votre usage, vous passez toujours des nombres (puisque vous aurez corrigé dans `WindowPage` pour envoyer un `number` à la place d’une chaîne).
+
+### 3.2 Calcul du cap (“heading”)
+
+* **Cas 1 :** on a déjà une `this.lastLat` / `this.lastLon` et la position a effectivement changé (si `lat !== this.lastLat || lon !== this.lastLon`).
+
+  * Vous appelez `this.computeHeading([this.lastLat, this.lastLon], [lat, lon])`.
+  * **`computeHeading`** (méthode factice ici, mais c’est en fait le calcul inline) utilise la formule géodésique pour déterminer l’angle (en degrés) du vecteur (point précédent → point courant).
+  * Vous ramenez l’angle dans \[0,360) en faisant `if (θ < 0) θ += 360`.
+  * **✅ C’est la façon correcte de calculer le cap quand on connaît deux coordonnées successives.**
+
+* **Cas 2 :** si c’est la première fois qu’on instancie le marker (ou que la position n’a pas changé), `this.lastLat` et `this.lastLon` valent `null`, **ou** `(lat,lon)` est identique à l’ancien.
+
+  * Dans ce cas, vous cherchez sur la polyline `this.points[]` (100+ points) celui qui est le plus proche de la position actuelle, mais **en excluant** les points dont la distance est < 0.01° (≈ 1 km) pour éviter de prendre le même “point courant”.
+  * Une fois que vous avez repéré le “point suivant” (celui à la plus faible distance > 0.01), vous appelez à nouveau `computeHeading(currentPos, next)`.
+  * Cela simule le cap “au début du vol” même si on n’a pas encore de vecteur de déplacement.
+  * **✅ Cette logique est tout à fait valable pour avoir un cap “raisonnable” dès la première itération.**
+
+* **Arrondi au multiple de 15°** pour construire un chemin d’icône du type `plane_045deg.png` → **très pratique** si vous disposez d’images pour chaque direction 0°, 015°, 030°, …360°.
+
+  * L’alignement sur 15° assure que, même si le calcul géodésique donne 47°, on utilisera l’icône “plane\_045deg.png” plutôt qu’une rotation arbitraire sur la balise `<img>`.
+  * **✅ Rien à redire, c’est cohérent.**
+
+### 3.3 Injection du marker “avion” dans la carte
+
+* Vous créez le marker avec
+
+  ```ts
+  L.marker(pos, {
+    icon: L.icon({
+      iconUrl: planeImagePath, // ex. 'assets/plane_090deg.png'
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -20]
+    })
+  }).addTo(this.map);
+  ```
+
+* Puis, dès que le marker est ajouté, vous faites
+
+  ```ts
+  const zoom = this.getMapZoomFromAltitude(this.altitude);
+  this.map.setView(pos, zoom);
+  ```
+
+  ce qui fait à la fois re-centrer la carte sur `pos` et forcer le zoom selon l’altitude.
+
+* **Remarque unit conversions**
+
+  * Votre fonction `getMapZoomFromAltitude(altitude: number)` (définie plus bas) prend `altitude` en **pieds** (sync avec ce que vous passez depuis `WindowPage`). Elle mappe linéairement `0 ft → zoom = 13` et `40000 ft → zoom = 6`.
+  * Tant que vos altitudes “réelles” varient entre 0 et 40 000 ft, vous aurez un zoom compris entre 13 (au décollage) et 6 (en croisière haute).
+  * C’est cohérent avec ce composant, même si la formule est moins “physique” que celle du `WindowHublotComponent` (log2 ± cos(lat) …). Mais pour une vue “cockpit”, c’est souvent suffisant de rester simple.
+
+* **Conclusion**
+
+  * Le marker avion se met à jour pour chaque changement de lat/lon (ou alt si vous implémentez la suggestion ci-dessus).
+  * Le zoom se recalcule en fonction de l’altitude, donc la carte “zoome/dézoome” au fur et à mesure qu’on monte ou descend.
+  * **Tout est conforme** à l’intention : montrer au passager une vue “cockpit” immersive.
+
+---
+
+## 4. `getMapZoomFromAltitude(altitude: number)`
+
+```ts
+getMapZoomFromAltitude(altitude: number): number {
+  const minAlt = 0;
+  const maxAlt = 40000;
+  const minZoom = 6;
+  const maxZoom = 13;
+  const alt = Math.max(minAlt, Math.min(maxAlt, altitude));
+  // On inverse la formule linéaire : plus on est haut (alt grande), plus zoom proche de minZoom
+  const zoom = maxZoom - ((alt - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
+  return Math.round(zoom);
+}
+```
+
+* **Explication**
+
+  * Quand `altitude = 0 ft`, on a `(alt - minAlt) / (maxAlt - minAlt) = 0` → `zoom = maxZoom = 13`.
+  * Quand `altitude = 40 000 ft`, on a `(40000 - 0) / (40000 - 0) = 1` → `zoom = 13 - (1) × (13 - 6) = 6`.
+  * Entre les deux, c’est une interpolation linéaire.
+* **Observation**
+
+  * 13 → 6 est une plage de zoom assez “radicale” pour une carte mondiale. Le zoom 6 se situe sur une carte assez “continentale / pays” (≈ 1 pixel = 4 km).
+  * Un zoom de 13 (au sol) est une vue très serrée (1 pixel ≈ 1 mètre).
+  * **Pour un vol en croisière à 35 000 ft, on ne s’attend pas à voir un détail < 10 km autour**, donc ce mapping linéaire donne un résultat plausible.
+* **Rien à corriger ici** si l’effet visuel vous convient. Sinon, vous pouvez jouer sur les bornes (par exemple zoom ∈ \[5…14]) ou utiliser une formule log2 (comme dans `WindowHublotComponent`) si vous voulez reproduire plus fidèlement l’échelle “m/pixel”.
+
+---
+
+## 5. `updatePOIMarkers()` : affichage des POIs visibles
+
+```ts
+updatePOIMarkers() {
+  // 1) Suppression des anciens marqueurs
+  if (this.poiMarkers && this.poiMarkers.length) {
+    for (const marker of this.poiMarkers) {
+      this.map.removeLayer(marker);
+    }
+  }
+  this.poiMarkers = [];
+
+  if (!this.poisVisibles) return;
+
+  // 2) Pour chaque POI dans la liste reçue en @Input(), on ajoute un marker
+  for (const poi of this.poisVisibles) {
+    // Récupérer latitude et longitude du POI (soit .lat/.lon, soit .latitude/.longitude)
+    const lat = (typeof poi.lat === 'number' && !isNaN(poi.lat))
+      ? poi.lat
+      : (typeof poi.latitude === 'number' && !isNaN(poi.latitude)
+          ? poi.latitude
+          : undefined);
+    const lon = (typeof poi.lon === 'number' && !isNaN(poi.lon))
+      ? poi.lon
+      : (typeof poi.longitude === 'number' && !isNaN(poi.longitude)
+          ? poi.longitude
+          : undefined);
+
+    if (typeof lat !== 'number' || typeof lon !== 'number') continue;
+
+    const marker = L.marker([lat, lon], {
+      icon: L.icon({
+        iconUrl: 'assets/pin.png', // on utilise un pin générique, à adapter
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      })
+    }).addTo(this.map);
+
+    // On lie un popup contenant le nom, la description et le lien Wikipedia
+    marker.bindPopup(`
+      <b>${poi.name}</b><br>
+      ${poi.description}<br>
+      <a href='${poi.wiki_url}' target='_blank'>Wikipedia</a>
+    `);
+
+    this.poiMarkers.push(marker);
+  }
+}
+```
+
+### Vérifications
+
+1. **Suppression des anciens marqueurs**
+
+   * Avant d’ajouter de nouveaux POIs, vous parcourez `this.poiMarkers` et appelez `this.map.removeLayer(marker)` sur chacun.
+   * Vous réinitialisez ensuite `this.poiMarkers = []`.
+   * **✅ Cela évite d’accumuler des icônes POI obsolètes à l’écran.**
+
+2. **Filtrage des POIs sans coordonnées valides**
+
+   * Vous testez d’abord `poi.lat` et `poi.lon` (en tant que nombre), sinon `poi.latitude` et `poi.longitude`.
+   * Si `lat` ou `lon` n’est pas un nombre, vous continuez la boucle.
+   * **✅ Cette double prise en charge (.lat/.lon ou .latitude/.longitude) est utile pour accepter plusieurs schémas d’objet POI.**
+
+3. **Création du marker**
+
+   * Vous utilisez une icône générique `"assets/pin.png"`.
+   * Si vous aviez des icônes spécifiques par type de POI, il suffirait de les remplacer ici (par ex. `poi.iconUrl` ou via un switch sur `poi.type`).
+   * Le `iconSize: [32,32]`, `iconAnchor: [16,32]` (pointe du pin sur le sol) sont des valeurs standard.
+   * Vous appelez ensuite `marker.bindPopup(...)` pour montrer un petit aperçu (nom, description, lien wiki) au clic.
+   * **✅ Tout est en ordre.**
+
+4. **Ajout au tableau `this.poiMarkers`**
+
+   * Vous conservez chaque nouvel objet `marker` dans `this.poiMarkers` pour pouvoir le supprimer lors du prochain rafraîchissement.
+   * **✅ Pratique pour ne pas créer de fuites mémoire.**
+
+---
+
+## 6. Synthèse et petites recommandations
+
+* **Zoom sur altitudes en temps réel**
+  Actuellement, si vous envoyez un nouveau `altitude` (en modifiant seulement la propriété `altitude` de `WindowMapTestComponent`), le `ngOnChanges` ne le détecte pas pour déclencher `updatePlaneMarker()`. Pour que la carte zoome instantanément quand `altitude` change, il suffit d’étendre `ngOnChanges` ainsi :
+
+  ```ts
+  ngOnChanges(changes: SimpleChanges) {
+    if ((changes['lat'] || changes['lon'] || changes['altitude']) && this.map) {
+      this.updatePlaneMarker();
+    }
+    if (changes['poisVisibles'] && this.map) {
+      this.updatePOIMarkers();
+    }
+  }
+  ```
+
+* **Uniformisation des unités**
+
+  * Vous recevez `@Input() altitude: number` en **pieds** (ft) depuis `WindowPage`.
+  * Votre fonction `getMapZoomFromAltitude()` travaille en pieds → zoom. Tant que vous restez cohérent entre les deux composants, c’est parfait.
+  * **Si vous décidez de passer l’altitude en mètres** (par exemple pour coller à la logique du `WindowHublotComponent`), il suffirait d’ajuster soit l’`@Input()` (p. ex. `[altitude]="(flightData.altitude * 0.3048)"`), soit d’ajouter la conversion à l’intérieur de `getMapZoomFromAltitude`.
+
+* **Polyfill du container “map”**
+
+  * L’ID `map` est hardcodé dans le template (`<div id="map"></div>`). Si vous utilisez plusieurs cartes Leaflet sur la même page, veillez à donner des IDs distincts (ou utilisez `@ViewChild('map')` pour référencer un `<div #map>`).
+  * Pour ce cas précis, comme il s’agit de la page complète, un seul `#map` suffit.
+
+* **Fuite des `poiMarkers`**
+
+  * Si vous envoyez fréquemment une nouvelle liste `poisVisibles`, `updatePOIMarkers()` supprime correctement les anciens marqueurs et en recrée de nouveaux.
+  * **Au moment de la destruction du composant**, vous ne faites pas explicitement `marker.remove()` pour chaque `poiMarkers`, mais puisque le conteneur `<div id="map">` sera détruit par Angular, Leaflet enlèvera automatiquement toutes ses layers.
+  * Si vous êtes très pointilleux, vous pourriez dans `ngOnDestroy()` faire :
+
+    ```ts
+    for (const m of this.poiMarkers) {
+      m.remove();
+    }
+    this.poiMarkers = [];
+    ```
+
+    ce qui n’est cependant pas strictement nécessaire.
+
+* **Amélioration possible : mise à jour de la vue sans recadrer**
+
+  * À chaque appel de `updatePlaneMarker()`, vous faites `this.map.setView(pos, zoom)`. Cela recadre toujours la carte sur l’avion, même si ce dernier se déplace légèrement (ce qui peut donner un léger effet “saccadé” si vous voulez garder la carte statique et ne faire bouger que le marker).
+  * **Option** :
+
+    ```ts
+    if (!this.map.getBounds().contains(pos)) {
+      // seulement si l’avion est en dehors de l’écran, recadrer
+      this.map.setView(pos, zoom);
+    }
+    // sinon, juste appliquer map.setZoom(zoom) pour modifier le niveau.
+    ```
+
+    De cette façon, la carte reste plus stable, et seul le niveau de zoom se met à jour. Mais ce n’est qu’une question de préférence UX.
+
+* **Ajout d’une couche POI plus riche (cluster, icons différents, etc.)**
+
+  * Si vous avez beaucoup de POIs simultanément, vous pourriez envisager d’utiliser `leaflet.markercluster` (ou `@asymmetrik/ngx-leaflet-markercluster` sous Angular) pour grouper les marqueurs à faible zoom.
+  * De même, pour chaque type de POI (`montagne`, `ville`, etc.), vous pourriez avoir une icône spécifique plutôt qu’un simple `assets/pin.png`. Par exemple :
+
+    ```ts
+    const iconUrl = poi.iconUrl || 'assets/pin.png';
+    L.marker([lat, lon], {
+      icon: L.icon({
+        iconUrl,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+      })
+    }).addTo(this.map);
+    ```
+
+---
+
+## 7. Conclusion
+
+* **Le composant `WindowMapTestComponent` fonctionne exactement comme prévu** :
+
+  1. Il trace la trajectoire grand-cercle Genève → Athènes.
+  2. Il positionne un marker “avion” qui pivote selon le cap calculé à chaque nouveau `lat`/`lon`.
+  3. Il ajuste dynamiquement le **zoom** en fonction de l’altitude (`this.altitude`).
+  4. Il affiche les **POIs visibles** en tant que markers avec des popups, recréés à chaque mise à jour de `poisVisibles`.
+
+* **Points à corriger/improver** :
+
+  1. Dans `ngOnChanges`, ajouter la prise en compte de `changes['altitude']` pour que le zoom change aussitôt que l’altitude évolue.
+  2. (Optionnel) Dans `ngOnDestroy`, supprimer également explicitement tous les POI markers pour éliminer toute ambiguïté de fuite mémoire.
+  3. Vérifier que l’`altitude` reçue en feet depuis `WindowPage` est cohérente avec la formule de zoom : soit vous continuez à l’envoyer en ft, soit vous envoyez en mètres et adaptez `getMapZoomFromAltitude`.
+
+* **À présent**, vous avez deux vues complémentaires :
+
+  1. **La carte “cockpit”** (couvrant 90 % de la hauteur de l’écran) avec la trajectoire et l’avion en mouvement (`WindowMapTestComponent`).
+  2. **Les deux hublots latéraux** en bas de page, chacun affichant une mini-carte orientée et zoomée selon l’altitude et le côté (`WindowHublotComponent`).
+
+Avec ces deux composants, l’utilisateur voit à la fois la trajectoire d’ensemble du vol et, en zoom plus serré, la vue “passager” telle qu’elle apparaîtrait depuis la fenêtre d’avion. Si vous implémentez les petites recommandations (prise en compte de `altitude` dans `ngOnChanges`, conversion éventuelle ft→m), tout sera parfaitement synchronisé et fluide.

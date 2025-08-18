@@ -1,0 +1,323 @@
+<ion-header class="modern-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="header-title">
+      <div class="title-content">
+        <ion-icon name="airplane" class="title-icon"></ion-icon>
+        <span>{{ 'TRIPS.TITLE' | translate }}</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="refreshData()" class="action-btn">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" (click)="addNewTrip()" class="add-btn">
+        <ion-icon name="add" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button fill="outline" color="warning" (click)="resetDemoData()" *ngIf="userRole.isDemo" style="margin-left: 8px;">
+        <ion-icon name="refresh-circle" slot="start"></ion-icon>
+        Réinitialiser la démo
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="trips-content-modern">
+  <!-- Hero Section avec métriques -->
+  <div class="hero-section">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+      <div class="hero-title">
+        <h1>{{ 'TRIPS.TITLE' | translate }}</h1>
+        <p class="hero-subtitle">{{ 'TRIPS.SUBTITLE' | translate }}</p>
+      </div>
+      
+      <!-- Métriques en temps réel -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon ongoing">
+            <ion-icon name="airplane"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ ongoingTrips.length }}</div>
+            <div class="metric-label">{{ 'TRIPS.ONGOING' | translate }}</div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon upcoming">
+            <ion-icon name="calendar"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ upcomingTrips.length }}</div>
+            <div class="metric-label">{{ 'TRIPS.UPCOMING' | translate }}</div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon past">
+            <ion-icon name="time"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ pastTrips.length }}</div>
+            <div class="metric-label">{{ 'TRIPS.PAST' | translate }}</div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-icon total">
+            <ion-icon name="stats-chart"></ion-icon>
+          </div>
+          <div class="metric-content">
+            <div class="metric-value">{{ ongoingTrips.length + upcomingTrips.length + pastTrips.length }}</div>
+            <div class="metric-label">Total</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation moderne avec onglets -->
+  <div class="modern-tabs">
+    <div class="tabs-container">
+      <div class="tab-item" 
+           [class.active]="selectedSegment === 'ongoing'"
+           (click)="selectedSegment = 'ongoing'">
+        <div class="tab-icon">
+          <ion-icon name="airplane"></ion-icon>
+        </div>
+        <div class="tab-content">
+          <div class="tab-label">{{ 'TRIPS.ONGOING' | translate }}</div>
+          <div class="tab-count">{{ ongoingTrips.length }}</div>
+        </div>
+        <div class="tab-indicator" *ngIf="selectedSegment === 'ongoing'"></div>
+      </div>
+      
+      <div class="tab-item" 
+           [class.active]="selectedSegment === 'upcoming'"
+           (click)="selectedSegment = 'upcoming'">
+        <div class="tab-icon">
+          <ion-icon name="calendar"></ion-icon>
+        </div>
+        <div class="tab-content">
+          <div class="tab-label">{{ 'TRIPS.UPCOMING' | translate }}</div>
+          <div class="tab-count">{{ upcomingTrips.length }}</div>
+        </div>
+        <div class="tab-indicator" *ngIf="selectedSegment === 'upcoming'"></div>
+      </div>
+      
+      <div class="tab-item" 
+           [class.active]="selectedSegment === 'past'"
+           (click)="selectedSegment = 'past'">
+        <div class="tab-icon">
+          <ion-icon name="time"></ion-icon>
+        </div>
+        <div class="tab-content">
+          <div class="tab-label">{{ 'TRIPS.PAST' | translate }}</div>
+          <div class="tab-count">{{ pastTrips.length }}</div>
+        </div>
+        <div class="tab-indicator" *ngIf="selectedSegment === 'past'"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="trips-container-modern">
+    <ng-container *ngIf="isLoading; else tripsContent">
+      <div class="loading-modern">
+        <div class="loading-spinner">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+        <div class="loading-text">Chargement de vos voyages...</div>
+        <div class="loading-progress">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    
+    <ng-template #tripsContent>
+      <!-- Message d'erreur moderne -->
+      <div *ngIf="error" class="error-modern">
+        <div class="error-icon">
+          <ion-icon name="alert-circle"></ion-icon>
+        </div>
+        <div class="error-content">
+          <h2>{{ 'TRIPS.ERROR_TITLE' | translate }}</h2>
+          <p>{{ error }}</p>
+          <ion-button fill="outline" (click)="refreshData()">
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Réessayer
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Liste des voyages -->
+      <div *ngIf="!error">
+        <div *ngFor="let segment of ['ongoing', 'upcoming', 'past']">
+          <div *ngIf="selectedSegment === segment">
+            <!-- État vide moderne -->
+            <div *ngIf="(segment === 'ongoing' ? ongoingTrips : segment === 'upcoming' ? upcomingTrips : pastTrips).length === 0" 
+                 class="empty-state-modern">
+              <div class="empty-icon">
+                <ion-icon [name]="segment === 'ongoing' ? 'airplane-outline' : segment === 'upcoming' ? 'calendar-outline' : 'time-outline'"></ion-icon>
+              </div>
+              <div class="empty-content">
+                <h2>{{ segment === 'ongoing' ? ('TRIPS.NO_ONGOING' | translate) : segment === 'upcoming' ? ('TRIPS.NO_UPCOMING' | translate) : ('TRIPS.NO_PAST' | translate) }}</h2>
+                <p>{{ segment === 'ongoing' ? ('TRIPS.NO_ONGOING_DESC' | translate) : segment === 'upcoming' ? ('TRIPS.NO_UPCOMING_DESC' | translate) : ('TRIPS.NO_PAST_DESC' | translate) }}</p>
+                <ion-button fill="solid" (click)="addNewTrip()" class="empty-action">
+                  <ion-icon name="add" slot="start"></ion-icon>
+                  Créer votre premier voyage
+                </ion-button>
+              </div>
+            </div>
+
+            <!-- Cartes de voyage immersives unifiées -->
+            <div *ngFor="let trip of (segment === 'ongoing' ? ongoingTrips : segment === 'upcoming' ? upcomingTrips : pastTrips); let i = index">
+              <div class="trip-card-waw" [ngClass]="[segment, 'card-' + (i % 3)]" [style.animation-delay]="(i * 0.1) + 's'">
+                <!-- Image de fond immersive uniquement sur la carte -->
+                <div class="trip-background-waw">
+                  <img [src]="getTripCoverImage(trip)" alt="Image du voyage" />
+                  <div class="trip-overlay-waw"></div>
+                </div>
+                <div class="trip-content-waw">
+                  <div class="trip-header-waw">
+                    <div class="trip-title-section">
+                      <h2 class="trip-title-waw">{{ getTitle(trip.title) }}</h2>
+                      <div class="trip-badge-waw" [ngClass]="getMainFlightStatus(trip)">
+                        <span class="badge-icon">
+                          <ion-icon [name]="getStatusIcon(getMainFlightStatus(trip))"></ion-icon>
+                        </span>
+                        <span class="badge-text">{{ getStatusLabel(getMainFlightStatus(trip)) }}</span>
+                      </div>
+                    </div>
+                    <div class="trip-actions-waw">
+                      <ion-button fill="clear" size="small" (click)="shareTrip(trip, $event); $event.stopPropagation();" class="action-btn-waw">
+                        <ion-icon name="share-outline"></ion-icon>
+                      </ion-button>
+                      <ion-button fill="clear" size="small" (click)="editTrip(trip, $event); $event.stopPropagation();" class="action-btn-waw">
+                        <ion-icon name="create-outline"></ion-icon>
+                      </ion-button>
+                      <ion-button fill="clear" size="small" (click)="showTripMenu(trip, $event); $event.stopPropagation();" class="action-btn-waw">
+                        <ion-icon name="ellipsis-vertical"></ion-icon>
+                      </ion-button>
+                    </div>
+                  </div>
+                  <div class="trip-info-waw">
+                    <div class="trip-location-waw">
+                      <ion-icon name="location"></ion-icon>
+                      <span>{{ getTripLocation(trip) }}</span>
+                    </div>
+                    <div class="trip-dates-waw">
+                      <ion-icon name="calendar"></ion-icon>
+                      <span>{{ getTripStartDate(trip) | date:'d MMM yyyy' }} – {{ getTripEndDate(trip) | date:'d MMM yyyy' }}</span>
+                      <span class="trip-duration-waw">({{ getTripDuration(trip) }})</span>
+                    </div>
+                    <div class="trip-countdown-waw" *ngIf="trip.status === 'upcoming'">
+                      <ion-icon name="time"></ion-icon>
+                      <span>{{ getCountdown(trip.startDate) }}</span>
+                    </div>
+                  </div>
+                  <div class="trip-summary-waw" *ngIf="trip.plans?.length">
+                    <div class="summary-stats">
+                      <div class="stat-item">
+                        <span class="stat-value">{{ getPlansCount(trip) }}</span>
+                        <span class="stat-label">plans</span>
+                      </div>
+                      <div class="stat-item" *ngIf="hasFlights(trip)">
+                        <span class="stat-value">{{ getFlightsCount(trip) }}</span>
+                        <span class="stat-label">vols</span>
+                      </div>
+                      <div class="stat-item" *ngIf="hasHotels(trip)">
+                        <span class="stat-value">{{ getHotelsCount(trip) }}</span>
+                        <span class="stat-label">hôtels</span>
+                      </div>
+                      <div class="stat-item" *ngIf="hasActivities(trip)">
+                        <span class="stat-value">{{ getActivitiesCount(trip) }}</span>
+                        <span class="stat-label">activités</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="trip-actions-bottom-waw">
+                    <ion-button fill="outline" size="small" (click)="addPlanToTrip(trip); $event.stopPropagation();" class="add-plan-btn-waw">
+                      <ion-icon name="add" slot="start"></ion-icon>
+                      Ajouter un plan
+                    </ion-button>
+                    <ion-button fill="clear" size="small" (click)="uploadImage(trip, $event)" class="upload-btn-waw">
+                      <ion-icon name="camera"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+                <div class="expand-indicator-waw" [class.expanded]="trip.showDetails" (click)="toggleTripDetails(trip); $event.stopPropagation()">
+                  <ion-icon name="chevron-down"></ion-icon>
+                </div>
+              </div>
+              <!-- Timeline TripIt Pro++ WAW++ -->
+              <div *ngIf="trip.showDetails" class="tripit-timeline-waw-container">
+                <div *ngIf="trip.plans?.length; else noPlans" class="tripit-timeline-waw tripit-timeline-pro">
+                  <ng-container *ngFor="let plan of trip.plans; let j = index">
+                    <div *ngIf="j === 0 || (trip.plans && !isSameDay(plan.startDate, trip.plans[j-1]?.startDate))" class="timeline-day-sticky-pro pastel">
+                      <span class="timeline-day-label">{{ formatPlanDay(plan.startDate) }}</span>
+                    </div>
+                    <div class="timeline-row-ultra animate-fadein" role="listitem">
+                      <div class="timeline-time-ultra">
+                        <div class="time-main-ultra">
+                          <ng-container *ngIf="plan.type === 'flight'; else defaultTime">
+                            <span>{{ plan.formattedStartTime || 'Heure inconnue' }}</span>
+                          </ng-container>
+                          <ng-template #defaultTime>
+                            {{ plan.formattedStartTime || formatPlanTime(plan.startDate) }}
+                          </ng-template>
+                        </div>
+                      </div>
+                      <div class="timeline-icon-ultra">
+                        <div class="icon-circle-ultra {{ plan.type }}" tabindex="0" [attr.aria-label]="getPlanTypeLabel(plan.type) || ''">
+                          <ion-icon *ngIf="plan.icon" [name]="plan.icon" class="timeline-icon"></ion-icon>
+                        </div>
+                        <div class="timeline-ultra-line shadow-line" [ngStyle]="{'background': getPlanLineColor(plan.type || 'other')}" *ngIf="trip.plans && j < trip.plans.length - 1"></div>
+                      </div>
+                      <div class="timeline-content-ultra glass animate-slidein">
+                        <div class="plan-header-ultra">
+                          <span class="plan-title-ultra">{{ getTitle(plan.title) }}</span>
+                          <span class="plan-badge-ultra" [ngClass]="plan.status">{{ getPlanStatusLabel(plan.status || 'upcoming') }}</span>
+                          <span class="plan-actions-ultra" (click)="showPlanMenu(plan, $event)" tabindex="0" aria-label="Actions">&#x22EE;</span>
+                        </div>
+                        <div class="plan-details-ultra">
+                          <span *ngIf="getFlightNumber(plan)" class="plan-flight-ultra">Vol : {{ getFlightNumber(plan) }}</span>
+                          <span *ngIf="getDepartureAirport(plan)" class="plan-airport-ultra">Départ : {{ getDepartureAirport(plan) }}</span>
+                          <span *ngIf="getArrivalAirport(plan)" class="plan-airport-ultra">Arrivée : {{ getArrivalAirport(plan) }}</span>
+                          <span *ngIf="plan.type === 'flight'" class="plan-time-ultra">
+                            Départ : <span>{{ plan.formattedStartDate }} {{ plan.formattedStartTime || formatPlanTime(plan.startDate) }} <span class="time-tz-ultra">{{ plan.departureTzAbbr || 'UTC' }}</span></span>
+                          </span>
+                          <span *ngIf="plan.type === 'flight'" class="plan-time-ultra">
+                            Arrivée : <span>{{ plan.arrivalTimeAffiche || 'Heure inconnue' }} <span class="time-tz-ultra">{{ plan.arrivalTzAbbr || 'UTC' }}</span><span *ngIf="plan.arrivalTzDiff"> ({{ plan.arrivalTzDiff }})</span></span>
+                          </span>
+                          <span *ngIf="plan.company" class="plan-company-ultra">{{ plan.company }}</span>
+                          <span *ngIf="plan.number" class="plan-number-ultra">{{ plan.number }}</span>
+                          <span *ngIf="plan.location" class="plan-location-ultra">{{ plan.location }}</span>
+                          <span *ngIf="plan.confirmation" class="plan-confirmation-ultra">Conf. {{ plan.confirmation }}</span>
+                          <span *ngIf="plan.endTime" class="plan-end-ultra">Fin {{ plan.endTime | date:'HH:mm' }}</span>
+                          <span *ngIf="plan.status" class="plan-status-ultra">Statut : {{ getPlanStatusLabel(plan.status) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+                  <button class="add-plan-fab animate-fadein" title="Ajouter un plan" (click)="addPlanToTrip(trip)">
+                    <span class="fab-icon" [innerHTML]="getAddPlanSVG()"></span>
+                    <span class="fab-label">{{ 'Ajouter un plan' | translate }}</span>
+                  </button>
+                </div>
+                <ng-template #noPlans>
+                  <div class="timeline-empty">Aucun plan pour ce voyage</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</ion-content> 

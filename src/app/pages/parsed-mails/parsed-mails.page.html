@@ -1,0 +1,258 @@
+<ion-header>
+  <app-user-status-bar title="Emails Parsés"></app-user-status-bar>
+</ion-header>
+
+<ion-content class="parsed-mails-container">
+  <div class="content-wrapper">
+    <!-- En-tête avec statistiques -->
+    <div class="stats-header">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📧</div>
+          <div class="stat-content">
+            <h3>Total Réservations</h3>
+            <p>{{ stats.totalFiles }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✈️</div>
+          <div class="stat-content">
+            <h3>Vols</h3>
+            <p>{{ stats.types['flight'] || 0 }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏨</div>
+          <div class="stat-content">
+            <h3>Hôtels</h3>
+            <p>{{ stats.types['hotel'] || 0 }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🚗</div>
+          <div class="stat-content">
+            <h3>Voitures</h3>
+            <p>{{ stats.types['car_rental'] || 0 }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre d'actions -->
+    <div class="action-bar">
+      <ion-button expand="block" (click)="parseNewEmails()" [disabled]="isLoading" class="parse-btn">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        {{ isLoading ? 'Parsing en cours...' : 'Parser Nouveaux Emails' }}
+      </ion-button>
+      <ion-button expand="block" fill="outline" (click)="refresh()" class="refresh-btn">
+        <ion-icon name="reload" slot="start"></ion-icon>
+        Actualiser
+      </ion-button>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="search-section">
+      <ion-searchbar 
+        [(ngModel)]="searchTerm" 
+        placeholder="Rechercher une réservation..."
+        (ionInput)="onSearchChange()"
+        class="search-bar">
+      </ion-searchbar>
+      
+      <div class="filter-row">
+        <ion-select 
+          [(ngModel)]="selectedType" 
+          placeholder="Type de réservation"
+          (ionChange)="onTypeChange()"
+          interface="popover"
+          class="filter-select">
+          <ion-select-option *ngFor="let type of bookingTypes" [value]="type.value">
+            <ion-icon [name]="type.icon"></ion-icon>
+            {{ type.label }}
+          </ion-select-option>
+        </ion-select>
+
+        <ion-select 
+          [(ngModel)]="selectedProvider" 
+          placeholder="Fournisseur"
+          (ionChange)="onProviderChange()"
+          interface="popover"
+          class="filter-select">
+          <ion-select-option value="">Tous les fournisseurs</ion-select-option>
+          <ion-select-option *ngFor="let provider of providers" [value]="provider">
+            {{ provider }}
+          </ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+
+    <!-- Liste des réservations -->
+    <div class="bookings-list" *ngIf="filteredBookings.length > 0">
+      <ion-card 
+        *ngFor="let booking of filteredBookings; trackBy: trackByBooking" 
+        class="booking-card"
+        [class]="'booking-' + booking.booking_type">
+        
+        <ion-card-header>
+          <ion-card-title class="booking-title">
+            <ion-icon 
+              [name]="getBookingTypeIcon(booking.booking_type)" 
+              [color]="getBookingTypeColor(booking.booking_type)">
+            </ion-icon>
+            {{ getBookingSummary(booking) }}
+          </ion-card-title>
+          <ion-card-subtitle>
+            <ion-badge [color]="getBookingTypeColor(booking.booking_type)">
+              {{ getBookingTypeLabel(booking.booking_type) }}
+            </ion-badge>
+            <span class="provider">{{ booking.provider }}</span>
+            <span class="date">{{ formatDate(booking.parsed_at) }}</span>
+          </ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="booking-details">
+            <!-- Informations principales -->
+            <div class="main-info">
+              <div class="info-row" *ngIf="booking.name">
+                <ion-icon name="business" color="medium"></ion-icon>
+                <span>{{ booking.name }}</span>
+              </div>
+              
+              <div class="info-row" *ngIf="booking.location">
+                <ion-icon name="location" color="medium"></ion-icon>
+                <span>{{ booking.location }}</span>
+              </div>
+              
+              <div class="info-row" *ngIf="booking.reference_number">
+                <ion-icon name="card" color="medium"></ion-icon>
+                <span>Ref: {{ booking.reference_number }}</span>
+              </div>
+              
+              <div class="info-row" *ngIf="booking.price">
+                <ion-icon name="cash" color="medium"></ion-icon>
+                <span>{{ formatPrice(booking.price, booking.currency) }}</span>
+              </div>
+            </div>
+
+            <!-- Détails spécifiques par type -->
+            <div class="specific-details" *ngIf="booking.booking_type === 'flight' && booking.flight_details">
+              <h4>Détails du vol</h4>
+              <div class="info-row" *ngIf="booking.flight_details.flight_number">
+                <ion-icon name="airplane" color="primary"></ion-icon>
+                <span>{{ booking.flight_details.flight_number }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.flight_details.departure_airport">
+                <ion-icon name="arrow-forward" color="success"></ion-icon>
+                <span>{{ booking.flight_details.departure_airport }} → {{ booking.flight_details.arrival_airport }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.departure_date">
+                <ion-icon name="calendar" color="medium"></ion-icon>
+                <span>Départ: {{ formatDate(booking.departure_date) }}</span>
+              </div>
+            </div>
+
+            <div class="specific-details" *ngIf="booking.booking_type === 'hotel' && booking.hotel_details">
+              <h4>Détails de l'hôtel</h4>
+              <div class="info-row" *ngIf="booking.hotel_details.room_type">
+                <ion-icon name="bed" color="secondary"></ion-icon>
+                <span>{{ booking.hotel_details.room_type }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.hotel_details.guests">
+                <ion-icon name="people" color="medium"></ion-icon>
+                <span>{{ booking.hotel_details.guests }} personne(s)</span>
+              </div>
+              <div class="info-row" *ngIf="booking.checkin_date">
+                <ion-icon name="calendar" color="medium"></ion-icon>
+                <span>{{ formatDate(booking.checkin_date) }} - {{ formatDate(booking.checkout_date) }}</span>
+              </div>
+            </div>
+
+            <div class="specific-details" *ngIf="booking.booking_type === 'car_rental' && booking.car_details">
+              <h4>Détails de la location</h4>
+              <div class="info-row" *ngIf="booking.car_details.car_type">
+                <ion-icon name="car" color="tertiary"></ion-icon>
+                <span>{{ booking.car_details.car_type }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.car_details.pickup_location">
+                <ion-icon name="location" color="medium"></ion-icon>
+                <span>{{ booking.car_details.pickup_location }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.car_details.pickup_time">
+                <ion-icon name="time" color="medium"></ion-icon>
+                <span>{{ booking.car_details.pickup_time }}</span>
+              </div>
+            </div>
+
+            <div class="specific-details" *ngIf="booking.booking_type === 'activity' && booking.activity_details">
+              <h4>Détails de l'activité</h4>
+              <div class="info-row" *ngIf="booking.activity_details.activity_type">
+                <ion-icon name="map" color="success"></ion-icon>
+                <span>{{ booking.activity_details.activity_type }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.activity_details.duration">
+                <ion-icon name="time" color="medium"></ion-icon>
+                <span>{{ booking.activity_details.duration }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.activity_details.participants">
+                <ion-icon name="people" color="medium"></ion-icon>
+                <span>{{ booking.activity_details.participants }} participant(s)</span>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="tags-section" *ngIf="booking.tags && booking.tags.length > 0">
+              <ion-chip *ngFor="let tag of booking.tags" size="small">
+                <ion-label>{{ tag }}</ion-label>
+              </ion-chip>
+            </div>
+
+            <!-- Contact -->
+            <div class="contact-section" *ngIf="booking.contact_info">
+              <h4>Contact</h4>
+              <div class="info-row" *ngIf="booking.contact_info.phone">
+                <ion-icon name="call" color="medium"></ion-icon>
+                <span>{{ booking.contact_info.phone }}</span>
+              </div>
+              <div class="info-row" *ngIf="booking.contact_info.email">
+                <ion-icon name="mail" color="medium"></ion-icon>
+                <span>{{ booking.contact_info.email }}</span>
+              </div>
+            </div>
+
+            <!-- Adresse -->
+            <div class="address-section" *ngIf="booking.address">
+              <h4>Adresse</h4>
+              <div class="info-row">
+                <ion-icon name="location" color="medium"></ion-icon>
+                <span>{{ booking.address }}</span>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- État vide -->
+    <div class="empty-state" *ngIf="filteredBookings.length === 0 && !isLoading">
+      <div class="empty-icon">📧</div>
+      <h2>Aucune réservation trouvée</h2>
+      <p *ngIf="searchTerm || selectedType || selectedProvider">
+        Aucune réservation ne correspond à vos critères de recherche.
+      </p>
+      <p *ngIf="!searchTerm && !selectedType && !selectedProvider">
+        Aucune réservation n'a encore été parsée. Commencez par parser vos emails !
+      </p>
+      <ion-button (click)="parseNewEmails()" fill="outline">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Parser Emails
+      </ion-button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Chargement des réservations...</p>
+    </div>
+  </div>
+</ion-content> 

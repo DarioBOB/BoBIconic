@@ -1,0 +1,279 @@
+:host {
+  display: block;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hublot-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hublot-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 400px;
+  min-height: 300px;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: #000;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.tab-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+ion-segment {
+  --background: rgba(255, 255, 255, 0.95);
+  --border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+ion-segment-button {
+  --color: #666;
+  --color-checked: #3880ff;
+  --indicator-color: #3880ff;
+  font-weight: 500;
+}
+
+.data-container {
+  position: absolute;
+  top: 100px;
+  right: 20px;
+  z-index: 20;
+  pointer-events: auto;
+  max-width: 300px;
+}
+
+ion-card {
+  --background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin: 0;
+}
+
+ion-card-header {
+  padding: 16px 20px 8px;
+}
+
+ion-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ion-card-content {
+  padding: 8px 20px 20px;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.data-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.data-item:last-child {
+  border-bottom: none;
+}
+
+.data-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.data-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.success {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.status-badge.warning {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.status-badge.info {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.info-container,
+.controls-container {
+  position: absolute;
+  top: 100px;
+  left: 20px;
+  right: 340px;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.info-item strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.progression-controls {
+  padding: 20px 0;
+}
+
+ion-range {
+  --bar-background: rgba(0, 0, 0, 0.1);
+  --bar-background-active: #3880ff;
+  --knob-background: #3880ff;
+  --pin-background: #3880ff;
+  margin: 20px 0;
+}
+
+.progression-info {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.progression-info p {
+  margin: 8px 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.progression-info strong {
+  color: #3880ff;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .data-container {
+    position: relative;
+    top: auto;
+    right: auto;
+    max-width: none;
+    margin: 20px;
+  }
+
+  .info-container,
+  .controls-container {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    margin: 20px;
+  }
+
+  .tab-container {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+  }
+
+  .hublot-canvas {
+    min-width: 300px;
+    min-height: 200px;
+  }
+}
+
+// Animation for smooth transitions
+ion-card,
+ion-segment {
+  transition: all 0.3s ease;
+}
+
+ion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+// Loading state
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+// Error state
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #f44336;
+  font-size: 16px;
+  text-align: center;
+  padding: 20px;
+} 

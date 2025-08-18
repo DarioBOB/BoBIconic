@@ -1,0 +1,529 @@
+ion-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  
+  span {
+    display: block;
+    line-height: 1.2;
+    
+    &.en {
+      font-size: 0.8em;
+      opacity: 0.8;
+    }
+  }
+}
+
+.search-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+ion-item {
+  --background: var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.error-message {
+  color: var(--ion-color-danger);
+  text-align: center;
+  margin: 16px 0;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+.flight-info {
+  ion-card {
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  ion-card-header {
+    background: var(--ion-color-primary);
+    color: white;
+    padding: 16px;
+  }
+
+  ion-card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  ion-list {
+    padding: 0;
+  }
+
+  ion-item {
+    --background: transparent;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 48px;
+  }
+
+  ion-label {
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+
+  ion-note {
+    color: var(--ion-color-dark);
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+.window-callsign-input {
+  font-family: inherit;
+  font-size: 1.3em;
+  font-weight: bold;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-transform: uppercase;
+  flex: 1 1 auto;
+  min-width: 150px;
+  max-width: 300px;
+  margin-right: 1em;
+}
+
+.window-date {
+  font-family: inherit;
+}
+
+.window-search-btn {
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-left: 1em;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .window-header-bar {
+    /* ... existing code ... */
+  }
+}
+
+// Styles pour la section de restauration des données
+.restore-data-container {
+  margin: 16px 0;
+  
+  ion-card {
+    background: var(--ion-color-light-tint);
+    border: 1px solid var(--ion-color-light-shade);
+  }
+  
+  .restore-data-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+  }
+  
+  .restore-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+  }
+  
+  .restore-text {
+    flex: 1;
+    
+    p {
+      margin: 0;
+      line-height: 1.4;
+      
+      &:first-child {
+        font-weight: 500;
+        color: var(--ion-color-dark);
+        font-size: 0.9rem;
+      }
+      
+      &.restore-callsign {
+        color: var(--ion-color-primary);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-top: 4px;
+      }
+    }
+  }
+  
+  .restore-button {
+    --color: var(--ion-color-primary);
+    --background: transparent;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+}
+
+// Styles pour la section voyage en cours
+.ongoing-trip-container {
+  margin-bottom: 16px;
+  
+  ion-card {
+    background: linear-gradient(135deg, var(--ion-color-primary-tint), var(--ion-color-primary));
+    color: white;
+  }
+  
+  ion-card-header {
+    background: transparent;
+    padding: 16px;
+  }
+  
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+  
+  .ongoing-trip-info {
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .trip-dates {
+      margin: 8px 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .trip-status {
+      margin: 8px 0 0 0;
+      
+      ion-badge {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+      }
+    }
+  }
+}
+
+// Styles pour la section d'information démo
+.demo-info-container {
+  margin: 16px 0;
+  
+  ion-card {
+    background: var(--ion-color-warning-tint);
+    border: 1px solid var(--ion-color-warning-shade);
+  }
+  
+  .demo-info-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+  }
+  
+  .demo-icon {
+    font-size: 24px;
+    color: var(--ion-color-warning);
+    flex-shrink: 0;
+  }
+  
+  .demo-text {
+    flex: 1;
+    
+    p {
+      margin: 0;
+      line-height: 1.4;
+      font-weight: 500;
+      color: var(--ion-color-dark);
+      font-size: 0.9rem;
+    }
+  }
+  
+  .demo-button {
+    --color: var(--ion-color-warning);
+    --background: transparent;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .restore-data-content,
+  .demo-info-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    
+    .restore-text,
+    .demo-text {
+      order: 2;
+    }
+    
+    .restore-button,
+    .demo-button {
+      order: 3;
+    }
+  }
+} 
+
+/* Styles pour les POIs */
+.pois-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pois-side {
+  h3 {
+    color: #1976d2;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+}
+
+.pois-list {
+  .poi-item {
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+}
+
+.poi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.visible-badge {
+  background-color: #4CAF50;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 10px;
+  margin-left: 8px;
+  font-weight: normal;
+}
+
+.poi-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  
+  .detail-item {
+    background-color: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #666;
+  }
+}
+
+.no-pois {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Animation pour les POIs visibles */
+.poi-item {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+}
+
+/* Responsive design pour les POIs */
+@media (max-width: 768px) {
+  .pois-container {
+    gap: 15px;
+  }
+  
+  .poi-details {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .detail-item {
+    font-size: 10px;
+  }
+} 
+
+/* Styles pour le nouveau layout des hublots */
+.hublots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.progression-controls {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 10px;
+}
+
+.progression-controls ion-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #333;
+}
+
+.custom-range {
+  --bar-background: #e9ecef;
+  --bar-background-active: #007bff;
+  --knob-background: #007bff;
+  --height: 8px;
+  --knob-size: 20px;
+}
+
+.progression-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.progression-info span {
+  background: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+/* Styles pour l'onglet Hublot */
+.hublot-container {
+  margin-top: 16px;
+}
+
+.hublots-row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.hublot-item {
+  flex: 1;
+  max-width: 300px;
+  text-align: center;
+}
+
+.hublot-item h4 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.hublot-item app-window-hublot {
+  display: block;
+  width: 100%;
+  height: 400px; /* Augmenté de 300px à 400px */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive design pour les hublots */
+@media (max-width: 768px) {
+  .hublots-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px; /* Adjusted from 20px */
+  }
+  
+  .hublot-item {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .hublot-item app-window-hublot {
+    height: 350px; /* Augmenté de 250px à 350px */
+  }
+}
+
+@media (max-width: 480px) {
+  .hublot-item app-window-hublot {
+    height: 300px; /* Augmenté de 220px à 300px */
+  }
+} 
+
+/* Styles pour le modal des hublots */
+.hublot-modal {
+  --height: 80%;
+  --width: 90%;
+  --max-width: 800px;
+  --border-radius: 16px;
+  --backdrop-opacity: 0.8;
+}
+
+.hublot-modal .modal-wrapper {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.hublot-modal ion-header {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.hublot-modal ion-title {
+  color: white;
+  font-weight: bold;
+}
+
+.hublot-modal ion-button {
+  --color: white;
+}
+
+/* Animation d'entrée pour le modal */
+.hublot-modal {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+} 

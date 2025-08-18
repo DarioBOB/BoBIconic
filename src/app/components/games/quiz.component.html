@@ -1,0 +1,164 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/games"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Quiz Culture Générale</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="restart()">
+        🔄
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="quiz-container">
+  <!-- Écran de démarrage -->
+  <div class="start-screen" *ngIf="!gameState.gameStarted">
+    <div class="start-content">
+      <h1>🧠 Quiz Culture Générale</h1>
+      <p>Testez vos connaissances avec 10 questions variées !</p>
+      <div class="game-info">
+        <div class="info-item">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>30 secondes par question</span>
+        </div>
+        <div class="info-item">
+          <ion-icon name="trophy-outline"></ion-icon>
+          <span>Score basé sur le temps et les séries</span>
+        </div>
+        <div class="info-item">
+          <ion-icon name="help-circle-outline"></ion-icon>
+          <span>4 réponses possibles</span>
+        </div>
+      </div>
+      <ion-button size="large" (click)="startGame()" class="start-btn">
+        🚀 Commencer le Quiz
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Interface de jeu -->
+  <div class="game-interface" *ngIf="gameState.gameStarted && !gameState.gameOver">
+    <!-- En-tête du jeu -->
+    <div class="game-header">
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+        </div>
+        <span class="progress-text">{{ gameState.currentQuestionIndex + 1 }}/{{ gameState.totalQuestions }}</span>
+      </div>
+      
+      <div class="stats-row">
+        <div class="stat-card">
+          <h3>Score</h3>
+          <p>{{ gameState.score }}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Temps</h3>
+          <p [class]="'time-' + getTimeColor()">{{ gameState.timeLeft }}s</p>
+        </div>
+        <div class="stat-card">
+          <h3>Série</h3>
+          <p>{{ gameState.streak }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question actuelle -->
+    <div class="question-container" *ngIf="getCurrentQuestion()">
+      <ion-card class="question-card">
+        <ion-card-header>
+          <ion-card-subtitle>
+            <ion-badge [color]="getDifficultyColor(getCurrentQuestion()!.difficulty)">
+              {{ getDifficultyText(getCurrentQuestion()!.difficulty) }}
+            </ion-badge>
+            <span class="category">{{ getCurrentQuestion()!.category }}</span>
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <h2 class="question-text">{{ getCurrentQuestion()!.question }}</h2>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Options de réponse -->
+      <div class="answers-container">
+        <ion-button 
+          *ngFor="let option of getCurrentQuestion()!.options; let i = index"
+          [class]="'answer-btn ' + getAnswerClass(i)"
+          [disabled]="gameState.answered"
+          (click)="selectAnswer(i)"
+          expand="block"
+          fill="outline">
+          <span class="answer-letter">{{ getAnswerLetter(i) }}</span>
+          <span class="answer-text">{{ option }}</span>
+          <ion-icon 
+            *ngIf="gameState.answered && isCorrectAnswer(i)" 
+            name="checkmark-circle" 
+            class="correct-icon">
+          </ion-icon>
+          <ion-icon 
+            *ngIf="gameState.answered && isSelectedAnswer(i) && !isCorrectAnswer(i)" 
+            name="close-circle" 
+            class="incorrect-icon">
+          </ion-icon>
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Écran de fin de partie -->
+  <div class="results-screen" *ngIf="gameState.gameOver && !gameState.showResults">
+    <div class="results-content">
+      <h1>🎯 Quiz Terminé !</h1>
+      <div class="final-stats">
+        <div class="stat-item">
+          <h3>Score Final</h3>
+          <p class="final-score">{{ gameState.score }}</p>
+        </div>
+        <div class="stat-item">
+          <h3>Meilleure Série</h3>
+          <p>{{ gameState.bestStreak }}</p>
+        </div>
+        <div class="stat-item">
+          <h3>Performance</h3>
+          <p>{{ getPerformanceMessage() }}</p>
+        </div>
+      </div>
+      <div class="action-buttons">
+        <ion-button fill="outline" (click)="showResults()">
+          📊 Voir les résultats
+        </ion-button>
+        <ion-button (click)="restart()">
+          🔄 Nouvelle partie
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Écran des résultats détaillés -->
+  <div class="detailed-results" *ngIf="gameState.showResults">
+    <h2>📊 Résultats Détaillés</h2>
+    <div class="questions-review">
+      <div 
+        *ngFor="let question of questions; let i = index"
+        class="question-review"
+        [class.correct]="i < gameState.currentQuestionIndex && questions[i].correctAnswer === (gameState.selectedAnswer || -1)"
+        [class.incorrect]="i < gameState.currentQuestionIndex && questions[i].correctAnswer !== (gameState.selectedAnswer || -1)">
+        <div class="question-header">
+          <span class="question-number">Question {{ i + 1 }}</span>
+          <ion-badge [color]="getDifficultyColor(question.difficulty)">
+            {{ getDifficultyText(question.difficulty) }}
+          </ion-badge>
+        </div>
+        <p class="question-text">{{ question.question }}</p>
+        <div class="answer-review">
+          <p><strong>Réponse correcte :</strong> {{ question.options[question.correctAnswer] }}</p>
+        </div>
+      </div>
+    </div>
+    <ion-button expand="block" (click)="restart()">
+      🔄 Nouvelle partie
+    </ion-button>
+  </div>
+</ion-content> 

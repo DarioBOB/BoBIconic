@@ -1,0 +1,305 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <ion-icon name="people" color="primary"></ion-icon>
+      Bobbers
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="editProfile()">
+        <ion-icon name="settings"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement des Bobbers...</p>
+  </div>
+
+  <!-- Main content -->
+  <div *ngIf="!loading" class="bobbers-container">
+    <!-- Vue Chat -->
+    <div *ngIf="showChatView && selectedChat && selectedChatParticipant" class="chat-view">
+      <!-- En-tête du chat -->
+      <div class="chat-header">
+        <ion-button fill="clear" (click)="onBackToChatList()">
+          <ion-icon name="arrow-back"></ion-icon>
+        </ion-button>
+        <div class="chat-title">
+          <h3>{{ selectedChatParticipant.displayName }}</h3>
+          <p *ngIf="selectedChat.metadata.flightNumber">Vol {{ selectedChat.metadata.flightNumber }}</p>
+        </div>
+        <ion-button fill="clear" (click)="onViewProfile(selectedChatParticipant.id)">
+          <ion-icon name="person"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Composant de chat -->
+      <app-bobber-chat
+        [chat]="selectedChat"
+        [currentUserId]="myProfile?.id || ''"
+        [otherParticipant]="selectedChatParticipant"
+        (sendMessageEvent)="onSendMessageToChat($event)"
+        (viewProfileEvent)="onViewProfile($event)"
+        (callEvent)="onQuickCall({chat: selectedChat, participantId: $event})">
+      </app-bobber-chat>
+    </div>
+
+    <!-- Vue principale avec onglets -->
+    <div *ngIf="!showChatView" class="main-view">
+      <!-- Tab navigation -->
+      <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange($event)" color="primary" scrollable="true">
+        <ion-segment-button value="nearby">
+          <ion-icon [name]="getTabIcon('nearby')"></ion-icon>
+          <ion-label>{{ getTabLabel('nearby') }}</ion-label>
+        </ion-segment-button>
+        
+        <ion-segment-button value="connections">
+          <ion-icon [name]="getTabIcon('connections')"></ion-icon>
+          <ion-label>{{ getTabLabel('connections') }}</ion-label>
+        </ion-segment-button>
+        
+        <ion-segment-button value="recommendations">
+          <ion-icon [name]="getTabIcon('recommendations')"></ion-icon>
+          <ion-label>{{ getTabLabel('recommendations') }}</ion-label>
+        </ion-segment-button>
+        
+        <ion-segment-button value="chats">
+          <ion-icon [name]="getTabIcon('chats')"></ion-icon>
+          <ion-label>{{ getTabLabel('chats') }}</ion-label>
+        </ion-segment-button>
+        
+        <ion-segment-button value="profile">
+          <ion-icon [name]="getTabIcon('profile')"></ion-icon>
+          <ion-label>{{ getTabLabel('profile') }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <!-- Tab content -->
+      <div class="tab-content">
+        <!-- Onglet: À proximité -->
+        <div *ngIf="selectedTab === 'nearby'" class="tab-pane">
+          <app-bobbers-nearby></app-bobbers-nearby>
+        </div>
+
+        <!-- Onglet: Connexions -->
+        <div *ngIf="selectedTab === 'connections'" class="tab-pane">
+          <div class="connections-container">
+            <div class="section-header">
+              <h2>Mes Connexions</h2>
+              <p>{{ myConnections.length }} Bobbers connectés</p>
+            </div>
+
+            <div *ngIf="myConnections.length === 0" class="empty-state">
+              <ion-icon name="people-outline" size="large"></ion-icon>
+              <h3>Aucune connexion</h3>
+              <p>Connectez-vous avec d'autres Bobbers pour commencer à échanger !</p>
+              <ion-button fill="outline" (click)="selectedTab = 'nearby'">
+                Découvrir des Bobbers
+              </ion-button>
+            </div>
+
+            <div class="connections-list">
+              <app-bobber-card
+                *ngFor="let match of myConnections"
+                [profile]="match.profile"
+                [match]="match"
+                [isOnline]="true"
+                [isConnected]="true"
+                [canSendMessage]="true"
+                (viewProfile)="onViewProfile($event)"
+                (sendMessage)="onSendMessage($event)"
+                (connect)="onConnect($event)"
+                (share)="onShare($event)">
+              </app-bobber-card>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet: Recommandations -->
+        <div *ngIf="selectedTab === 'recommendations'" class="tab-pane">
+          <div class="recommendations-container">
+            <div class="section-header">
+              <h2>Recommandations</h2>
+              <p>Bobbers qui pourraient vous intéresser</p>
+            </div>
+
+            <div *ngIf="recommendedBobbers.length === 0" class="empty-state">
+              <ion-icon name="heart-outline" size="large"></ion-icon>
+              <h3>Aucune recommandation</h3>
+              <p>Complétez votre profil pour recevoir des recommandations personnalisées !</p>
+            </div>
+
+            <div class="recommendations-list">
+              <app-bobber-card
+                *ngFor="let match of recommendedBobbers"
+                [profile]="match.profile"
+                [match]="match"
+                [isOnline]="true"
+                [isConnected]="false"
+                [canSendMessage]="false"
+                (viewProfile)="onViewProfile($event)"
+                (sendMessage)="onSendMessage($event)"
+                (connect)="onConnect($event)"
+                (share)="onShare($event)">
+              </app-bobber-card>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet: Messages -->
+        <div *ngIf="selectedTab === 'chats'" class="tab-pane">
+          <app-bobber-chat-list
+            [chats]="myChats"
+            [currentUserId]="myProfile?.id || ''"
+            [participants]="participants"
+            [selectedChatId]="selectedChat?.id"
+            (chatSelect)="onChatSelect($event)"
+            (newChat)="onNewChat()"
+            (discoverBobbers)="onDiscoverBobbers()"
+            (quickCall)="onQuickCall($event)"
+            (moreOptions)="onMoreOptions($event)">
+          </app-bobber-chat-list>
+        </div>
+
+        <!-- Onglet: Profil -->
+        <div *ngIf="selectedTab === 'profile'" class="tab-pane">
+          <div class="profile-container" *ngIf="myProfile">
+            <div class="profile-header">
+              <div class="profile-avatar">
+                <ion-avatar>
+                  <img [src]="myProfile.avatar || 'assets/avatars/default-avatar.jpg'" 
+                       [alt]="myProfile.displayName">
+                </ion-avatar>
+              </div>
+              
+              <div class="profile-info">
+                <h2>{{ myProfile.displayName }}</h2>
+                <p class="profile-bio" *ngIf="myProfile.bio">{{ myProfile.bio }}</p>
+                
+                <div class="profile-stats">
+                  <div class="stat">
+                    <ion-icon name="airplane"></ion-icon>
+                    <span>{{ myProfile.totalFlights }} vols</span>
+                  </div>
+                  <div class="stat">
+                    <ion-icon name="globe"></ion-icon>
+                    <span>{{ myProfile.countriesVisited }} pays</span>
+                  </div>
+                  <div class="stat">
+                    <ion-icon name="calendar"></ion-icon>
+                    <span>Membre depuis {{ myProfile.memberSince | date:'MMM yyyy' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-sections">
+              <!-- Style de voyage -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="briefcase"></ion-icon>
+                    Style de voyage
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-chip color="primary">
+                    <ion-icon name="briefcase" *ngIf="myProfile.travelStyle === 'business'"></ion-icon>
+                    <ion-icon name="sunny" *ngIf="myProfile.travelStyle === 'leisure'"></ion-icon>
+                    <ion-icon name="compass" *ngIf="myProfile.travelStyle === 'adventure'"></ion-icon>
+                    <ion-icon name="people" *ngIf="myProfile.travelStyle === 'family'"></ion-icon>
+                    <ion-label>{{ getTabLabel(myProfile.travelStyle) }}</ion-label>
+                  </ion-chip>
+                </ion-card-content>
+              </ion-card>
+
+              <!-- Intérêts -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="heart"></ion-icon>
+                    Intérêts
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <div class="interests-grid">
+                    <ion-chip *ngFor="let interest of myProfile.interests" 
+                             size="small" color="secondary">
+                      {{ getTabLabel(interest) }}
+                    </ion-chip>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+
+              <!-- Badges -->
+              <ion-card *ngIf="myProfile.badges.length > 0">
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="trophy"></ion-icon>
+                    Badges
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <div class="badges-grid">
+                    <div *ngFor="let badge of myProfile.badges" class="badge-item">
+                      <ion-icon [name]="badge.icon" color="success"></ion-icon>
+                      <div class="badge-info">
+                        <h4>{{ badge.name }}</h4>
+                        <p>{{ badge.description }}</p>
+                        <small>{{ badge.earnedAt | date:'dd/MM/yyyy' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+
+              <!-- Programmes de fidélité -->
+              <ion-card *ngIf="myProfile.loyaltyPrograms.length > 0">
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="card"></ion-icon>
+                    Programmes de fidélité
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <div class="loyalty-programs">
+                    <div *ngFor="let program of myProfile.loyaltyPrograms" class="program-item">
+                      <div class="program-info">
+                        <h4>{{ program.program }}</h4>
+                        <p>{{ program.number }}</p>
+                      </div>
+                      <ion-badge color="warning">{{ program.status }}</ion-badge>
+                    </div>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Modal de modification du profil -->
+<ion-modal [isOpen]="showProfileModal" (didDismiss)="closeProfileModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Modifier le profil</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeProfileModal()">Fermer</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="profile-edit-container">
+        <p>Fonctionnalité à venir...</p>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal> 

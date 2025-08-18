@@ -1,0 +1,134 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/games"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Memory</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="restart()">
+        🔄
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="memory-container">
+  <!-- Écran de démarrage -->
+  <div class="start-screen" *ngIf="!gameState.gameStarted">
+    <div class="start-content">
+      <h1>🧠 Memory</h1>
+      <p>Retrouvez toutes les paires d'animaux !</p>
+      <div class="game-info">
+        <div class="info-item">
+          <ion-icon name="grid-outline"></ion-icon>
+          <span>16 cartes (8 paires)</span>
+        </div>
+        <div class="info-item">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Chronomètre en temps réel</span>
+        </div>
+        <div class="info-item">
+          <ion-icon name="trophy-outline"></ion-icon>
+          <span>Score basé sur les coups et le temps</span>
+        </div>
+      </div>
+      <ion-button size="large" (click)="startGame()" class="start-btn">
+        🚀 Commencer
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Interface de jeu -->
+  <div class="game-interface" *ngIf="gameState.gameStarted && !gameState.gameOver">
+    <!-- En-tête du jeu -->
+    <div class="game-header">
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+        </div>
+        <span class="progress-text">{{ getMatchedPairsCount() }}/{{ getTotalPairsCount() }}</span>
+      </div>
+      
+      <div class="stats-row">
+        <div class="stat-card">
+          <h3>Score</h3>
+          <p>{{ gameState.score }}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Temps</h3>
+          <p>{{ getTimeString() }}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Coups</h3>
+          <p>{{ gameState.moves }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grille de cartes -->
+    <div class="cards-grid-container">
+      <div class="cards-grid">
+        <div 
+          *ngFor="let card of gameState.cards; trackBy: trackByCard"
+          class="memory-card-wrapper"
+          [class.locked]="isCardLocked(card)"
+          (click)="flipCard(card)">
+          <div class="memory-card" [class]="getCardClass(card)">
+            <div class="card-inner">
+              <div class="card-front">
+                <span class="card-back-icon">❓</span>
+              </div>
+              <div class="card-back">
+                <span class="card-value">{{ card.value }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Écran de fin de partie -->
+  <div class="results-screen" *ngIf="gameState.gameOver">
+    <div class="results-content">
+      <h1 *ngIf="gameState.won">🎉 Félicitations !</h1>
+      <h1 *ngIf="!gameState.won">⏰ Temps écoulé</h1>
+      
+      <div class="final-stats">
+        <div class="stat-item">
+          <h3>Score Final</h3>
+          <p class="final-score">{{ gameState.score }}</p>
+        </div>
+        <div class="stat-item">
+          <h3>Temps</h3>
+          <p>{{ getTimeString() }}</p>
+        </div>
+        <div class="stat-item">
+          <h3>Coups</h3>
+          <p>{{ gameState.moves }}</p>
+        </div>
+        <div class="stat-item" *ngIf="gameState.bestScore > 0">
+          <h3>Meilleur Score</h3>
+          <p>{{ gameState.bestScore }}</p>
+        </div>
+        <div class="stat-item" *ngIf="gameState.bestTime > 0">
+          <h3>Meilleur Temps</h3>
+          <p>{{ getBestTimeString() }}</p>
+        </div>
+        <div class="stat-item">
+          <h3>Performance</h3>
+          <p>{{ getPerformanceMessage() }}</p>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <ion-button fill="outline" (click)="restart()">
+          🔄 Nouvelle partie
+        </ion-button>
+        <ion-button (click)="restart()">
+          🏆 Rejouer
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content> 

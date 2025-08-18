@@ -1,0 +1,154 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <ion-icon name="airplane" color="primary"></ion-icon>
+      Vue 3D - Ma Fenêtre
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="hublot-container">
+    <!-- Three.js Canvas -->
+    <canvas #hublotCanvas class="hublot-canvas"></canvas>
+
+    <!-- Overlay UI -->
+    <div class="overlay">
+      <!-- Tab Navigation -->
+      <div class="tab-container">
+        <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange($event)" color="primary">
+          <ion-segment-button value="hublot">
+            <ion-icon name="eye"></ion-icon>
+            <ion-label>Vue 3D</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="info">
+            <ion-icon name="information-circle"></ion-icon>
+            <ion-label>Infos</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="controls">
+            <ion-icon name="settings"></ion-icon>
+            <ion-label>Contrôles</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Dynamic Data Panel -->
+      <div class="data-container">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="speedometer" color="primary"></ion-icon>
+              Données en Temps Réel
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="data-grid">
+              <div class="data-item">
+                <ion-icon name="trending-up" color="success"></ion-icon>
+                <div class="data-content">
+                  <span class="data-label">Altitude</span>
+                  <span class="data-value">{{ dynamicData.altitude | number:'1.0-0' }} ft</span>
+                </div>
+              </div>
+              
+              <div class="data-item">
+                <ion-icon name="speedometer" color="secondary"></ion-icon>
+                <div class="data-content">
+                  <span class="data-label">Vitesse</span>
+                  <span class="data-value">{{ dynamicData.speed | number:'1.0-0' }} km/h</span>
+                </div>
+              </div>
+              
+              <div class="data-item">
+                <ion-icon name="partly-sunny" color="warning"></ion-icon>
+                <div class="data-content">
+                  <span class="data-label">Météo</span>
+                  <span class="data-value">{{ dynamicData.weather }}</span>
+                </div>
+              </div>
+              
+              <div class="data-item">
+                <ion-icon name="airplane" color="success"></ion-icon>
+                <div class="data-content">
+                  <span class="data-label">Phase</span>
+                  <span class="data-value">{{ dynamicData.phase }}</span>
+                </div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Info Tab -->
+      <div *ngIf="selectedTab === 'info'" class="info-container">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="information-circle" color="primary"></ion-icon>
+              Détails du Vol
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Vol:</strong> {{ flightInfo.flightNumber }}
+              </div>
+              <div class="info-item">
+                <strong>Départ:</strong> {{ flightInfo.departure }}
+              </div>
+              <div class="info-item">
+                <strong>Arrivée:</strong> {{ flightInfo.arrival }}
+              </div>
+              <div class="info-item">
+                <strong>Statut:</strong> 
+                <span class="status-badge success">{{ flightInfo.status }}</span>
+              </div>
+              <div class="info-item">
+                <strong>Avion:</strong> {{ flightInfo.aircraft }}
+              </div>
+              <div class="info-item">
+                <strong>Heure départ:</strong> {{ flightInfo.departureTime }}
+              </div>
+              <div class="info-item">
+                <strong>Heure arrivée:</strong> {{ flightInfo.arrivalTime }}
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Controls Tab -->
+      <div *ngIf="selectedTab === 'controls'" class="controls-container">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="settings" color="primary"></ion-icon>
+              Contrôles de Vol
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="progression-controls">
+              <ion-label>Progression du vol</ion-label>
+              <ion-range
+                [(ngModel)]="currentPercent"
+                (ionChange)="onProgressChange($event)"
+                min="0"
+                max="100"
+                step="1"
+                snaps="true"
+                color="primary">
+                <div slot="start">0%</div>
+                <div slot="end">100%</div>
+              </ion-range>
+              
+              <div class="progression-info">
+                <p><strong>Progression actuelle:</strong> {{ currentPercent }}%</p>
+                <p><strong>Heure actuelle:</strong> {{ getCurrentTime() }}</p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+</ion-content> 

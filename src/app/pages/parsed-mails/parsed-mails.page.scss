@@ -1,0 +1,451 @@
+// Styles de base pour corriger le positionnement
+.parsed-mails-container {
+  --ion-background-color: #f8f9fa;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+// Wrapper principal pour le contenu
+.content-wrapper {
+  min-height: 100vh !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: var(--ion-background-color);
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+// Correction du positionnement de l'en-tête
+ion-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  background: var(--ion-background-color) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+
+// En-tête avec statistiques
+.stats-header {
+  padding: 16px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  margin: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      
+      .stat-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      
+      .stat-content {
+        h3 {
+          margin: 0;
+          font-size: 12px;
+          font-weight: 500;
+          opacity: 0.9;
+        }
+        
+        p {
+          margin: 4px 0 0 0;
+          font-size: 20px;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
+
+// Barre d'actions
+.action-bar {
+  padding: 16px !important;
+  display: flex;
+  gap: 12px;
+  background: white !important;
+  border-bottom: 1px solid var(--ion-color-light);
+  position: relative !important;
+  top: 0 !important;
+  margin: 0 !important;
+  
+  .parse-btn {
+    flex: 2;
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border-radius: 12px;
+    --box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .refresh-btn {
+    flex: 1;
+    --border-radius: 12px;
+  }
+}
+
+// Section de recherche
+.search-section {
+  padding: 16px !important;
+  background: white !important;
+  border-bottom: 1px solid var(--ion-color-light);
+  position: relative !important;
+  top: 0 !important;
+  margin: 0 !important;
+  
+  .search-bar {
+    margin-bottom: 12px;
+    --border-radius: 12px;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filter-row {
+    display: flex;
+    gap: 12px;
+    
+    .filter-select {
+      flex: 1;
+      --border-radius: 12px;
+      --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// Liste des réservations
+.bookings-list {
+  padding: 16px !important;
+  min-height: 200px;
+  position: relative !important;
+  top: 0 !important;
+  margin: 0 !important;
+  
+  .booking-card {
+    margin-bottom: 16px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    // Couleurs par type
+    &.booking-flight {
+      --ion-color-primary: #3880ff;
+      border-left: 4px solid #3880ff;
+    }
+    
+    &.booking-hotel {
+      --ion-color-primary: #3dc2ff;
+      border-left: 4px solid #3dc2ff;
+    }
+    
+    &.booking-car_rental {
+      --ion-color-primary: #5260ff;
+      border-left: 4px solid #5260ff;
+    }
+    
+    &.booking-activity {
+      --ion-color-primary: #2dd36f;
+      border-left: 4px solid #2dd36f;
+    }
+    
+    &.booking-restaurant {
+      --ion-color-primary: #ffc409;
+      border-left: 4px solid #ffc409;
+    }
+    
+    &.booking-other {
+      --ion-color-primary: #92949c;
+      border-left: 4px solid #92949c;
+    }
+    
+    ion-card-header {
+      padding: 16px 20px 12px;
+      
+      .booking-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+      
+      ion-card-subtitle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        
+        ion-badge {
+          font-size: 10px;
+          padding: 4px 8px;
+        }
+        
+        .provider {
+          font-weight: 500;
+          color: var(--ion-color-primary);
+        }
+        
+        .date {
+          font-size: 12px;
+          color: var(--ion-color-medium);
+        }
+      }
+    }
+    
+    ion-card-content {
+      padding: 0 20px 20px;
+      
+      .booking-details {
+        .main-info {
+          margin-bottom: 16px;
+          
+          .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            
+            ion-icon {
+              font-size: 16px;
+              min-width: 16px;
+            }
+            
+            span {
+              color: var(--ion-color-dark);
+            }
+          }
+        }
+        
+        .specific-details {
+          background: var(--ion-color-light);
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 16px;
+          
+          h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ion-color-primary);
+          }
+          
+          .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            
+            ion-icon {
+              font-size: 14px;
+              min-width: 14px;
+            }
+          }
+        }
+        
+        .tags-section {
+          margin-bottom: 16px;
+          
+          ion-chip {
+            margin: 2px;
+            font-size: 11px;
+          }
+        }
+        
+        .contact-section,
+        .address-section {
+          background: var(--ion-color-light);
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 12px;
+          
+          h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ion-color-primary);
+          }
+          
+          .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            
+            ion-icon {
+              font-size: 14px;
+              min-width: 14px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// État vide
+.empty-state {
+  text-align: center;
+  padding: 80px 20px !important;
+  margin: 20px !important;
+  background: white !important;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: relative !important;
+  top: 0 !important;
+  
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  h2 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+  
+  p {
+    margin: 0 0 24px 0;
+    color: var(--ion-color-medium);
+    line-height: 1.5;
+  }
+}
+
+// Loading
+.loading-state {
+  text-align: center;
+  padding: 80px 20px !important;
+  margin: 20px !important;
+  position: relative !important;
+  top: 0 !important;
+  
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 0;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    
+    .filter-select {
+      width: 100%;
+    }
+  }
+  
+  .action-bar {
+    flex-direction: column;
+    
+    .parse-btn,
+    .refresh-btn {
+      width: 100%;
+    }
+  }
+  
+  .bookings-list {
+    padding: 12px;
+  }
+  
+  .stats-header,
+  .action-bar,
+  .search-section {
+    padding: 12px;
+  }
+}
+
+// Gestion du scroll personnalisé
+.parsed-mails-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.parsed-mails-container::-webkit-scrollbar-track {
+  background: var(--ion-color-light);
+  border-radius: 4px;
+}
+
+.parsed-mails-container::-webkit-scrollbar-thumb {
+  background: var(--ion-color-medium);
+  border-radius: 4px;
+}
+
+.parsed-mails-container::-webkit-scrollbar-thumb:hover {
+  background: var(--ion-color-medium-shade);
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.booking-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Thème sombre
+@media (prefers-color-scheme: dark) {
+  .parsed-mails-container {
+    --ion-background-color: #1a1a1a;
+  }
+  
+  .stats-header {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  }
+  
+  .booking-card {
+    --ion-color-light: #2d3748;
+    --ion-color-medium: #a0aec0;
+    --ion-color-dark: #e2e8f0;
+  }
+} 
